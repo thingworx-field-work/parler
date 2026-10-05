@@ -1,0 +1,34 @@
+{
+  "schema": "parler-playbook-conversion-report-v1",
+  "description": "Normative required fields for Slice F conversion reports. Canonical prose: docs/agent/playbook-customer-readiness.md §10.6.3.",
+  "required": [
+    "schema",
+    "sourceSkill",
+    "targetPlaybook",
+    "requiredAgentVersion",
+    "runnable",
+    "validation",
+    "converted",
+    "partiallyConverted",
+    "notConverted",
+    "deriveOpsUsed",
+    "runtimeRequirements",
+    "authorActions",
+    "suggestedLiveTests"
+  ],
+  "properties": {
+    "schema": { "const": "parler-playbook-conversion-report-v1" },
+    "sourceSkill": { "type": "string" },
+    "targetPlaybook": { "type": "string" },
+    "requiredAgentVersion": { "type": "string", "description": "Minimum agent version the generated Playbook requires (numeric semver segments; not snapshot echo)." },
+    "runnable": { "type": "boolean" },
+    "validation": { "type": "object", "description": "Full §6.2 ValidatePlaybookDocument report shape." },
+    "deriveOpsUsed": { "type": "array", "items": { "type": "string" } },
+    "converted": { "type": "array", "items": { "type": "string" } },
+    "partiallyConverted": { "type": "array" },
+    "notConverted": { "type": "array" },
+    "runtimeRequirements": { "type": "array", "items": { "type": "string" } },
+    "authorActions": { "type": "array", "items": { "type": "string" } },
+    "suggestedLiveTests": { "type": "array", "items": { "type": "string" } }
+  }
+}

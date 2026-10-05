@@ -1,0 +1,173 @@
+# Training-stage configuration contracts live eval (docs/agent/training-stage-configuration-contracts.md).
+# Run from the repository root:
+#   uv run utilization-stage-smoke
+# Uses agent-matrix env: AGENT_EVAL_AGENT_GPT_5_5 (wrapper default SCPA_Demo_Agent, or PARLER_E2E_AGENT_THING).
+
+version: 1
+suite: utilization-stage-contracts-v1
+
+baselineRef:
+  rateControl: tmp/agent-eval/rate-control-utilization-stage/
+
+agentMatrix:
+  gpt_5_5:
+    thingName: SCPA_Demo_Agent
+    defaultEnabled: true
+
+assertionGroups:
+  m4_list_machines_grounding:
+    - toolNotCalled: invoke_service
+    - toolsCalledSubsequence:
+        - list_utilization_machines
+    - toolResultContains: machineName
+    - finalRegex: "(?i)machine|utilization"
+
+  m4_records_grounding:
+    - toolNotCalled: invoke_service
+    - toolsCalledSubsequence:
+        - get_utilization_records
+    - toolResultContains: utilizationState
+    - finalRegex: "(?i)utilization|record|event|state"
+
+  m4_state_summary_grounding:
+    - toolNotCalled: invoke_service
+    - toolsCalledSubsequence:
+        - get_utilization_state_summary
+    - toolResultContains: utilizationPercent
+    - finalRegex: "(?i)utilization|percent|\\d"
+    - finalRegex: "(?i)running|idle|down|state"
+
+  m4_overview_grounding:
+    - toolNotCalled: invoke_service
+    - toolsCalledSubsequence:
+        - get_utilization_overview
+    - toolResultRegex: "(?i)utilization|percent|machine|state"
+    - finalRegex: "(?i)utilization|overview"
+    - finalRegex: "(?i)machine|coverage|fleet"
+    - finalRegex: "(?i)percent|\\d"
+
+  playbook_summary_grounding:
+    - toolCalled: start_playbook
+    - toolNotCalled: invoke_service
+    - finalRegex: "(?i)utilization|percent|\\d"
+    - finalRegex: "(?i)running|idle|down|state"
+
+  playbook_overview_grounding:
+    - toolCalled: start_playbook
+    - toolNotCalled: invoke_service
+    - finalRegex: "(?i)utilization|overview|machine|coverage|state|percent"
+
+  playbook_machine_grounding:
+    - toolCalled: start_playbook
+    - toolNotCalled: invoke_service
+    - finalRegex: "(?i)utilization|percent|\\d"
+    - finalRegex: "(?i)machine|running|idle|down|state"
+
+cases:
+  - id: nl_machine_listing
+    tags: [stage-contracts, utilization, nl]
+    skipUnlessEnv:
+      - DEV_SERVER
+      - DEV_KEY
+    skipReason: DEV_SERVER/DEV_KEY not configured
+    turns:
+      - user: Which machines are available for utilization reporting?
+        acceptableOutcomes:
+          - name: list_machines
+            score: 1.0
+            assertions:
+              - useAssertionGroup: m4_list_machines_grounding
+
+  - id: nl_raw_records
+    tags: [stage-contracts, utilization, nl]
+    skipUnlessEnv:
+      - DEV_SERVER
+      - DEV_KEY
+    skipReason: DEV_SERVER/DEV_KEY not configured
+    turns:
+      - user: >
+          List raw utilization event records for all machines from 2025-09-03 to 2025-09-26.
+        acceptableOutcomes:
+          - name: raw_records
+            score: 1.0
+            assertions:
+              - useAssertionGroup: m4_records_grounding
+
+  - id: nl_state_aggregate
+    tags: [stage-contracts, utilization, nl]
+    skipUnlessEnv:
+      - DEV_SERVER
+      - DEV_KEY
+    skipReason: DEV_SERVER/DEV_KEY not configured
+    turns:
+      - user: >
+          Show utilization aggregated by utilization state across all machines from 2025-09-03 to 2025-09-26.
+        acceptableOutcomes:
+          - name: state_summary
+            score: 1.0
+            assertions:
+              - useAssertionGroup: m4_state_summary_grounding
+
+  - id: nl_overview
+    tags: [stage-contracts, utilization, nl]
+    skipUnlessEnv:
+      - DEV_SERVER
+      - DEV_KEY
+    skipReason: DEV_SERVER/DEV_KEY not configured
+    turns:
+      - user: >
+          Show utilization overview across machines from 2025-09-03 to 2025-09-26.
+        acceptableOutcomes:
+          - name: overview
+            score: 1.0
+            assertions:
+              - useAssertionGroup: m4_overview_grounding
+
+  - id: playbook_utilization_summary
+    tags: [stage-contracts, utilization, playbook]
+    skipUnlessEnv:
+      - DEV_SERVER
+      - DEV_KEY
+    skipReason: DEV_SERVER/DEV_KEY not configured
+    turns:
+      - user: >
+          Please run playbook utilization_summary with StartDate 2025-09-03T00:00:00Z
+          and EndDate 2025-09-26T23:59:59Z.
+        acceptableOutcomes:
+          - name: playbook_summary
+            score: 1.0
+            assertions:
+              - useAssertionGroup: playbook_summary_grounding
+
+  - id: playbook_utilization_overview
+    tags: [stage-contracts, utilization, playbook]
+    skipUnlessEnv:
+      - DEV_SERVER
+      - DEV_KEY
+    skipReason: DEV_SERVER/DEV_KEY not configured
+    turns:
+      - user: >
+          Please run playbook utilization_overview with StartDate 2025-09-03T00:00:00Z
+          and EndDate 2025-09-26T23:59:59Z.
+        acceptableOutcomes:
+          - name: playbook_overview
+            score: 1.0
+            assertions:
+              - useAssertionGroup: playbook_overview_grounding
+
+  - id: playbook_machine_utilization_summary
+    tags: [stage-contracts, utilization, playbook]
+    skipUnlessEnv:
+      - DEV_SERVER
+      - DEV_KEY
+    skipReason: DEV_SERVER/DEV_KEY not configured
+    turns:
+      - user: >
+          Please run playbook machine_utilization_summary with StartDate 2025-09-03T00:00:00Z,
+          EndDate 2025-09-26T23:59:59Z, and machine set to the first machine returned by
+          list_utilization_machines for that date window.
+        acceptableOutcomes:
+          - name: playbook_machine_summary
+            score: 1.0
+            assertions:
+              - useAssertionGroup: playbook_machine_grounding

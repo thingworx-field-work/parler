@@ -1,0 +1,17 @@
+{
+  "schema": "parler-host-context-template",
+  "key": "asset_detail.current_asset",
+  "description": "Context for an Asset Detail page with one current Thing.",
+  "requiredContextFields": ["thingName"],
+  "maxRenderedChars": 1200,
+  "promptTemplate": [
+    "Host page context for this turn:",
+    "- Page: {{context.page}}",
+    "- Current asset Thing name: {{context.thingName}}",
+    "- Current tab: {{context.tab}}",
+    "- Page time window: {{format.timeWindow(context.timeWindow)}}",
+    "",
+    "Use this context only when the user refers to the current page, this asset,",
+    "this tab, or the same time window. Explicit user text wins."
+  ]
+}

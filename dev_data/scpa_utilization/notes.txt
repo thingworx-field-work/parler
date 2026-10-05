@@ -1,0 +1,12 @@
+Sample data setup notes (SCPA utilization)
+
+Manager configuration: PTCSC.UtilizationTWImpl.Manager -> Configuration -> UtilizationConfiguration
+- DemoMode = false
+- DaysToKeepWithPurging defaults to 7, which purges data older than 7 days. Set it to a large value (for example
+  1000) so the September 2025 sample data in SCPA_xls/ is kept.
+
+Loading the daily workbooks into the utilization stream: use the StreamImporter utility of the installed solution.
+- Mashup:  <server>/Thingworx/Runtime/index.html?mashup=PTCTS.Utilities.StreamImporter_MU
+- Service: <server>/Thingworx/Things/PTCTS.Utilities.Manager/Services/ImportStreamFromExcel
+  payload: {"Filename":"20250917.xlsx","StreamName":"PTCSC.UtilizationTWImpl.Utilization_SM","SheetName":"20250917","FileRepo":"SystemRepository"}
+  Upload the workbook to SystemRepository first, then call the service once per daily file.

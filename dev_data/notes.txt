@@ -1,0 +1,1 @@
+/cross_region_operational_diagnosis For the Stacking Robots in the USA and Germany, what is the main current problem at each site: speed, voltage, emergency stops or wrist temperature? Which site should be handled first?

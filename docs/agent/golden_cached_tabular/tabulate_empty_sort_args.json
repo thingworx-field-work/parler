@@ -1,0 +1,9 @@
+{
+  "description": "Positive: zero-row cached table, sort_topn → CACHED_TABULATE_EMPTY; still expect insightEnvelope.",
+  "arguments": {
+    "cacheId": "<PUT_EMPTY_CACHED_TABLE_ID>",
+    "mode": "sort_topn",
+    "sortBy": "x",
+    "limit": 10
+  }
+}

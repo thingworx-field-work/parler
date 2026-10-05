@@ -1,0 +1,22 @@
+{
+  "schema": "parler-semantic-profile-v1",
+  "profileId": "example-profile",
+  "version": "2026.07.1",
+  "assetTypes": {
+    "ExampleAssetType": {
+      "propertyRoles": {
+        "example_role": {
+          "aliases": ["example alias"],
+          "binding": {
+            "kind": "PROPERTY",
+            "propertyName": "ExampleProperty"
+          },
+          "unit": "Cel",
+          "dimension": "temperature",
+          "grain": "sample",
+          "expectedCadence": "PT5S"
+        }
+      }
+    }
+  }
+}

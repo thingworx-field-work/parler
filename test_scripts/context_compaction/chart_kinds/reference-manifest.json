@@ -1,0 +1,89 @@
+{
+  "version": 1,
+  "suite": "chart-kinds-ten-turns-v2",
+  "description": "Manual-review manifest, not a numeric golden. The automatic judge returns insufficient_evidence/no_reference_evidence; review saved wire evidence against reviewCriteria.",
+  "automaticJudgmentPolicy": "Record evidence; never count transport done as task pass. Do not add empty reference objects.",
+  "turns": {
+    "1": {
+      "terminal": "done",
+      "reviewCriteria": [
+        "One histogram chart with 8 bins and method equal_width_v1",
+        "edges strictly increasing, counts sum = validCount - below - above",
+        "Parent table is the bin_numeric output"
+      ]
+    },
+    "2": {
+      "terminal": "done",
+      "reviewCriteria": [
+        "One histogram with 4 bins, method explicit_edges_v1, mode density",
+        "belowRangeCount and aboveRangeCount both positive (observed range is about 51 to 199)",
+        "Densities integrate to 1 over the bins"
+      ]
+    },
+    "3": {
+      "terminal": "done",
+      "reviewCriteria": [
+        "query_property_history for MUC BenchScale 02 answers PROPERTY_NOT_FOUND; no 222-row value-stream table",
+        "One boxplot with two groups (ORD-Contacting-01, ORD-Contacting-02) built from a union_rows result, and a usl reference line at 190",
+        "The answer says MUC BenchScale 02 has no contactForce; quartile order invariant holds per group"
+      ]
+    },
+    "4": {
+      "terminal": "done",
+      "reviewCriteria": [
+        "The records result has more than 20 rows and its tool envelope carries a cacheId (promotion); the model saw at most 20 sample rows",
+        "One boxplot with one group per utilization state; box_summary read the cached table, n sums to the full row count",
+        "No refusal, no statistics computed from the 20-row sample"
+      ]
+    },
+    "5": {
+      "terminal": "done",
+      "reviewCriteria": [
+        "One heatmap, rows and columns from utilizationState and reason",
+        "Combinations absent from the source are null, not 0; missingCount equals the null count",
+        "No zero-filling",
+        "Built from the promoted full-window table (or a fresh complete one), not from a 20-row sample"
+      ]
+    },
+    "6": {
+      "terminal": "done",
+      "reviewCriteria": [
+        "One bar chart with stackMode stacked and two or more series",
+        "Values unchanged from the grouped table",
+        "Built from the full-window table; totals match turn 5 row sums"
+      ]
+    },
+    "7": {
+      "terminal": "done",
+      "reviewCriteria": [
+        "One bar chart with stackMode percent and orientation horizontal",
+        "No negative values; same series as the previous turn"
+      ]
+    },
+    "8": {
+      "terminal": "done",
+      "reviewCriteria": [
+        "One chart group with three ready members and a final revision",
+        "sharedCategories append-only across members; each category keeps one slot in all three pies",
+        "Mapping revision precedes each member chart frame"
+      ]
+    },
+    "9": {
+      "terminal": "done",
+      "reviewCriteria": [
+        "Exactly one chart, the pie",
+        "No histogram frame; the answer states that the 2020 window has no data",
+        "No chart built from the utilization table under a histogram title"
+      ]
+    },
+    "10": {
+      "terminal": "done",
+      "reviewCriteria": [
+        "Seven per-day summaries, one union_rows call with labelColumn for the day and seven labelValues",
+        "The union result carries a derived cacheId; one heatmap with 7 day rows or columns",
+        "A day-state combination absent from the source is null, not 0",
+        "No automatic paging or repeated query beyond the seven days asked for"
+      ]
+    }
+  }
+}

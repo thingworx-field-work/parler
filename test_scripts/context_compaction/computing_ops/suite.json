@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "suite": "computing-ops-ten-turns-v1",
+  "description": "Ten prompts covering the computing-enhancement operators delivered in Agent 0.1.247-0.1.248 and the read-limit marking delivered in 0.1.246: counter_delta (plain increments and a stated rollover rule), rolling_stats (observation-count and elapsed-duration windows), time_weighted (step_hold and trapezoid integrals with a time mean), calendar_bucket (local day and hour labels, aggregated with group_metric), a read that reaches its row limit, and a closing turn that must carry the completeness caveats forward. Uses the existing ten-turn driver unchanged.",
+  "variables": { "userTimezone": "America/New_York", "hostContext": "" },
+  "helperCapture": { "intervalSeconds": 30, "reads": 2 },
+  "clientWaitSeconds": 600,
+  "turnGapSeconds": 0,
+  "goldenRef": "reference-manifest.json",
+  "datasetManifest": {
+    "baseline": "User-restored ThingWorx Stream/ValueStream history; same snapshot as the chart_kinds suite.",
+    "knownCoverage": {
+      "timeseries": "contactForce, operationalVoltage and num_GoodProductionCount on ORD-Contacting-01/02. contactForce has 37 samples in 2026-09-14 22:00 to 2026-09-15 02:00 America/New_York, about one per six minutes, first 2026-09-15T02:01:36.925Z and last 2026-09-15T05:37:36.920Z; 147 samples over 2026-09-01 to 2026-09-20.",
+      "utilization": "ORD-Contacting-01/02, AC-Contacting-01, BOS-Contacting-02, 2025-09-03 to 2025-09-14; 25 records for ORD-Contacting-01 over the full window.",
+      "cachedHistoryColumns": "A numeric property-history cache has exactly two columns: timestamp (STRING) and value (NUMBER).",
+      "utilizationColumns": "equipmentId, equipmentDescription, eventStart, durationSeconds, utilizationState, reason, reasonGroup, shiftId."
+    },
+    "referenceDataStatus": "not_independently_verified",
+    "userTimezone": "America/New_York",
+    "promptPolicy": "Prompts state explicit dates and, where an operator requires them, the rule, zone, window and method in the user's own words, because the agent must never guess a counter rule or a time zone.",
+    "knownLimits": [
+      "counter_delta needs valueColumn; a modulus or reset baseline is used only when the user or the App states it.",
+      "rolling_stats takes one statistic per call over record-anchored windows; warmedUp is not coverage.",
+      "time_weighted requires integrationMethod, maxGapSeconds and timeUnit, and reports only what was read.",
+      "calendar_bucket requires timeColumn, timeZone and calendarBucket; it labels rows and does not aggregate, so a grouping step follows.",
+      "The default history read limit is 1000 and the hard cap is 5000, so reaching the limit in this dataset needs an explicit small maxItems."
+    ]
+  },
+  "turns": [
+    { "id": 1, "prompt": "num_GoodProductionCount on ORD-Contacting-01 is a cumulative production counter. Show me the actual production increments between consecutive readings from September 14, 2026 22:00 to September 15, 2026 02:00, and tell me the total production you can account for.", "judgmentFocus": "counter_delta: property history, then tabulate_cached_result mode counter_delta on the value column. Increments between real readings, never a plain sum of the raw readings." },
+    { "id": 2, "prompt": "That counter wraps around at 10000 and never climbs faster than 5 units per second. Redo the increments with those rules and show me which segments were classified as a rollover.", "judgmentFocus": "counter_delta with counterModulus 10000 and maxRatePerSecond 5, both taken from the user. Rollover segments classified, not silently summed." },
+    { "id": 3, "prompt": "For contactForce on ORD-Contacting-01 over the same window, show me a rolling mean over the last 5 readings at each point.", "judgmentFocus": "rolling_stats with statistic mean, rollingKind OBSERVATION_COUNT, observationWindow 5, anchored on each source record." },
+    { "id": 4, "prompt": "Now show the rolling maximum of the same contactForce series over a 30-minute window instead, and tell me where the highest rolling maximum occurs.", "judgmentFocus": "rolling_stats with statistic max and rollingKind ELAPSED_DURATION, durationWindowSeconds 1800. The elapsed window semantics are echoed." },
+    { "id": 5, "prompt": "Treat contactForce as a held value between readings, with any gap longer than 10 minutes counted as unknown. Give me the time-weighted integral and the time-weighted mean over that window, in hours.", "judgmentFocus": "time_weighted with integrationMethod step_hold, maxGapSeconds 600, timeUnit hours. Integral, time mean, covered and unknown time all reported." },
+    { "id": 6, "prompt": "Redo that with straight-line interpolation between readings instead of a held value, and tell me how much the two answers differ and why.", "judgmentFocus": "time_weighted with integrationMethod trapezoid and the same gap rule, compared against turn 5 without re-reading the platform." },
+    { "id": 7, "prompt": "Using the utilization event records for ORD-Contacting-01 from 2025-09-03 through 2025-09-14, label each event with its local calendar day in America/New_York and give me total event duration per local day.", "judgmentFocus": "calendar_bucket with timeColumn eventStart, timeZone America/New_York, calendarBucket day, followed by a grouping step for the per-day totals. The label step does not aggregate by itself." },
+    { "id": 8, "prompt": "Label the same records by local hour of day instead, and show me which hours of the day the Down events start in.", "judgmentFocus": "calendar_bucket with calendarBucket hour on the same cached records, then grouping filtered to the Down state. No new platform read." },
+    { "id": 9, "prompt": "Show me at most 20 contactForce readings for ORD-Contacting-01 in that same September 2026 window, and tell me plainly whether I am seeing all of the data.", "judgmentFocus": "The read reaches its row limit: readLimitReached true, and the answer says the result may be incomplete without claiming it is truncated." },
+    { "id": 10, "prompt": "Summarize what you computed in this conversation, and be explicit about which numbers cover only part of the data and which time was counted as unknown.", "judgmentFocus": "Carries forward the read-limit caveat from turn 9 and the unknown-time reporting from turns 5 and 6; does not upgrade any partial result to a window total." }
+  ]
+}

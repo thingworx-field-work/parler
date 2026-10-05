@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Entities>
+    <DataShapes>
+        <DataShape name="HierarchyNode_DS"
+                   description="Hierarchy node row with backend id and display name">
+            <FieldDefinitions>
+                <FieldDefinition name="id" baseType="STRING"
+                                 description="Stable backend node id"
+                                 ordinal="0" aspect.isPrimaryKey="true"/>
+                <FieldDefinition name="name" baseType="STRING"
+                                 description="Canonical hierarchy display string for this node (stable casing per platform); not the same semantic as ResolveNetworkID input name (NL fragment)"
+                                 ordinal="1"/>
+            </FieldDefinitions>
+        </DataShape>
+    </DataShapes>
+</Entities>

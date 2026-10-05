@@ -1,0 +1,21 @@
+{
+  "schema": "parler-semantic-profile-v1",
+  "profileId": "cell-a-operations",
+  "version": "2026.07.1",
+  "assetTypes": {
+    "StackingRobot": {
+      "propertyRoles": {
+        "energy_per_cycle": {
+          "binding": {
+            "kind": "SERVICE",
+            "thingName": "CellAAnalytics",
+            "serviceName": "GetEnergyPerCycle"
+          },
+          "unit": "kWh",
+          "dimension": "energy",
+          "grain": "cycle"
+        }
+      }
+    }
+  }
+}

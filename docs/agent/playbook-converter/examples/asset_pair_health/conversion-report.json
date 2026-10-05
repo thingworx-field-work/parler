@@ -1,0 +1,53 @@
+{
+  "schema": "parler-playbook-conversion-report-v1",
+  "sourceSkill": "asset_pair_health",
+  "targetPlaybook": "cross_asset_pair_health",
+  "requiredAgentVersion": "0.1.191",
+  "runnable": true,
+  "validation": {
+    "status": "valid",
+    "playbookId": "cross_asset_pair_health",
+    "agentVersion": "0.1.191",
+    "errors": [],
+    "warnings": []
+  },
+  "deriveOpsUsed": [
+    "pick_taxonomy_row",
+    "normalize_resolved_thing",
+    "flatten_pair_assets",
+    "group_alerts_by_source_property",
+    "select_primary_problem_property",
+    "union_property_names",
+    "trend_targets",
+    "trend_summary",
+    "summarize_asset_pair_health"
+  ],
+  "converted": [
+    "resolve asset type from taxonomy",
+    "resolve both asset identifiers via resolve_thing",
+    "read alert summaries per asset",
+    "group alerts by sourceProperty",
+    "read current property values",
+    "read numeric trend history and compact trend evidence",
+    "summarize pair health for llm_summary"
+  ],
+  "partiallyConverted": [],
+  "notConverted": [],
+  "runtimeRequirements": [
+    "resolve_thing playbookSafe",
+    "query_alert_summary playbookSafe",
+    "get_property_values playbookSafe",
+    "query_property_history playbookSafe",
+    "pick_taxonomy_row",
+    "flatten_pair_assets",
+    "trend_summary"
+  ],
+  "authorActions": [
+    "Install playbook at /playbooks/cross_asset_pair_health/playbook.json",
+    "RefreshPromptContextCache",
+    "Run the suggested smoke prompt"
+  ],
+  "suggestedLiveTests": [
+    "please compare the health status between ORD Contacting 02 and ORD Contacting 01 over the past 24 hours"
+  ]
+}

@@ -1,0 +1,25 @@
+version: 1
+suite: customer-identity
+
+agentMatrix:
+  gpt_5_4:
+    thingName: Customer_Agent_GPT54
+    defaultEnabled: true
+
+cases:
+  - id: display_label_resolves_to_thing
+    tags: [identity, thingname]
+    turns:
+      - user: "For ORD Contacting 01, what is the current value of property currentDraw?"
+        acceptableOutcomes:
+          - name: resolved_and_read_current_value
+            score: 1.0
+            assertions:
+              - toolCalled: resolve_thing
+              - toolCalled: get_property_values
+              - finalRegex: "(?i)currentDraw|current\\s+draw"
+        rejectIf:
+          - toolArgEquals:
+              tool: query_entities_by_taxonomy
+              path: hierarchyNodeName
+              value: "ORD Contacting 01"

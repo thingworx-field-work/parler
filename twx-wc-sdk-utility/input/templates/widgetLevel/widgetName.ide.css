@@ -1,0 +1,22 @@
+/* Place custom CSS styling for {{widgetName}} widget in Composer in this file */
+
+.widget-{{{widgetName}}} {
+
+}
+
+.widget-{{{widgetName}}}-helper {
+  display: flex;
+}
+
+.widget-{{{widgetName}}}-helper span {
+  display: inline-block;
+  height: 48px;
+  width: 48px;
+  background: url(default_widget_icon.ide.svg) no-repeat;
+  background-size: 48px 48px;
+}
+
+.widget-{{{widgetName}}}-helper:after {
+  content: "\A0{{{widgetName}}}";
+  color: blue;
+}

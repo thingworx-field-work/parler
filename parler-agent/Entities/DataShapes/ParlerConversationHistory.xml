@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Entities>
+    <!--
+      One row of persisted chat for a single conversation, as read from AgentMessageStream.
+      Value columns match AgentMessageData plus stream timestamp. Thread identity is Stream metadata source
+      (same string as AddStreamEntry.source — conversation Thing, thread id, or adhoc-*).
+    -->
+    <DataShapes>
+        <DataShape name="ParlerConversationHistory"
+                   description="Stream-backed message history; InfoTable row shape for Parler mashups">
+            <FieldDefinitions>
+                <FieldDefinition name="timestamp" baseType="DATETIME"
+                                 description="Stream entry time (sort key)"
+                                 ordinal="0"/>
+                <FieldDefinition name="streamSource" baseType="STRING"
+                                 description="Stream entry source (conversation Thing name, AgentThread id, or adhoc key)"
+                                 ordinal="1"/>
+                <FieldDefinition name="agentThing" baseType="STRING"
+                                 description="AIAgent Thing name"
+                                 ordinal="2"/>
+                <FieldDefinition name="role" baseType="STRING"
+                                 description="Message role: user, assistant, tool"
+                                 ordinal="3"/>
+                <FieldDefinition name="content" baseType="TEXT"
+                                 description="Message body; empty when assistant row is tool_calls only"
+                                 ordinal="4"/>
+                <FieldDefinition name="toolCallId" baseType="STRING"
+                                 description="Tool invocation id when role=tool"
+                                 ordinal="5"/>
+                <FieldDefinition name="toolCalls" baseType="TEXT"
+                                 description="JSON array of tool calls when role=assistant with tool_calls"
+                                 ordinal="6"/>
+                <FieldDefinition name="promptTokens" baseType="INTEGER"
+                                 description="LLM prompt tokens for this row’s assistant round"
+                                 ordinal="7"/>
+                <FieldDefinition name="completionTokens" baseType="INTEGER"
+                                 description="LLM completion tokens for this row’s assistant round"
+                                 ordinal="8"/>
+                <FieldDefinition name="llmUsageJson" baseType="TEXT"
+                                 description="Compact provider usage JSON for assistant rows; empty for user/tool"
+                                 ordinal="9"/>
+            </FieldDefinitions>
+        </DataShape>
+    </DataShapes>
+</Entities>

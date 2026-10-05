@@ -1,0 +1,88 @@
+{
+  "schema": "parler-playbook-v1",
+  "id": "utilization_summary",
+  "title": "Utilization summary",
+  "description": "Summarize utilization across all machines for a date range and optional shift using the LLM-friendly state-summary tool.",
+  "whenToUse": "Use when the user asks for overall utilization, fleet-level utilization, utilization by state, or utilization percent without naming a single machine.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "startDate": {
+        "type": "string"
+      },
+      "endDate": {
+        "type": "string"
+      },
+      "shiftId": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "startDate",
+      "endDate"
+    ]
+  },
+  "execution": {
+    "timeoutSeconds": 900,
+    "maxNodes": 10,
+    "maxToolCalls": 4,
+    "maxEvidenceBytes": 12000
+  },
+  "budgets": {
+    "timeoutSeconds": 900,
+    "maxNodes": 10,
+    "maxToolCalls": 4,
+    "maxEvidenceBytes": 12000
+  },
+  "vars": {},
+  "nodes": [
+    {
+      "id": "state_summary",
+      "kind": "tool_call",
+      "dependsOn": [],
+      "tool": "get_utilization_state_summary",
+      "args": {
+        "StartDate": {
+          "$input": "startDate"
+        },
+        "EndDate": {
+          "$input": "endDate"
+        },
+        "ShiftID": {
+          "$input": "shiftId"
+        }
+      },
+      "evidence": {
+        "label": "Read fleet utilization state summary",
+        "includeToolOutputPaths": [
+          "result.stats.utilizationPercent",
+          "result.stats.eventCount",
+          "result.scope"
+        ],
+        "table": {
+          "path": "result.rows",
+          "columns": [
+            "utilizationState",
+            "percentage",
+            "count",
+            "sumDurationHours"
+          ],
+          "maxRows": 8
+        }
+      }
+    },
+    {
+      "id": "final_summary",
+      "kind": "llm_summary",
+      "dependsOn": [
+        "state_summary"
+      ],
+      "prompt": "Write a concise utilization summary for all machines over the requested time range. Explain utilization states, total event volume, utilization percent, uptime/downtime when present, and evidence gaps. Use only the provided playbook evidence.",
+      "evidenceRefs": [
+        "state_summary"
+      ],
+      "maxEvidenceBytes": 8000
+    }
+  ],
+  "finalNode": "final_summary"
+}

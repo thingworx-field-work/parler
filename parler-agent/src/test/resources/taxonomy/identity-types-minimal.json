@@ -1,0 +1,77 @@
+{
+  "version": 2,
+  "entities": [
+    {
+      "key": "asset",
+      "aliases": ["device", "equipment"],
+      "types": [
+        {
+          "key": "Jet Dryer",
+          "aliases": ["jet dryer", "jet dryers", "robot"],
+          "representation": "shape_as_type",
+          "membership": {
+            "entityType": "ThingShape",
+            "entityName": "PTCTDD.CellfabDataset.JetDryer_TS"
+          },
+          "identity": {
+            "properties": ["name", "PTCDisplayName", "PTCSerialNumber"],
+            "matchRules": ["exact", "normalized"]
+          },
+          "criticalProperties": [
+            "PTCDisplayName",
+            "PTCMake",
+            "PTCModel",
+            "PTCSerialNumber"
+          ]
+        },
+        {
+          "key": "Stacking Robot",
+          "aliases": ["robot", "stacking robots"],
+          "representation": "shape_as_type",
+          "membership": {
+            "entityType": "ThingShape",
+            "entityName": "PTCTDD.CellfabDataset.StackingRobot_TS"
+          },
+          "identity": {
+            "properties": ["name", "PTCDisplayName", "PTCSerialNumber"],
+            "matchRules": ["exact", "normalized"]
+          },
+          "criticalProperties": ["PTCDisplayName", "PTCSerialNumber"]
+        },
+        {
+          "key": "Workunit Jet Dryer",
+          "aliases": ["workunit jet"],
+          "representation": "shape_as_type",
+          "membership": {
+            "entityType": "ThingShape",
+            "entityName": "PTCTDD.CellfabDataset.JetDryer_TS"
+          },
+          "queryParent": {
+            "entityType": "ThingTemplate",
+            "entityName": "PTC.MfgModel.DefaultWorkunit_TT",
+            "role": "optional_narrowing"
+          },
+          "identity": {
+            "properties": ["name", "description"],
+            "matchRules": ["exact", "normalized"]
+          },
+          "criticalProperties": ["description"]
+        },
+        {
+          "key": "Registered Clinic",
+          "aliases": ["clinic row"],
+          "representation": "template_as_type",
+          "membership": {
+            "entityType": "ThingTemplate",
+            "entityName": "PTC.MfgModel.DefaultWorkunit_TT"
+          },
+          "identity": {
+            "properties": ["name", "clinicCode"],
+            "matchRules": ["exact", "normalized"]
+          },
+          "criticalProperties": ["clinicCode"]
+        }
+      ]
+    }
+  ]
+}

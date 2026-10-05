@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Entities>
+    <DataShapes>
+        <DataShape name="AgentMessageData"
+                   description="Data shape for agent message (Stream entry value row)">
+            <FieldDefinitions>
+                <FieldDefinition name="agentThing" baseType="STRING"
+                                 description="AIAgent Thing name that produced this row" ordinal="0"/>
+                <FieldDefinition name="role" baseType="STRING"
+                                 description="Message role: system, user, assistant, tool, ui_feedback, context_checkpoint" ordinal="1"/>
+                <FieldDefinition name="content" baseType="TEXT"
+                                 description="Message content (null when role=assistant with tool_calls only)" ordinal="2"/>
+                <FieldDefinition name="toolCallId" baseType="STRING"
+                                 description="Tool call id (for role=tool)" ordinal="3"/>
+                <FieldDefinition name="toolCalls" baseType="TEXT"
+                                 description="JSON array of tool calls (for role=assistant with tool_calls)" ordinal="4"/>
+                <FieldDefinition name="promptTokens" baseType="INTEGER"
+                                 description="LLM prompt (input) tokens for this row’s assistant API round; 0 for user/tool"
+                                 ordinal="5"/>
+                <FieldDefinition name="completionTokens" baseType="INTEGER"
+                                 description="LLM completion (output) tokens for this row’s assistant API round; 0 for user/tool"
+                                 ordinal="6"/>
+                <FieldDefinition name="llmUsageJson" baseType="TEXT"
+                                 description="Compact provider usage JSON for assistant rows; empty for user/tool"
+                                 ordinal="7"/>
+                <FieldDefinition name="assistantMessageId" baseType="STRING"
+                                 description="Stable server id for final assistant rows (feedback anchor); empty for user/tool/ui_feedback"
+                                 ordinal="8"/>
+                <FieldDefinition name="executedToolName" baseType="STRING"
+                                 description="LLM-facing tool id for role=tool (built-in or extended); empty when unknown; not duplicated in content JSON"
+                                 ordinal="9"/>
+                <FieldDefinition name="hostContextSnapshotJson" baseType="TEXT"
+                                 description="Host context turn-state snapshot JSON for role=user; empty otherwise"
+                                 ordinal="10"/>
+                <FieldDefinition name="chartGroupsJson" baseType="TEXT"
+                                 description="Final chart-group manifests (JSON array) for the final assistant row; empty otherwise"
+                                 ordinal="11"/>
+            </FieldDefinitions>
+        </DataShape>
+    </DataShapes>
+</Entities>

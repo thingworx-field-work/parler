@@ -1,0 +1,13 @@
+/* Mashup Builder design-time chrome for AI Parler (class matches widget id aiparler) */
+.widget-aiparler {
+  box-sizing: border-box;
+  min-height: 320px;
+  min-width: 280px;
+  border: 1px dashed rgba(138, 180, 255, 0.35);
+}
+
+ptcs-widget[widget-type="aiparler"],
+ptcs-widget[widget-type="parler-ui"] {
+  min-height: 320px;
+  min-width: 280px;
+}

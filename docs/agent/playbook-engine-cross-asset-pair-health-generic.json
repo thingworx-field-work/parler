@@ -1,0 +1,263 @@
+{
+  "schema": "parler-playbook-v1",
+  "title": "Cross asset pair health (generic derive path — Phase E reference)",
+  "budgets": {
+    "timeoutSeconds": 900,
+    "maxNodes": 80,
+    "maxToolCalls": 200,
+    "maxEvidenceBytes": 12000
+  },
+  "vars": {},
+  "nodes": [
+    {
+      "id": "taxonomy_row",
+      "kind": "derive",
+      "dependsOn": [],
+      "op": "pick_taxonomy_row",
+      "args": {
+        "assetType": { "$input": "assetType" },
+        "taxonomyRows": { "$var": "assetTaxonomy.rows" }
+      },
+      "evidence": { "label": "Resolve asset type from taxonomy" }
+    },
+    {
+      "id": "list_candidates",
+      "kind": "tool_call",
+      "dependsOn": ["taxonomy_row"],
+      "tool": "query_entities_by_taxonomy",
+      "args": {
+        "EntityType": { "$var": "taxonomy.EntityType" },
+        "EntityName": { "$var": "taxonomy.EntityName" },
+        "CriticalProperties": { "$var": "taxonomy.CriticalProperties" }
+      },
+      "evidence": { "label": "List candidate Things for asset type" }
+    },
+    {
+      "id": "match_asset_a",
+      "kind": "derive",
+      "dependsOn": ["list_candidates"],
+      "op": "match_entity_identifiers",
+      "args": {
+        "identifier": { "$input": "assetIdentifierA" },
+        "label": "asset A",
+        "candidatesNodeId": "list_candidates"
+      },
+      "evidence": { "label": "Match first asset identifier" }
+    },
+    {
+      "id": "require_exact_a",
+      "kind": "derive",
+      "dependsOn": ["match_asset_a"],
+      "op": "require_exact_count",
+      "args": { "matchNodeId": "match_asset_a" },
+      "evidence": { "label": "Confirm single match for asset A" }
+    },
+    {
+      "id": "match_asset_b",
+      "kind": "derive",
+      "dependsOn": ["list_candidates"],
+      "op": "match_entity_identifiers",
+      "args": {
+        "identifier": { "$input": "assetIdentifierB" },
+        "label": "asset B",
+        "candidatesNodeId": "list_candidates"
+      },
+      "evidence": { "label": "Match second asset identifier" }
+    },
+    {
+      "id": "require_exact_b",
+      "kind": "derive",
+      "dependsOn": ["match_asset_b"],
+      "op": "require_exact_count",
+      "args": { "matchNodeId": "match_asset_b" },
+      "evidence": { "label": "Confirm single match for asset B" }
+    },
+    {
+      "id": "pair_assets",
+      "kind": "derive",
+      "dependsOn": ["require_exact_a", "require_exact_b"],
+      "op": "flatten_pair_assets",
+      "args": {
+        "matchNodeA": "match_asset_a",
+        "matchNodeB": "match_asset_b"
+      },
+      "evidence": { "label": "Resolve asset pair" }
+    },
+    {
+      "id": "alerts_history_fanout",
+      "kind": "fan_out",
+      "dependsOn": ["pair_assets"],
+      "items": { "$ref": "pair_assets.output.assets" },
+      "itemVar": "asset",
+      "maxItems": 2,
+      "maxConcurrency": 1,
+      "node": {
+        "kind": "tool_call",
+        "tool": "query_alert_history",
+        "args": {
+          "thingName": { "$item": "name" },
+          "relativeDuration": "24h"
+        },
+        "evidence": {
+          "label": "Alert history per asset",
+          "includeToolOutputRootFields": ["appliedStartTime", "appliedEndTime", "rowCount", "thingName"],
+          "table": {
+            "maxRows": 8,
+            "columns": ["sourceProperty", "timestamp", "severity"]
+          }
+        }
+      }
+    },
+    {
+      "id": "alert_rows_flatten",
+      "kind": "derive",
+      "dependsOn": ["alerts_history_fanout"],
+      "op": "flatten_fan_out_rows",
+      "args": {
+        "fanOutNodeId": "alerts_history_fanout",
+        "injectFromItem": [{ "from": "name", "as": "thingName" }]
+      },
+      "evidence": { "label": "Flatten fan-out alert rows for generic ops" }
+    },
+    {
+      "id": "alert_filtered",
+      "kind": "derive",
+      "dependsOn": ["alert_rows_flatten"],
+      "op": "filter",
+      "args": {
+        "rows": { "$ref": "alert_rows_flatten.output.rows" },
+        "where": { "op": "is_present", "field": "sourceProperty" }
+      },
+      "evidence": { "label": "Keep rows with sourceProperty" }
+    },
+    {
+      "id": "alert_grouped",
+      "kind": "derive",
+      "dependsOn": ["alert_filtered"],
+      "op": "group_by",
+      "args": {
+        "rows": { "$ref": "alert_filtered.output.rows" },
+        "keys": ["sourceProperty"],
+        "maxGroups": 50,
+        "measures": [
+          { "name": "alertCount", "op": "count" }
+        ]
+      },
+      "evidence": { "label": "Count alerts by sourceProperty" }
+    },
+    {
+      "id": "top_properties",
+      "kind": "derive",
+      "dependsOn": ["alert_grouped"],
+      "op": "top_n",
+      "args": {
+        "rows": { "$ref": "alert_grouped.output.rows" },
+        "n": 2,
+        "orderBy": [
+          { "field": "alertCount", "direction": "desc" },
+          { "field": "sourceProperty", "direction": "asc" }
+        ]
+      },
+      "evidence": { "label": "Top two driving properties" }
+    },
+    {
+      "id": "trend_targets",
+      "kind": "derive",
+      "dependsOn": ["top_properties", "pair_assets"],
+      "op": "build_targets",
+      "args": {
+        "sources": {
+          "asset": { "$ref": "pair_assets.output.assets" },
+          "prop": { "$ref": "top_properties.output.rows" }
+        },
+        "template": {
+          "thingName": { "$path": "asset.name" },
+          "propertyName": { "$path": "prop.sourceProperty" },
+          "relativeDuration": "7d"
+        },
+        "maxTargets": 10
+      },
+      "evidence": { "label": "Asset x property trend targets" }
+    },
+    {
+      "id": "trends_history_fanout",
+      "kind": "fan_out",
+      "dependsOn": ["trend_targets"],
+      "items": { "$ref": "trend_targets.output.targets" },
+      "itemVar": "target",
+      "maxItems": 10,
+      "maxConcurrency": 1,
+      "node": {
+        "kind": "tool_call",
+        "tool": "query_property_history",
+        "args": {
+          "thingName": { "$item": "thingName" },
+          "propertyName": { "$item": "propertyName" },
+          "relativeDuration": { "$item": "relativeDuration" },
+          "actions": ["FIRST", "LAST", "MIN", "MAX", "MEAN"]
+        },
+        "evidence": {
+          "label": "Numeric property history per target",
+          "includeToolOutputRootFields": ["rowCount", "thingName", "propertyName"]
+        }
+      }
+    },
+    {
+      "id": "trend_rows_flatten",
+      "kind": "derive",
+      "dependsOn": ["trends_history_fanout"],
+      "op": "flatten_fan_out_rows",
+      "args": {
+        "fanOutNodeId": "trends_history_fanout",
+        "injectFromItem": [{ "from": "thingName", "as": "thingName" }]
+      },
+      "evidence": { "label": "Flatten trend fan-out rows" }
+    },
+    {
+      "id": "trend_aggregate",
+      "kind": "derive",
+      "dependsOn": ["trend_rows_flatten"],
+      "op": "aggregate",
+      "args": {
+        "rows": { "$ref": "trend_rows_flatten.output.rows" },
+        "measures": [
+          { "name": "meanValue", "op": "mean", "field": "value" }
+        ]
+      },
+      "evidence": { "label": "Aggregate trend sample values" }
+    },
+    {
+      "id": "gap_collect",
+      "kind": "derive",
+      "dependsOn": ["trend_aggregate", "alert_grouped", "trend_targets"],
+      "op": "collect_gaps",
+      "args": {
+        "refs": [
+          "alert_grouped.output.gaps",
+          "trend_targets.output.gaps",
+          "trend_aggregate.output.gaps"
+        ],
+        "maxItems": 32
+      },
+      "evidence": { "label": "Merged derive gaps" }
+    },
+    {
+      "id": "final_summary",
+      "kind": "llm_summary",
+      "dependsOn": ["gap_collect"],
+      "prompt": "Write a concise asset-pair health comparison using only the playbook evidence. Compare the two assets on alert-driven properties and trend aggregates; cite evidence gaps when present.",
+      "evidenceRefs": [
+        "taxonomy_row",
+        "pair_assets",
+        "alert_filtered",
+        "alert_grouped",
+        "top_properties",
+        "trend_targets",
+        "trend_aggregate",
+        "gap_collect"
+      ],
+      "maxEvidenceBytes": 8000
+    }
+  ],
+  "finalNode": "final_summary"
+}

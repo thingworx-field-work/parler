@@ -1,0 +1,2144 @@
+/* Scoped to <parler-ui> custom element (light DOM). Safe for Mashup embedding. */
+parler-ui {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  /* Never use min-height:0 on the host: ThingWorx / flex parents often give 0 track height and the whole UI collapses. */
+  min-height: 280px;
+  width: 100%;
+  color: var(--parler-effective-color-text);
+  background: var(--parler-effective-color-canvas);
+  font-family: var(--parler-effective-font-family);
+  font-size: var(--parler-effective-font-size);
+  line-height: var(--parler-effective-line-height);
+}
+
+/* Native controls do not consistently inherit font-family from a custom-element host. */
+parler-ui button,
+parler-ui input,
+parler-ui select,
+parler-ui textarea {
+  font-family: inherit;
+}
+
+parler-ui[theme-mode="mashup"] {
+  --parler-effective-font-family: var(--parler-font-family, var(--parler-theme-font-family, "Open Sans", "Segoe UI", system-ui, sans-serif));
+  --parler-effective-font-size: var(--parler-font-size, var(--parler-theme-font-size, 14px));
+  --parler-effective-line-height: var(--parler-line-height, 1.5);
+  --parler-effective-color-canvas: var(--parler-color-canvas, var(--parler-theme-color-canvas, #ffffff));
+  --parler-effective-color-surface: var(--parler-color-surface, var(--parler-theme-color-surface, #f7f7f7));
+  --parler-effective-color-surface-raised: var(--parler-color-surface-raised, var(--parler-theme-color-surface-raised, #ffffff));
+  --parler-effective-color-surface-subtle: var(--parler-color-surface-subtle, var(--parler-theme-color-surface-subtle, #f2f4f5));
+  --parler-effective-color-text: var(--parler-color-text, var(--parler-theme-color-text, #232b2d));
+  --parler-effective-color-text-muted: var(--parler-color-text-muted, var(--parler-theme-color-text-muted, #5f6b70));
+  --parler-effective-color-border: var(--parler-color-border, var(--parler-theme-color-border, #c2c7ce));
+  --parler-effective-color-accent: var(--parler-color-accent, var(--parler-theme-color-accent, #006f9b));
+  --parler-effective-color-on-accent: var(--parler-color-on-accent, var(--parler-theme-color-on-accent, #ffffff));
+  --parler-effective-color-focus: var(--parler-color-focus, var(--parler-theme-color-focus, #006f9b));
+  --parler-effective-color-danger: var(--parler-color-danger, var(--parler-theme-color-danger, #af3231));
+  --parler-effective-color-warning: var(--parler-color-warning, #8a5a00);
+  --parler-effective-color-success: var(--parler-color-success, var(--parler-theme-color-success, #13783a));
+  --parler-effective-color-scrim: var(--parler-color-scrim, rgba(0, 0, 0, 0.32));
+  --parler-effective-notice-info: var(--parler-theme-notice-info, var(--parler-effective-color-accent));
+  --parler-effective-color-control-bg: var(--parler-color-control-bg, var(--parler-theme-color-control-bg, #ffffff));
+  --parler-effective-color-control-text: var(--parler-color-control-text, var(--parler-theme-color-control-text, #232b2d));
+  --parler-effective-color-control-border: var(--parler-color-control-border, var(--parler-theme-color-control-border, #c2c7ce));
+  --parler-effective-color-control-hover: var(--parler-color-control-hover, var(--parler-theme-color-control-hover, #eef4f7));
+  --parler-effective-color-control-disabled: var(--parler-color-control-disabled, var(--parler-theme-color-control-disabled, #e5e7e9));
+  --parler-effective-color-placeholder: var(--parler-color-placeholder, var(--parler-theme-color-placeholder, #5f6b70));
+  --parler-effective-color-scrollbar-thumb: var(--parler-color-scrollbar-thumb, var(--parler-theme-color-scrollbar-thumb, #c2c7ce));
+  --parler-effective-color-scrollbar-track: var(--parler-color-scrollbar-track, var(--parler-theme-color-scrollbar-track, #f7f7f7));
+  --parler-effective-color-selection-bg: var(--parler-color-selection-bg, var(--parler-theme-color-selection-bg, #006f9b));
+  --parler-effective-color-selection-text: var(--parler-color-selection-text, var(--parler-theme-color-selection-text, #ffffff));
+  --parler-effective-color-user-message: var(--parler-color-user-message, var(--parler-theme-color-user-message, #f2f4f5));
+  --parler-effective-color-on-user-message: var(--parler-color-on-user-message, var(--parler-theme-color-on-user-message, #232b2d));
+  --parler-effective-color-assistant-message: var(--parler-color-assistant-message, var(--parler-theme-color-assistant-message, #f7f7f7));
+  --parler-effective-color-on-assistant-message: var(--parler-color-on-assistant-message, var(--parler-theme-color-on-assistant-message, #232b2d));
+  --parler-effective-content-max-width: var(--parler-content-max-width, 1200px);
+  --parler-effective-message-max-width: var(--parler-message-max-width, min(92%, 960px));
+  --parler-effective-activity-max-width: var(--parler-activity-max-width, 100%);
+  --parler-effective-empty-state-media-max-width: var(--parler-empty-state-media-max-width, 320px);
+  --parler-effective-empty-state-media-max-height: var(--parler-empty-state-media-max-height, 160px);
+  --parler-effective-empty-state-media-opacity: var(--parler-empty-state-media-opacity, 1);
+  --parler-effective-empty-state-media-filter: var(--parler-empty-state-media-filter, none);
+  --parler-effective-radius-panel: var(--parler-radius-panel, var(--parler-theme-radius-panel, 12px));
+  --parler-effective-radius-message: var(--parler-radius-message, var(--parler-theme-radius-message, 12px));
+  --parler-effective-radius-control: var(--parler-radius-control, var(--parler-theme-radius-control, 8px));
+  --parler-effective-shadow-panel: var(--parler-shadow-panel, 0 4px 20px rgba(0, 0, 0, 0.18));
+  --parler-effective-space-unit: var(--parler-space-unit, 4px);
+  --parler-effective-markdown-heading: var(--parler-markdown-heading, var(--parler-theme-markdown-heading, #232b2d));
+  --parler-effective-markdown-link: var(--parler-markdown-link, var(--parler-theme-markdown-link, #006f9b));
+  --parler-effective-markdown-link-visited: var(--parler-markdown-link-visited, #6f42c1);
+  --parler-effective-markdown-code-bg: var(--parler-markdown-code-bg, var(--parler-theme-markdown-code-bg, #f2f4f5));
+  --parler-effective-markdown-code-text: var(--parler-markdown-code-text, var(--parler-theme-markdown-code-text, #232b2d));
+  --parler-effective-markdown-code-border: var(--parler-markdown-code-border, var(--parler-theme-markdown-code-border, #d8dbde));
+  --parler-effective-markdown-quote-bg: var(--parler-markdown-quote-bg, var(--parler-theme-markdown-quote-bg, #f2f4f5));
+  --parler-effective-markdown-quote-text: var(--parler-markdown-quote-text, var(--parler-theme-markdown-quote-text, #232b2d));
+  --parler-effective-markdown-quote-border: var(--parler-markdown-quote-border, var(--parler-theme-markdown-quote-border, #c2c7ce));
+  --parler-effective-markdown-table-header-bg: var(--parler-markdown-table-header-bg, var(--parler-theme-markdown-table-header-bg, #f2f4f5));
+  --parler-effective-markdown-table-border: var(--parler-markdown-table-border, var(--parler-theme-markdown-table-border, #c2c7ce));
+  --parler-effective-markdown-hr: var(--parler-markdown-hr, var(--parler-theme-markdown-hr, #d8dbde));
+  --parler-effective-markdown-image-radius: var(--parler-markdown-image-radius, var(--parler-theme-markdown-image-radius, 8px));
+  --parler-effective-chart-series-1: var(--parler-chart-series-1, var(--parler-theme-chart-series-1, #3363d8));
+  --parler-effective-chart-series-2: var(--parler-chart-series-2, var(--parler-theme-chart-series-2, #139492));
+  --parler-effective-chart-series-3: var(--parler-chart-series-3, var(--parler-theme-chart-series-3, #8a4ff7));
+  --parler-effective-chart-series-4: var(--parler-chart-series-4, var(--parler-theme-chart-series-4, #eb6d00));
+  --parler-effective-chart-series-5: var(--parler-chart-series-5, var(--parler-theme-chart-series-5, #2f97ff));
+  --parler-effective-chart-series-6: var(--parler-chart-series-6, var(--parler-theme-chart-series-6, #f05b80));
+  --parler-effective-chart-series-7: var(--parler-chart-series-7, var(--parler-theme-chart-series-7, #2a5b59));
+  --parler-effective-chart-series-8: var(--parler-chart-series-8, var(--parler-theme-chart-series-8, #aa9103));
+  --parler-effective-chart-series-9: var(--parler-chart-series-9, var(--parler-theme-chart-series-9, #2b387f));
+  --parler-effective-chart-series-10: var(--parler-chart-series-10, var(--parler-theme-chart-series-10, #b8849a));
+  --parler-effective-chart-series-11: var(--parler-chart-series-11, var(--parler-theme-chart-series-11, #8d909a));
+  --parler-effective-chart-series-12: var(--parler-chart-series-12, var(--parler-theme-chart-series-12, #bb68c8));
+  --parler-effective-chart-series-13: var(--parler-chart-series-13, var(--parler-theme-chart-series-13, #c33e70));
+  --parler-effective-chart-series-14: var(--parler-chart-series-14, var(--parler-theme-chart-series-14, #904b6f));
+  --parler-effective-chart-series-15: var(--parler-chart-series-15, var(--parler-theme-chart-series-15, #9d27b0));
+  --parler-effective-chart-series-16: var(--parler-chart-series-16, var(--parler-theme-chart-series-16, #00709e));
+  --parler-effective-chart-series-17: var(--parler-chart-series-17, var(--parler-theme-chart-series-17, #381394));
+  --parler-effective-chart-series-18: var(--parler-chart-series-18, var(--parler-theme-chart-series-18, #8f3809));
+  --parler-effective-chart-series-19: var(--parler-chart-series-19, var(--parler-theme-chart-series-19, #8e6514));
+  --parler-effective-chart-series-20: var(--parler-chart-series-20, var(--parler-theme-chart-series-20, #5d5f69));
+  --parler-effective-chart-series-21: var(--parler-chart-series-21, var(--parler-theme-chart-series-21, #86335e));
+  --parler-effective-chart-series-22: var(--parler-chart-series-22, var(--parler-theme-chart-series-22, #490e3e));
+  --parler-effective-chart-series-23: var(--parler-chart-series-23, var(--parler-theme-chart-series-23, #56226e));
+  --parler-effective-chart-series-24: var(--parler-chart-series-24, var(--parler-theme-chart-series-24, #1d496e));
+  --parler-effective-chart-title-text: var(--parler-chart-title-text, var(--parler-theme-chart-title-text, #232b2d));
+  --parler-effective-chart-legend-text: var(--parler-chart-legend-text, var(--parler-theme-chart-legend-text, #5f6b70));
+  --parler-effective-chart-tick-text: var(--parler-chart-tick-text, var(--parler-theme-chart-tick-text, #5f6b70));
+  --parler-effective-chart-axis-label-text: var(--parler-chart-axis-label-text, var(--parler-theme-chart-axis-label-text, #5f6b70));
+  --parler-effective-chart-axis: var(--parler-chart-axis, var(--parler-theme-chart-axis, #6b7377));
+  --parler-effective-chart-grid: var(--parler-chart-grid, var(--parler-theme-chart-grid, #d8dbde));
+  --parler-effective-chart-point-outline: var(--parler-chart-point-outline, var(--parler-theme-chart-point-outline, var(--parler-theme-chart-point-outline-secondary, #ffffff)));
+  --parler-effective-chart-reference-danger: var(--parler-chart-reference-danger, var(--parler-theme-chart-reference-danger, #af3231));
+  --parler-effective-chart-reference-warning: var(--parler-chart-reference-warning, #8a5a00);
+  --parler-effective-chart-reference-target: var(--parler-chart-reference-target, var(--parler-theme-chart-reference-target, #6e717c));
+  --parler-effective-chart-font-family: var(--parler-chart-font-family, var(--parler-theme-chart-font-family, "Open Sans", "Segoe UI", system-ui, sans-serif));
+  --parler-effective-chart-line-width: var(--parler-chart-line-width, 2px);
+  --parler-effective-chart-line-point-radius: var(--parler-chart-line-point-radius, 3px);
+  --parler-effective-chart-scatter-point-radius: var(--parler-chart-scatter-point-radius, 4px);
+  --parler-effective-chart-outline-width: var(--parler-chart-outline-width, 1px);
+  --parler-effective-chart-bar-radius: var(--parler-chart-bar-radius, 3px);
+  --parler-effective-chart-axis-line-width: var(--parler-chart-axis-line-width, var(--parler-theme-chart-axis-line-width, 1px));
+  --parler-effective-chart-grid-line-width: var(--parler-chart-grid-line-width, 1px);
+  --parler-effective-chart-grid-opacity: var(--parler-chart-grid-opacity, 0.7);
+  --parler-effective-chart-reference-line-width: var(--parler-chart-reference-line-width, 2px);
+  --parler-effective-chart-target-line-width: var(--parler-chart-target-line-width, 1.5px);
+  --parler-effective-chart-reference-opacity: var(--parler-chart-reference-opacity, 0.95);
+  --parler-effective-chart-reference-limit-dash: var(--parler-chart-reference-limit-dash, none);
+  --parler-effective-chart-reference-control-dash: var(--parler-chart-reference-control-dash, 6 4);
+  --parler-effective-chart-reference-target-dash: var(--parler-chart-reference-target-dash, 4 3);
+  --parler-effective-chart-reference-warning-dash: var(--parler-chart-reference-warning-dash, 6 3);
+  --parler-effective-chart-title-font-size: var(--parler-chart-title-font-size, 14px);
+  --parler-effective-chart-title-font-weight: var(--parler-chart-title-font-weight, 600);
+  --parler-effective-chart-legend-font-size: var(--parler-chart-legend-font-size, 12px);
+  --parler-effective-chart-tick-font-size: var(--parler-chart-tick-font-size, 12px);
+  --parler-effective-chart-axis-label-font-size: var(--parler-chart-axis-label-font-size, 11px);
+  --parler-effective-chart-reference-label-font-size: var(--parler-chart-reference-label-font-size, 10px);
+  --parler-effective-chart-legend-swatch-size: var(--parler-chart-legend-swatch-size, 10px);
+  --parler-effective-chart-legend-swatch-radius: var(--parler-chart-legend-swatch-radius, 2px);
+  --parler-effective-chart-legend-line-length: var(--parler-chart-legend-line-length, 14px);
+  --parler-effective-chart-tick-length: var(--parler-chart-tick-length, 6px);
+  --parler-effective-chart-tick-padding: var(--parler-chart-tick-padding, 3px);
+  --parler-effective-print-canvas: var(--parler-print-canvas, #ffffff);
+  --parler-effective-print-text: var(--parler-print-text, #111111);
+  --parler-effective-print-muted: var(--parler-print-muted, #555555);
+  --parler-effective-print-border: var(--parler-print-border, #888888);
+  --parler-effective-print-surface-subtle: var(--parler-print-surface-subtle, #f0f0f0);
+  --parler-effective-print-accent: var(--parler-print-accent, #005ea8);
+  --parler-effective-print-chart-series-1: var(--parler-print-chart-series-1, #1b4f72);
+  --parler-effective-print-chart-series-2: var(--parler-print-chart-series-2, #117864);
+  --parler-effective-print-chart-series-3: var(--parler-print-chart-series-3, #7d3c98);
+  --parler-effective-print-chart-series-4: var(--parler-print-chart-series-4, #a04000);
+  --parler-effective-print-chart-series-5: var(--parler-print-chart-series-5, #1f618d);
+  --parler-effective-print-chart-series-6: var(--parler-print-chart-series-6, #a93226);
+  --parler-effective-print-chart-series-7: var(--parler-print-chart-series-7, #196f3d);
+  --parler-effective-print-chart-series-8: var(--parler-print-chart-series-8, #7d6608);
+  --parler-effective-print-chart-series-9: var(--parler-print-chart-series-9, #34495e);
+  --parler-effective-print-chart-series-10: var(--parler-print-chart-series-10, #884ea0);
+  --parler-effective-print-chart-series-11: var(--parler-print-chart-series-11, #5b2c6f);
+  --parler-effective-print-chart-series-12: var(--parler-print-chart-series-12, #21618c);
+  --parler-effective-print-chart-series-13: var(--parler-print-chart-series-13, #7b241c);
+  --parler-effective-print-chart-series-14: var(--parler-print-chart-series-14, #0e6251);
+  --parler-effective-print-chart-series-15: var(--parler-print-chart-series-15, #6e2c00);
+  --parler-effective-print-chart-series-16: var(--parler-print-chart-series-16, #4a235a);
+  --parler-effective-print-chart-series-17: var(--parler-print-chart-series-17, #1b2631);
+  --parler-effective-print-chart-series-18: var(--parler-print-chart-series-18, #78281f);
+  --parler-effective-print-chart-series-19: var(--parler-print-chart-series-19, #145a32);
+  --parler-effective-print-chart-series-20: var(--parler-print-chart-series-20, #512e5f);
+  --parler-effective-print-chart-series-21: var(--parler-print-chart-series-21, #154360);
+  --parler-effective-print-chart-series-22: var(--parler-print-chart-series-22, #641e16);
+  --parler-effective-print-chart-series-23: var(--parler-print-chart-series-23, #0b5345);
+  --parler-effective-print-chart-series-24: var(--parler-print-chart-series-24, #4d5656);
+  --parler-effective-print-chart-outline: var(--parler-print-chart-outline, #ffffff);
+  --parler-effective-print-chart-reference-danger: var(--parler-print-chart-reference-danger, #a61b1b);
+  --parler-effective-print-chart-reference-warning: var(--parler-print-chart-reference-warning, #8a5700);
+  --parler-effective-print-chart-reference-target: var(--parler-print-chart-reference-target, #126b3a);
+}
+
+parler-ui[theme-mode="parler-dark"] {
+  --parler-effective-font-family: var(--parler-font-family, "Open Sans", "Segoe UI", system-ui, sans-serif);
+  --parler-effective-font-size: var(--parler-font-size, 14px);
+  --parler-effective-line-height: var(--parler-line-height, 1.5);
+  --parler-effective-color-canvas: var(--parler-color-canvas, #0b0e13);
+  --parler-effective-color-surface: var(--parler-color-surface, #12151c);
+  --parler-effective-color-surface-raised: var(--parler-color-surface-raised, #1a1f28);
+  --parler-effective-color-surface-subtle: var(--parler-color-surface-subtle, #1e232c);
+  --parler-effective-color-text: var(--parler-color-text, #e8eaed);
+  --parler-effective-color-text-muted: var(--parler-color-text-muted, #9aa0a6);
+  --parler-effective-color-border: var(--parler-color-border, #2a3038);
+  --parler-effective-color-accent: var(--parler-color-accent, #8ab4ff);
+  --parler-effective-color-on-accent: var(--parler-color-on-accent, #0a0c10);
+  --parler-effective-color-focus: var(--parler-color-focus, #8ab4ff);
+  --parler-effective-color-danger: var(--parler-color-danger, #f28b82);
+  --parler-effective-color-warning: var(--parler-color-warning, #ffa546);
+  --parler-effective-color-success: var(--parler-color-success, #81c995);
+  --parler-effective-color-scrim: var(--parler-color-scrim, rgba(0, 0, 0, 0.48));
+  --parler-effective-notice-info: var(--parler-effective-color-accent);
+  --parler-effective-color-control-bg: var(--parler-color-control-bg, #12151c);
+  --parler-effective-color-control-text: var(--parler-color-control-text, #e8eaed);
+  --parler-effective-color-control-border: var(--parler-color-control-border, #2a3038);
+  --parler-effective-color-control-hover: var(--parler-color-control-hover, #232a35);
+  --parler-effective-color-control-disabled: var(--parler-color-control-disabled, #303640);
+  --parler-effective-color-placeholder: var(--parler-color-placeholder, #9aa0a6);
+  --parler-effective-color-scrollbar-thumb: var(--parler-color-scrollbar-thumb, #5f6b70);
+  --parler-effective-color-scrollbar-track: var(--parler-color-scrollbar-track, #12151c);
+  --parler-effective-color-selection-bg: var(--parler-color-selection-bg, #8ab4ff);
+  --parler-effective-color-selection-text: var(--parler-color-selection-text, #0a0c10);
+  --parler-effective-color-user-message: var(--parler-color-user-message, #173858);
+  --parler-effective-color-on-user-message: var(--parler-color-on-user-message, #e8f0ff);
+  --parler-effective-color-assistant-message: var(--parler-color-assistant-message, #161a22);
+  --parler-effective-color-on-assistant-message: var(--parler-color-on-assistant-message, #e8eaed);
+  --parler-effective-content-max-width: var(--parler-content-max-width, 1200px);
+  --parler-effective-message-max-width: var(--parler-message-max-width, min(92%, 960px));
+  --parler-effective-activity-max-width: var(--parler-activity-max-width, 100%);
+  --parler-effective-empty-state-media-max-width: var(--parler-empty-state-media-max-width, 320px);
+  --parler-effective-empty-state-media-max-height: var(--parler-empty-state-media-max-height, 160px);
+  --parler-effective-empty-state-media-opacity: var(--parler-empty-state-media-opacity, 1);
+  --parler-effective-empty-state-media-filter: var(--parler-empty-state-media-filter, none);
+  --parler-effective-radius-panel: var(--parler-radius-panel, 16px);
+  --parler-effective-radius-message: var(--parler-radius-message, 12px);
+  --parler-effective-radius-control: var(--parler-radius-control, 12px);
+  --parler-effective-shadow-panel: var(--parler-shadow-panel, 0 18px 50px rgba(0, 0, 0, 0.35));
+  --parler-effective-space-unit: var(--parler-space-unit, 4px);
+  --parler-effective-markdown-heading: var(--parler-markdown-heading, #e8eaed);
+  --parler-effective-markdown-link: var(--parler-markdown-link, #8ab4ff);
+  --parler-effective-markdown-link-visited: var(--parler-markdown-link-visited, #c58cff);
+  --parler-effective-markdown-code-bg: var(--parler-markdown-code-bg, #1e232c);
+  --parler-effective-markdown-code-text: var(--parler-markdown-code-text, #e8eaed);
+  --parler-effective-markdown-code-border: var(--parler-markdown-code-border, #39414b);
+  --parler-effective-markdown-quote-bg: var(--parler-markdown-quote-bg, #151b24);
+  --parler-effective-markdown-quote-text: var(--parler-markdown-quote-text, #d9e2f1);
+  --parler-effective-markdown-quote-border: var(--parler-markdown-quote-border, #5f6b70);
+  --parler-effective-markdown-table-header-bg: var(--parler-markdown-table-header-bg, #1e2632);
+  --parler-effective-markdown-table-border: var(--parler-markdown-table-border, #3d4652);
+  --parler-effective-markdown-hr: var(--parler-markdown-hr, #3d4652);
+  --parler-effective-markdown-image-radius: var(--parler-markdown-image-radius, 8px);
+  --parler-effective-chart-series-1: var(--parler-chart-series-1, #8ab4ff);
+  --parler-effective-chart-series-2: var(--parler-chart-series-2, #ffb74d);
+  --parler-effective-chart-series-3: var(--parler-chart-series-3, #81c784);
+  --parler-effective-chart-series-4: var(--parler-chart-series-4, #e57373);
+  --parler-effective-chart-series-5: var(--parler-chart-series-5, #ba68c8);
+  --parler-effective-chart-series-6: var(--parler-chart-series-6, #4dd0e1);
+  --parler-effective-chart-series-7: var(--parler-chart-series-7, #ffd54f);
+  --parler-effective-chart-series-8: var(--parler-chart-series-8, #90a4ae);
+  --parler-effective-chart-series-9: var(--parler-chart-series-9, #ff8a65);
+  --parler-effective-chart-series-10: var(--parler-chart-series-10, #9575cd);
+  --parler-effective-chart-series-11: var(--parler-chart-series-11, #64b5f6);
+  --parler-effective-chart-series-12: var(--parler-chart-series-12, #f48fb1);
+  --parler-effective-chart-series-13: var(--parler-chart-series-13, #80cbc4);
+  --parler-effective-chart-series-14: var(--parler-chart-series-14, #dce775);
+  --parler-effective-chart-series-15: var(--parler-chart-series-15, #ce93d8);
+  --parler-effective-chart-series-16: var(--parler-chart-series-16, #4fc3f7);
+  --parler-effective-chart-series-17: var(--parler-chart-series-17, #b39ddb);
+  --parler-effective-chart-series-18: var(--parler-chart-series-18, #ffab91);
+  --parler-effective-chart-series-19: var(--parler-chart-series-19, #fff176);
+  --parler-effective-chart-series-20: var(--parler-chart-series-20, #b0bec5);
+  --parler-effective-chart-series-21: var(--parler-chart-series-21, #f06292);
+  --parler-effective-chart-series-22: var(--parler-chart-series-22, #bcaaa4);
+  --parler-effective-chart-series-23: var(--parler-chart-series-23, #7986cb);
+  --parler-effective-chart-series-24: var(--parler-chart-series-24, #4db6ac);
+  --parler-effective-chart-title-text: var(--parler-chart-title-text, #e8eaed);
+  --parler-effective-chart-legend-text: var(--parler-chart-legend-text, #9aa0a6);
+  --parler-effective-chart-tick-text: var(--parler-chart-tick-text, #9aa0a6);
+  --parler-effective-chart-axis-label-text: var(--parler-chart-axis-label-text, #9aa0a6);
+  --parler-effective-chart-axis: var(--parler-chart-axis, #6b7377);
+  --parler-effective-chart-grid: var(--parler-chart-grid, #3d4652);
+  --parler-effective-chart-point-outline: var(--parler-chart-point-outline, #0e1013);
+  --parler-effective-chart-reference-danger: var(--parler-chart-reference-danger, #f28b82);
+  --parler-effective-chart-reference-warning: var(--parler-chart-reference-warning, #ffa546);
+  --parler-effective-chart-reference-target: var(--parler-chart-reference-target, #81c995);
+  --parler-effective-chart-font-family: var(--parler-chart-font-family, "Open Sans", "Segoe UI", system-ui, sans-serif);
+  --parler-effective-chart-line-width: var(--parler-chart-line-width, 2px);
+  --parler-effective-chart-line-point-radius: var(--parler-chart-line-point-radius, 3px);
+  --parler-effective-chart-scatter-point-radius: var(--parler-chart-scatter-point-radius, 4px);
+  --parler-effective-chart-outline-width: var(--parler-chart-outline-width, 1px);
+  --parler-effective-chart-bar-radius: var(--parler-chart-bar-radius, 3px);
+  --parler-effective-chart-axis-line-width: var(--parler-chart-axis-line-width, 1px);
+  --parler-effective-chart-grid-line-width: var(--parler-chart-grid-line-width, 1px);
+  --parler-effective-chart-grid-opacity: var(--parler-chart-grid-opacity, 0.7);
+  --parler-effective-chart-reference-line-width: var(--parler-chart-reference-line-width, 2px);
+  --parler-effective-chart-target-line-width: var(--parler-chart-target-line-width, 1.5px);
+  --parler-effective-chart-reference-opacity: var(--parler-chart-reference-opacity, 0.95);
+  --parler-effective-chart-reference-limit-dash: var(--parler-chart-reference-limit-dash, none);
+  --parler-effective-chart-reference-control-dash: var(--parler-chart-reference-control-dash, 6 4);
+  --parler-effective-chart-reference-target-dash: var(--parler-chart-reference-target-dash, 4 3);
+  --parler-effective-chart-reference-warning-dash: var(--parler-chart-reference-warning-dash, 6 3);
+  --parler-effective-chart-title-font-size: var(--parler-chart-title-font-size, 14px);
+  --parler-effective-chart-title-font-weight: var(--parler-chart-title-font-weight, 600);
+  --parler-effective-chart-legend-font-size: var(--parler-chart-legend-font-size, 12px);
+  --parler-effective-chart-tick-font-size: var(--parler-chart-tick-font-size, 12px);
+  --parler-effective-chart-axis-label-font-size: var(--parler-chart-axis-label-font-size, 11px);
+  --parler-effective-chart-reference-label-font-size: var(--parler-chart-reference-label-font-size, 10px);
+  --parler-effective-chart-legend-swatch-size: var(--parler-chart-legend-swatch-size, 10px);
+  --parler-effective-chart-legend-swatch-radius: var(--parler-chart-legend-swatch-radius, 2px);
+  --parler-effective-chart-legend-line-length: var(--parler-chart-legend-line-length, 14px);
+  --parler-effective-chart-tick-length: var(--parler-chart-tick-length, 6px);
+  --parler-effective-chart-tick-padding: var(--parler-chart-tick-padding, 3px);
+  --parler-effective-print-canvas: var(--parler-print-canvas, #ffffff);
+  --parler-effective-print-text: var(--parler-print-text, #111111);
+  --parler-effective-print-muted: var(--parler-print-muted, #555555);
+  --parler-effective-print-border: var(--parler-print-border, #888888);
+  --parler-effective-print-surface-subtle: var(--parler-print-surface-subtle, #f0f0f0);
+  --parler-effective-print-accent: var(--parler-print-accent, #005ea8);
+  --parler-effective-print-chart-series-1: var(--parler-print-chart-series-1, #1b4f72);
+  --parler-effective-print-chart-series-2: var(--parler-print-chart-series-2, #117864);
+  --parler-effective-print-chart-series-3: var(--parler-print-chart-series-3, #7d3c98);
+  --parler-effective-print-chart-series-4: var(--parler-print-chart-series-4, #a04000);
+  --parler-effective-print-chart-series-5: var(--parler-print-chart-series-5, #1f618d);
+  --parler-effective-print-chart-series-6: var(--parler-print-chart-series-6, #a93226);
+  --parler-effective-print-chart-series-7: var(--parler-print-chart-series-7, #196f3d);
+  --parler-effective-print-chart-series-8: var(--parler-print-chart-series-8, #7d6608);
+  --parler-effective-print-chart-series-9: var(--parler-print-chart-series-9, #34495e);
+  --parler-effective-print-chart-series-10: var(--parler-print-chart-series-10, #884ea0);
+  --parler-effective-print-chart-series-11: var(--parler-print-chart-series-11, #5b2c6f);
+  --parler-effective-print-chart-series-12: var(--parler-print-chart-series-12, #21618c);
+  --parler-effective-print-chart-series-13: var(--parler-print-chart-series-13, #7b241c);
+  --parler-effective-print-chart-series-14: var(--parler-print-chart-series-14, #0e6251);
+  --parler-effective-print-chart-series-15: var(--parler-print-chart-series-15, #6e2c00);
+  --parler-effective-print-chart-series-16: var(--parler-print-chart-series-16, #4a235a);
+  --parler-effective-print-chart-series-17: var(--parler-print-chart-series-17, #1b2631);
+  --parler-effective-print-chart-series-18: var(--parler-print-chart-series-18, #78281f);
+  --parler-effective-print-chart-series-19: var(--parler-print-chart-series-19, #145a32);
+  --parler-effective-print-chart-series-20: var(--parler-print-chart-series-20, #512e5f);
+  --parler-effective-print-chart-series-21: var(--parler-print-chart-series-21, #154360);
+  --parler-effective-print-chart-series-22: var(--parler-print-chart-series-22, #641e16);
+  --parler-effective-print-chart-series-23: var(--parler-print-chart-series-23, #0b5345);
+  --parler-effective-print-chart-series-24: var(--parler-print-chart-series-24, #4d5656);
+  --parler-effective-print-chart-outline: var(--parler-print-chart-outline, #ffffff);
+  --parler-effective-print-chart-reference-danger: var(--parler-print-chart-reference-danger, #a61b1b);
+  --parler-effective-print-chart-reference-warning: var(--parler-print-chart-reference-warning, #8a5700);
+  --parler-effective-print-chart-reference-target: var(--parler-print-chart-reference-target, #126b3a);
+}
+
+parler-ui .shell {
+  box-sizing: border-box;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  width: 100%;
+  max-width: min(100%, var(--parler-effective-content-max-width));
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+parler-ui .hero {
+  flex-shrink: 0;
+  padding-top: 12px;
+  padding-bottom: 8px;
+}
+
+parler-ui .hero h1 {
+  margin: 0 0 6px;
+  color: var(--parler-effective-color-text);
+  font-size: 1.5rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+parler-ui .thread-wrap {
+  flex: 1;
+  /* Floor height so an empty thread is still a visible “dialog” region in Mashup flex layouts */
+  min-height: min(200px, 35vh);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+parler-ui .thread-scroll {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 4px;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--parler-effective-color-scrollbar-thumb) var(--parler-effective-color-scrollbar-track);
+}
+
+parler-ui .thread-scroll:focus-visible {
+  outline: 2px solid var(--parler-effective-color-focus);
+  outline-offset: 2px;
+}
+
+parler-ui ::-webkit-scrollbar-thumb {
+  background: var(--parler-effective-color-scrollbar-thumb);
+  border-radius: 999px;
+}
+
+parler-ui ::-webkit-scrollbar-track {
+  background: var(--parler-effective-color-scrollbar-track);
+}
+
+parler-ui::selection,
+parler-ui ::selection {
+  color: var(--parler-effective-color-selection-text);
+  background: var(--parler-effective-color-selection-bg);
+}
+
+parler-ui .thread-panel {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 16px;
+  border-radius: var(--parler-effective-radius-panel);
+  border: 1px solid var(--parler-effective-color-border);
+  background: var(--parler-effective-color-surface);
+  box-shadow: var(--parler-effective-shadow-panel);
+  /* Allow flex children (e.g. assistant bubble + chart) to shrink below intrinsic SVG width */
+  min-width: 0;
+}
+
+parler-ui .empty-state {
+  flex: 1;
+  min-height: 120px;
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+}
+
+parler-ui .empty-state-media {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: min(100%, var(--parler-effective-empty-state-media-max-width));
+  max-height: min(100%, var(--parler-effective-empty-state-media-max-height));
+  object-fit: contain;
+  opacity: var(--parler-effective-empty-state-media-opacity);
+  filter: var(--parler-effective-empty-state-media-filter);
+}
+
+parler-ui .empty-state-media[hidden] {
+  display: none;
+}
+
+parler-ui .empty-state-label {
+  color: var(--parler-effective-color-text-muted);
+  font-family: var(--parler-effective-font-family);
+  font-size: clamp(28px, 4.5vw, 48px);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  opacity: 0.32;
+  text-shadow:
+    1px 0 0 color-mix(in srgb, currentColor 35%, transparent),
+    0 1px 0 color-mix(in srgb, currentColor 35%, transparent),
+    0 0 22px color-mix(in srgb, currentColor 30%, transparent);
+}
+
+parler-ui .turn {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+parler-ui .meta {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--parler-effective-color-text-muted);
+}
+
+parler-ui .turn-user {
+  align-items: flex-end;
+}
+
+parler-ui .turn-assistant {
+  align-items: flex-start;
+}
+
+parler-ui .bubble {
+  box-sizing: border-box;
+  max-width: min(100%, var(--parler-effective-message-max-width));
+  padding: 12px 14px;
+  border-radius: var(--parler-effective-radius-message);
+  border: 1px solid var(--parler-effective-color-border);
+  line-height: 1.55;
+}
+
+parler-ui .user-bubble {
+  background: var(--parler-effective-color-user-message);
+  color: var(--parler-effective-color-on-user-message);
+}
+
+parler-ui[theme-mode="mashup"] .user-bubble {
+  border-color: var(--parler-effective-color-accent);
+}
+
+parler-ui .user-prompt-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+}
+
+parler-ui .user-message-actions {
+  display: grid;
+  gap: var(--parler-effective-space-unit);
+  min-width: 0;
+}
+
+parler-ui .user-prompt-copy {
+  flex-shrink: 0;
+  margin-top: 1px;
+  opacity: 0.55;
+}
+
+parler-ui .user-bubble:hover .user-prompt-copy,
+parler-ui .user-bubble:focus-within .user-prompt-copy {
+  opacity: 1;
+}
+
+parler-ui .user-prompt-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+parler-ui .user-host-context {
+  margin-bottom: 8px;
+}
+
+parler-ui .user-host-context-disclosure {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 4px 6px;
+  border: 1px solid var(--parler-effective-color-control-border);
+  border-radius: var(--parler-effective-radius-control);
+  background: var(--parler-effective-color-control-bg);
+  color: var(--parler-effective-color-control-text);
+  font-size: 0.78rem;
+  line-height: 1.35;
+  text-align: left;
+  cursor: pointer;
+}
+
+parler-ui .user-host-context-disclosure:hover {
+  background: var(--parler-effective-color-control-hover);
+}
+
+parler-ui .user-host-context-disclosure:focus-visible {
+  outline: 2px solid var(--parler-effective-color-focus);
+  outline-offset: 2px;
+}
+
+parler-ui .user-host-context-disclosure-icon {
+  flex-shrink: 0;
+  width: 0.85rem;
+  opacity: 0.85;
+}
+
+parler-ui .user-host-context-disclosure-label {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+parler-ui .user-host-context-panel {
+  margin-top: 6px;
+  padding: 8px 10px;
+  border: 1px solid var(--parler-effective-color-border);
+  border-radius: var(--parler-effective-radius-control);
+  background: var(--parler-effective-color-surface-subtle);
+  color: var(--parler-effective-color-text);
+  font-family: var(--parler-effective-font-family);
+}
+
+parler-ui .user-host-context-raw-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+parler-ui .user-host-context-copy {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+parler-ui .user-host-context-raw {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  padding: 2px 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+parler-ui .user-host-context-unavailable {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--parler-effective-color-text-muted);
+  font-style: italic;
+}
+
+parler-ui .assistant-bubble {
+  background: var(--parler-effective-color-assistant-message);
+  color: var(--parler-effective-color-on-assistant-message);
+  min-width: 0;
+  width: 100%;
+}
+
+/* Assistant row Copy / Print — `docs/ui/assistant-response-actions.md` */
+parler-ui .assistant-row-actions {
+  margin-top: 0.35rem;
+  padding-top: 0.2rem;
+  min-height: 34px;
+  box-sizing: border-box;
+}
+
+parler-ui .assistant-row-actions-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--parler-effective-space-unit);
+  min-height: 30px;
+  opacity: 0.45;
+  transition: opacity 0.15s ease;
+}
+
+parler-ui .assistant-bubble:hover .assistant-row-actions-inner,
+parler-ui .assistant-bubble:focus-within .assistant-row-actions-inner {
+  opacity: 1;
+}
+
+@media (hover: none), (pointer: coarse) {
+  parler-ui .assistant-row-actions-inner {
+    opacity: 1;
+  }
+}
+
+parler-ui .assistant-row-actions-inner--placeholder {
+  pointer-events: none;
+  visibility: hidden;
+}
+
+parler-ui .assistant-action {
+  box-sizing: border-box;
+  min-height: 30px;
+  min-width: 30px;
+  padding: 0 6px;
+  border-radius: var(--parler-effective-radius-control);
+  border: 1px solid var(--parler-effective-color-control-border);
+  background: var(--parler-effective-color-control-bg);
+  color: var(--parler-effective-color-control-text);
+  font-size: 0.82rem;
+  font-weight: 400;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 0.12s ease,
+    border-color 0.12s ease,
+    transform 0.08s ease;
+}
+
+parler-ui .assistant-action--icon {
+  padding: 0;
+  width: 30px;
+  min-width: 30px;
+}
+
+parler-ui .assistant-action-icon {
+  display: block;
+  flex-shrink: 0;
+}
+
+parler-ui .assistant-action:active:not(:disabled) {
+  transform: scale(0.94);
+}
+
+@keyframes assistant-action-tap-pulse {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(0.86);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+parler-ui .assistant-action--tap-pulse {
+  animation: assistant-action-tap-pulse 0.38s ease-out;
+}
+
+parler-ui .assistant-action:disabled {
+  background: var(--parler-effective-color-control-disabled);
+  color: var(--parler-effective-color-text-muted);
+  border-color: var(--parler-effective-color-control-border);
+  cursor: default;
+}
+
+parler-ui .assistant-action:hover:not(:disabled) {
+  background: var(--parler-effective-color-control-hover);
+}
+
+parler-ui .assistant-action:focus-visible {
+  outline: 2px solid var(--parler-effective-color-focus);
+  outline-offset: 2px;
+  opacity: 1;
+}
+
+parler-ui .assistant-action--feedback-selected,
+parler-ui .assistant-action--info-selected {
+  background: var(--parler-effective-color-accent);
+  color: var(--parler-effective-color-on-accent);
+  border-color: var(--parler-effective-color-accent);
+}
+
+parler-ui .chart-expand-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-sizing: border-box;
+  padding: 12px;
+  overflow: auto;
+  border: 1px solid var(--parler-effective-color-border);
+  border-radius: var(--parler-effective-radius-panel);
+  background: var(--parler-effective-color-surface);
+  color: var(--parler-effective-color-text);
+  box-shadow: var(--parler-effective-shadow-panel);
+}
+
+parler-ui .chart-expand-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+parler-ui .chart-expand-title {
+  font-weight: 600;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+parler-ui .chart-expand-close {
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: var(--parler-effective-radius-control);
+  border: 1px solid var(--parler-effective-color-control-border);
+  background: var(--parler-effective-color-control-bg);
+  color: var(--parler-effective-color-control-text);
+  font: inherit;
+  cursor: pointer;
+}
+
+parler-ui .chart-expand-close:hover {
+  background: var(--parler-effective-color-control-hover);
+}
+
+parler-ui .chart-expand-close:focus-visible {
+  outline: 2px solid var(--parler-effective-color-focus);
+  outline-offset: 2px;
+}
+
+parler-ui .chart-expand-body {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+parler-ui .chart-expand-body parler-ui-chart {
+  display: block;
+  width: 100%;
+}
+
+parler-ui .chart-expand-placeholder {
+  margin: 8px 0;
+  padding: 8px 12px;
+  border: 1px dashed var(--parler-effective-color-border);
+  border-radius: var(--parler-effective-radius-control);
+  color: var(--parler-effective-color-text-muted);
+  font-family: var(--parler-effective-chart-font-family);
+  font-size: clamp(6px, var(--parler-effective-chart-legend-font-size), 18px);
+}
+
+parler-ui .chart-expand-placeholder:focus-visible {
+  outline: 2px solid var(--parler-effective-color-focus);
+  outline-offset: 2px;
+}
+
+parler-ui .assistant-info-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+parler-ui .assistant-info-scrim {
+  position: absolute;
+  inset: 0;
+  background: var(--parler-effective-color-scrim);
+  pointer-events: auto;
+}
+
+parler-ui .assistant-info-popover {
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
+  width: min(480px, calc(100vw - 32px));
+  max-height: min(72vh, 520px);
+  overflow: auto;
+  margin: 16px;
+  padding: 10px 12px 12px;
+  border-radius: var(--parler-effective-radius-panel);
+  border: 1px solid var(--parler-effective-color-border);
+  background: var(--parler-effective-color-surface-raised);
+  color: var(--parler-effective-color-text);
+  box-shadow: var(--parler-effective-shadow-panel);
+}
+
+parler-ui .assistant-info-popover-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+parler-ui .assistant-info-popover-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: inherit;
+}
+
+parler-ui .assistant-info-popover-close {
+  min-height: 28px;
+  min-width: 28px;
+  padding: 0;
+  border-radius: var(--parler-effective-radius-control);
+  border: 1px solid var(--parler-effective-color-control-border);
+  background: var(--parler-effective-color-control-bg);
+  color: var(--parler-effective-color-control-text);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+parler-ui .assistant-info-popover-close:hover {
+  background: var(--parler-effective-color-control-hover);
+}
+
+parler-ui .assistant-info-popover-close:focus-visible {
+  outline: 2px solid var(--parler-effective-color-focus);
+  outline-offset: 2px;
+}
+
+parler-ui .assistant-info-dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 34%) 1fr;
+  gap: 4px 10px;
+  font-size: 0.82rem;
+}
+
+parler-ui .assistant-info-dl dt {
+  margin: 0;
+  color: var(--parler-effective-color-text-muted);
+  font-weight: 500;
+}
+
+parler-ui .assistant-info-dl dd {
+  margin: 0;
+  word-break: break-word;
+  color: inherit;
+}
+
+parler-ui .gateway-invoke-err {
+  margin: 10px 0 0;
+}
+
+parler-ui .assistant-action-status {
+  font-size: 0.82rem;
+  max-width: 100%;
+}
+
+parler-ui [part="notice"],
+parler-ui [part="task-state"] {
+  border: 1px solid currentColor;
+  border-radius: var(--parler-effective-radius-control);
+  background: var(--parler-effective-color-surface-subtle);
+}
+
+parler-ui [part="notice"][data-severity="info"],
+parler-ui [part="task-state"][data-severity="info"] {
+  color: var(--parler-effective-notice-info);
+  border-color: var(--parler-effective-color-border);
+}
+
+parler-ui [part="notice"][data-severity="success"],
+parler-ui [part="task-state"][data-severity="success"] {
+  color: var(--parler-effective-color-success);
+}
+
+parler-ui [part="notice"][data-severity="warning"],
+parler-ui [part="task-state"][data-severity="warning"] {
+  color: var(--parler-effective-color-warning);
+}
+
+parler-ui [part="notice"][data-severity="danger"],
+parler-ui [part="task-state"][data-severity="danger"] {
+  color: var(--parler-effective-color-danger);
+}
+
+parler-ui .assistant-print-blocked {
+  flex: 1 1 100%;
+  margin-top: 2px;
+  padding: 8px 10px;
+  border-radius: var(--parler-effective-radius-control);
+  font-size: 0.82rem;
+}
+
+parler-ui .assistant-print-blocked-msg {
+  margin: 0 0 6px;
+}
+
+parler-ui .assistant-print-blocked-link {
+  color: var(--parler-effective-color-accent);
+  font-weight: 600;
+}
+
+parler-ui .assistant-print-blocked-dismiss {
+  margin-top: 8px;
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: var(--parler-effective-radius-control);
+  border: 1px solid var(--parler-effective-color-control-border);
+  background: var(--parler-effective-color-control-bg);
+  color: var(--parler-effective-color-control-text);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+parler-ui .assistant-print-blocked-dismiss:hover {
+  background: var(--parler-effective-color-control-hover);
+}
+
+parler-ui .assistant-print-blocked-dismiss:focus-visible {
+  outline: 2px solid var(--parler-effective-color-focus);
+  outline-offset: 2px;
+}
+
+parler-ui .working {
+  box-sizing: border-box;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  max-width: min(100%, var(--parler-effective-activity-max-width));
+  margin: 0.55rem 0 0;
+  display: grid;
+  gap: 0.28rem;
+  color: var(--parler-effective-color-text-muted);
+  font-size: 0.9rem;
+}
+
+parler-ui .working.working--rate-control-wait {
+  color: var(--parler-effective-color-warning);
+}
+
+parler-ui .working-text {
+  font-style: italic;
+}
+
+parler-ui .working-pulse {
+  box-sizing: border-box;
+  min-width: 0;
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  max-width: min(100%, var(--parler-effective-activity-max-width));
+  height: 2px;
+  overflow: hidden;
+  border-radius: 999px;
+  color: var(--parler-effective-color-accent);
+  background: transparent;
+  background: color-mix(in srgb, currentColor 14%, transparent);
+}
+
+parler-ui .working.working--rate-control-wait .working-pulse {
+  color: var(--parler-effective-color-warning);
+  background: color-mix(in srgb, currentColor 22%, transparent);
+}
+
+parler-ui .working-pulse::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 -35%;
+  width: 34%;
+  border-radius: inherit;
+  background: currentColor;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, currentColor 28%, transparent),
+    currentColor,
+    color-mix(in srgb, currentColor 28%, transparent),
+    transparent
+  );
+  animation: parler-working-pulse 1.65s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+}
+
+parler-ui .working.working--rate-control-wait .working-pulse::before {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, currentColor 35%, transparent),
+    currentColor,
+    color-mix(in srgb, currentColor 35%, transparent),
+    transparent
+  );
+}
+
+@keyframes parler-working-pulse {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(400%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  parler-ui .working-pulse::before {
+    inset: 0;
+    width: 100%;
+    opacity: 0.55;
+    animation: none;
+  }
+}
+
+/* D7: presence-only — do not branch on child fields here (see UI_CLIENT_PROTOCOL.md). */
+parler-ui .insight-envelope-hint {
+  margin: 0.35rem 0 0;
+  color: var(--parler-effective-color-text-muted);
+  font-size: 0.82rem;
+}
+
+/* v1b task.state panel — labels/status/summary only (no raw JSON). */
+parler-ui .task-state-panel {
+  margin: 0.65rem 0 0;
+  padding: 0.55rem 0.65rem;
+  font-size: 0.84rem;
+  max-width: 100%;
+}
+
+parler-ui .task-state-title {
+  margin: 0 0 0.35rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: inherit;
+}
+
+parler-ui .task-state-meta {
+  margin: 0 0 0.45rem;
+  color: var(--parler-effective-color-text-muted);
+  font-size: 0.8rem;
+}
+
+parler-ui .task-state-items {
+  margin: 0;
+  padding-left: 1.1rem;
+  list-style: disc;
+}
+
+parler-ui .task-state-item {
+  margin: 0.2rem 0;
+  line-height: 1.35;
+}
+
+parler-ui .task-state-status {
+  font-weight: 600;
+  margin-right: 0.35rem;
+  color: inherit;
+}
+
+parler-ui .task-state-label {
+  margin-right: 0.35rem;
+}
+
+parler-ui .task-state-summary {
+  color: var(--parler-effective-color-text-muted);
+  font-size: 0.82rem;
+}
+
+parler-ui [part="markdown-content"] {
+  max-width: 100%;
+  overflow-x: auto;
+  color: inherit;
+}
+
+parler-ui [part="markdown-content"] p {
+  margin: 0.4em 0;
+}
+
+parler-ui [part="markdown-content"] > :first-child {
+  margin-top: 0;
+}
+
+parler-ui [part="markdown-content"] > :last-child {
+  margin-bottom: 0;
+}
+
+parler-ui [part="markdown-content"] h1,
+parler-ui [part="markdown-content"] h2,
+parler-ui [part="markdown-content"] h3,
+parler-ui [part="markdown-content"] h4,
+parler-ui [part="markdown-content"] h5,
+parler-ui [part="markdown-content"] h6 {
+  margin: 0.85em 0 0.35em;
+  color: var(--parler-effective-markdown-heading);
+  line-height: 1.25;
+}
+
+parler-ui [part="markdown-content"] a {
+  color: var(--parler-effective-markdown-link);
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+}
+
+parler-ui [part="markdown-content"] a:visited {
+  color: var(--parler-effective-markdown-link-visited);
+}
+
+parler-ui [part="markdown-content"] a:hover {
+  text-decoration-thickness: 0.12em;
+}
+
+parler-ui [part="markdown-content"] a:focus-visible {
+  outline: 2px solid var(--parler-effective-color-focus);
+  outline-offset: 2px;
+}
+
+parler-ui [part="markdown-content"] strong,
+parler-ui [part="markdown-content"] em,
+parler-ui [part="markdown-content"] s {
+  color: inherit;
+}
+
+parler-ui [part="markdown-content"] ul,
+parler-ui [part="markdown-content"] ol {
+  margin: 0.35em 0 0.35em 1.2em;
+  padding: 0;
+}
+
+parler-ui [part="markdown-content"] li > ul,
+parler-ui [part="markdown-content"] li > ol {
+  margin-top: 0.2em;
+  margin-bottom: 0.2em;
+}
+
+parler-ui [part="markdown-content"] code {
+  font-size: 0.88em;
+  color: var(--parler-effective-markdown-code-text);
+  background: var(--parler-effective-markdown-code-bg);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}
+
+parler-ui [part="markdown-content"] pre {
+  box-sizing: border-box;
+  max-width: 100%;
+  margin: 0.6em 0;
+  padding: 0.75em 0.9em;
+  overflow-x: auto;
+  color: var(--parler-effective-markdown-code-text);
+  background: var(--parler-effective-markdown-code-bg);
+  border: 1px solid var(--parler-effective-markdown-code-border);
+  border-radius: 6px;
+  white-space: pre;
+}
+
+parler-ui [part="markdown-content"] pre code {
+  color: inherit;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  white-space: inherit;
+}
+
+parler-ui [part="markdown-content"] blockquote {
+  margin: 0.6em 0;
+  padding: 0.5em 0.75em;
+  color: var(--parler-effective-markdown-quote-text);
+  background: var(--parler-effective-markdown-quote-bg);
+  border-left: 4px solid var(--parler-effective-markdown-quote-border);
+}
+
+/* Markdown pipe tables (GFM) — match structured table density (table-view-solution.md §9.1). */
+parler-ui [part="markdown-content"] table {
+  width: 100%;
+  max-width: 100%;
+  margin: 0.5rem 0 0;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  border: 1px solid var(--parler-effective-markdown-table-border);
+  table-layout: auto;
+}
+
+parler-ui [part="markdown-content"] th,
+parler-ui [part="markdown-content"] td {
+  border: 1px solid var(--parler-effective-markdown-table-border);
+  padding: 0.25rem 0.45rem;
+  text-align: left;
+  vertical-align: top;
+  word-break: break-word;
+}
+
+parler-ui [part="markdown-content"] th {
+  font-weight: 600;
+  color: inherit;
+  background: var(--parler-effective-markdown-table-header-bg);
+}
+
+parler-ui [part="markdown-content"] hr {
+  height: 1px;
+  margin: 0.8em 0;
+  border: 0;
+  background: var(--parler-effective-markdown-hr);
+}
+
+parler-ui [part="markdown-content"] img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--parler-effective-markdown-image-radius);
+}
+
+/* Structured `table` wire — compact body, subtle surface (see docs/ui/table-view-solution.md). */
+parler-ui .parler-data-table-disclosure {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: 100%;
+  margin: 0 0 0.35rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--parler-effective-color-control-border);
+  border-radius: var(--parler-effective-radius-control);
+  background: var(--parler-effective-color-control-bg);
+  color: var(--parler-effective-color-control-text);
+  font: inherit;
+  font-size: 0.82rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.18s ease;
+}
+
+parler-ui .parler-data-table-disclosure:hover {
+  background: var(--parler-effective-color-control-hover);
+}
+
+parler-ui .parler-data-table-disclosure:focus-visible {
+  outline: 2px solid var(--parler-effective-color-focus);
+  outline-offset: 2px;
+}
+
+parler-ui .parler-data-table-disclosure-icon {
+  flex: 0 0 auto;
+  font-size: 0.7rem;
+  line-height: 1;
+}
+
+parler-ui .parler-data-table-disclosure-label {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+parler-ui .parler-data-table-panel {
+  transition: opacity 0.18s ease;
+}
+
+parler-ui .parler-data-table-wrap {
+  margin: 0.65rem 0 0.85rem;
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 0.5rem;
+  border: 1px solid var(--parler-effective-color-border);
+  border-radius: var(--parler-effective-radius-control);
+  background: var(--parler-effective-color-surface-subtle);
+}
+
+parler-ui .parler-data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92em;
+  line-height: 1.35;
+  border: 1px solid var(--parler-effective-color-border);
+  background: var(--parler-effective-color-surface);
+  color: var(--parler-effective-color-text);
+}
+
+parler-ui .parler-data-table th,
+parler-ui .parler-data-table td {
+  border: 1px solid var(--parler-effective-color-border);
+  padding: 0.25rem 0.45rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+parler-ui .parler-data-table th {
+  font-weight: 600;
+  color: var(--parler-effective-color-text);
+  background: var(--parler-effective-color-surface-subtle);
+}
+
+parler-ui .parler-data-table td {
+  color: var(--parler-effective-color-text);
+  background: var(--parler-effective-color-surface);
+}
+
+parler-ui .parler-data-table-foot,
+parler-ui .parler-data-table-dl {
+  margin: 0.35rem 0 0;
+  font-size: 0.85em;
+  color: var(--parler-effective-color-text-muted);
+}
+
+parler-ui .parler-data-table-dl a {
+  color: var(--parler-effective-color-accent);
+}
+
+parler-ui .err {
+  margin: 8px 0 0;
+  padding: 8px 10px;
+  font-size: 0.9rem;
+}
+
+parler-ui .history-loading {
+  margin: 0;
+  padding: 10px 12px;
+  border-style: dashed;
+  font-size: 0.9rem;
+}
+
+parler-ui .status-row {
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px 4px;
+}
+
+parler-ui .conn-status {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  font-weight: 600;
+}
+
+parler-ui .conn-status--disconnected {
+  color: var(--parler-effective-color-danger);
+}
+
+parler-ui .conn-status--connecting {
+  color: var(--parler-effective-color-warning);
+}
+
+parler-ui .conn-status--connected {
+  color: var(--parler-effective-color-success);
+}
+
+parler-ui .composer {
+  flex-shrink: 0;
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  margin-top: 0;
+  padding-top: 16px;
+  padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--parler-effective-color-border);
+  background: var(--parler-effective-color-canvas);
+}
+
+parler-ui .input {
+  flex: 1;
+  resize: vertical;
+  min-height: 72px;
+  max-height: 240px;
+  padding: 12px 14px;
+  border-radius: var(--parler-effective-radius-control);
+  border: 1px solid var(--parler-effective-color-control-border);
+  background: var(--parler-effective-color-control-bg);
+  color: var(--parler-effective-color-control-text);
+  font: inherit;
+}
+
+parler-ui .input::placeholder {
+  color: var(--parler-effective-color-placeholder);
+  opacity: 1;
+}
+
+parler-ui .input:focus-visible {
+  outline: 2px solid var(--parler-effective-color-focus);
+  outline-offset: 1px;
+}
+
+parler-ui .input:disabled {
+  background: var(--parler-effective-color-control-disabled);
+  color: var(--parler-effective-color-text-muted);
+  cursor: not-allowed;
+}
+
+parler-ui .send.send--stop {
+  background: var(--parler-effective-color-danger);
+  color: var(--parler-effective-color-on-accent);
+  border-color: var(--parler-effective-color-danger);
+}
+
+parler-ui .send {
+  padding: 10px 20px;
+  border: 1px solid var(--parler-effective-color-accent);
+  border-radius: var(--parler-effective-radius-control);
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--parler-effective-color-accent);
+  color: var(--parler-effective-color-on-accent);
+}
+
+parler-ui .send:focus-visible {
+  outline: 2px solid var(--parler-effective-color-focus);
+  outline-offset: 2px;
+}
+
+parler-ui .send:disabled {
+  background: var(--parler-effective-color-control-disabled);
+  color: var(--parler-effective-color-text-muted);
+  border-color: var(--parler-effective-color-control-border);
+  cursor: default;
+}
+
+parler-ui .jump-latest {
+  box-sizing: border-box;
+  position: static;
+  flex: 0 0 auto;
+  min-height: 24px;
+  margin: 0;
+  pointer-events: auto;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--parler-effective-color-control-border);
+  background: var(--parler-effective-color-surface-raised);
+  color: var(--parler-effective-color-control-text);
+  font-weight: 600;
+  font-size: 0.78rem;
+  line-height: 1.15;
+  cursor: pointer;
+  box-shadow: var(--parler-effective-shadow-panel);
+}
+
+parler-ui .jump-latest:hover {
+  background: var(--parler-effective-color-control-hover);
+}
+
+parler-ui .jump-latest:focus-visible {
+  outline: 2px solid var(--parler-effective-color-focus);
+  outline-offset: 2px;
+}
+
+parler-ui-chart {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+parler-ui .chart-card {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin: 10px 0;
+  padding: 0;
+}
+
+/* C3a (design §4.2 / §8.1): adjacent chart cards share a grid decided by the grid's own content
+   width, never the viewport: two columns only when each column keeps at least 360 CSS px after the
+   16 px gap, never more than two, else one column. Cards in a grid share layout only. */
+parler-ui .chart-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(max(360px, calc(50% - 8px)), 1fr));
+  gap: 16px;
+  align-items: start;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin: 10px 0;
+}
+
+parler-ui .chart-grid > parler-ui-chart,
+parler-ui .chart-grid > .chart-expand-placeholder {
+  min-width: 0;
+}
+
+parler-ui .chart-grid .chart-card {
+  margin: 0;
+}
+
+/* C3b-1 (design §8.5): a declared chart group is a titled card of ordered member slots; the slots
+   reuse the C3a grid rule unless the layout hint is stack; unready members show state text. */
+parler-ui .chart-group {
+  margin: 10px 0;
+  padding: 8px 10px 6px;
+  border: 1px solid var(--parler-effective-color-border);
+  border-radius: var(--parler-effective-radius-panel);
+  min-width: 0;
+}
+
+parler-ui .chart-group-title {
+  margin: 0 0 6px;
+  font-size: clamp(8px, var(--parler-effective-chart-title-font-size), 16px);
+  font-weight: var(--parler-effective-chart-title-font-weight);
+  overflow-wrap: anywhere;
+}
+
+parler-ui .chart-group-slots {
+  min-width: 0;
+}
+
+parler-ui .chart-group-slot {
+  min-width: 0;
+}
+
+/* C3b-2a (design §8.7): same-category focus across a group — non-matching marks and legend items step back;
+   transient, never printed. The colour sample before a tooltip or data-view name uses the mark's slot. */
+parler-ui .chart-root [data-parler-category-dimmed],
+parler-ui .chart-legend-item[data-parler-category-dimmed] {
+  opacity: 0.35;
+}
+
+parler-ui .chart-slot-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 6px;
+  vertical-align: -1px;
+  flex: none;
+}
+
+parler-ui .chart-tooltip-note {
+  font-style: italic;
+}
+
+parler-ui .chart-group-note,
+parler-ui .chart-group-summary {
+  margin: 6px 0 0;
+  font-size: var(--parler-effective-chart-legend-font-size);
+  color: var(--parler-effective-color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+parler-ui .chart-group-slot[data-parler-chart-group-state="pending"] .chart-group-note,
+parler-ui .chart-group-slot[data-parler-chart-group-state="ready"] .chart-group-note {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed var(--parler-effective-color-border);
+  border-radius: var(--parler-effective-radius-control);
+}
+
+parler-ui .chart-card-title {
+  margin: 0 0 4px;
+  padding: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.3;
+  color: var(--parler-effective-chart-title-text);
+  font-family: var(--parler-effective-chart-font-family);
+  font-size: clamp(8px, var(--parler-effective-chart-title-font-size), 16px);
+  font-weight: var(--parler-effective-chart-title-font-weight);
+}
+
+parler-ui .chart-plot-area {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  border-radius: var(--parler-effective-radius-control);
+}
+
+parler-ui .chart-plot-area:focus-visible {
+  outline: 2px solid var(--parler-effective-color-focus);
+  outline-offset: 2px;
+}
+
+parler-ui .chart-root {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin: 0 auto;
+  overflow-x: hidden;
+}
+
+/* Size policy (design §4.6): a pie whose disc leaves room puts its legend beside the disc. */
+parler-ui .chart-card[data-legend-placement="aside"] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: center;
+  column-gap: 24px;
+}
+
+parler-ui .chart-card[data-legend-placement="aside"] > * {
+  flex: 1 1 100%;
+  min-width: 0;
+}
+
+parler-ui .chart-card[data-legend-placement="aside"] > .chart-plot-area {
+  flex: 0 0 auto;
+  width: auto;
+  max-width: 100%;
+}
+
+parler-ui .chart-card[data-legend-placement="aside"] > .chart-legend {
+  flex: 0 1 var(--parler-chart-legend-width, 320px);
+  max-width: var(--parler-chart-legend-width, 320px);
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  margin: 0;
+  align-self: center;
+}
+
+parler-ui .chart-card[data-legend-placement="aside"] .chart-legend-item,
+parler-ui .chart-card[data-legend-placement="aside"] .chart-legend-toggle {
+  display: flex;
+  width: 100%;
+}
+
+parler-ui .chart-legend-value {
+  margin-left: auto;
+  padding-left: 12px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  color: var(--parler-effective-color-text-muted);
+}
+
+parler-ui .chart-card[data-legend-placement="aside"] .chart-legend-toggle[aria-pressed="true"] .chart-legend-value {
+  color: inherit;
+}
+
+/* Horizontal bars grow with the category count and scroll inside the card (design §4.2, §7.3). */
+parler-ui .chart-plot-area[data-orientation="horizontal"] {
+  max-height: 720px;
+  overflow-y: auto;
+}
+
+parler-ui .chart-expand-layer .chart-plot-area[data-orientation="horizontal"] {
+  max-height: none;
+  overflow-y: visible;
+}
+
+/* Heatmaps keep their 20 px cell floor and scroll inside the card (design §7.4); the expand layer
+   drops the height cap but keeps horizontal scrolling; text is never scaled down. */
+parler-ui .chart-plot-area[data-kind="heatmap"] {
+  max-height: 720px;
+  overflow: auto;
+}
+
+parler-ui .chart-plot-area[data-kind="heatmap"] .chart-root {
+  max-width: none;
+  overflow-x: visible;
+}
+
+parler-ui .chart-expand-layer .chart-plot-area[data-kind="heatmap"] {
+  max-height: none;
+  overflow-y: visible;
+  overflow-x: auto;
+}
+
+parler-ui .chart-heat-legend {
+  display: flex;
+  justify-content: center;
+  margin: 6px 0 0;
+}
+
+parler-ui .chart-heat-legend svg {
+  width: 320px;
+  max-width: 100%;
+  height: auto;
+}
+
+parler-ui .chart-focus-ring {
+  fill: none;
+  stroke: var(--parler-effective-color-focus);
+  stroke-width: 2;
+  pointer-events: none;
+}
+
+parler-ui .chart-tooltip {
+  position: absolute;
+  z-index: 2;
+  max-width: min(320px, 100%);
+  padding: 6px 8px;
+  border-radius: var(--parler-effective-radius-control);
+  border: 1px solid var(--parler-effective-color-border);
+  background: var(--parler-effective-color-surface-raised);
+  color: var(--parler-effective-color-text);
+  box-shadow: var(--parler-effective-shadow-panel);
+  font-family: var(--parler-effective-chart-font-family);
+  font-size: clamp(6px, var(--parler-effective-chart-legend-font-size), 18px);
+  line-height: 1.35;
+  pointer-events: none;
+  overflow-wrap: anywhere;
+}
+
+parler-ui .chart-tooltip-line {
+  display: block;
+}
+
+parler-ui .chart-tooltip-line:first-child {
+  font-weight: 600;
+}
+
+parler-ui .chart-legend {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  max-width: 100%;
+  line-height: 1.3;
+  color: var(--parler-effective-chart-legend-text);
+  font-family: var(--parler-effective-chart-font-family);
+  font-size: clamp(6px, var(--parler-effective-chart-legend-font-size), 18px);
+}
+
+parler-ui .chart-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+parler-ui .chart-legend-swatch {
+  flex: none;
+  display: block;
+}
+
+parler-ui .chart-legend-label {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+parler-ui .chart-legend-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 1px 2px;
+  border: 0;
+  border-radius: var(--parler-effective-radius-control);
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  min-width: 0;
+  max-width: 100%;
+  text-align: left;
+}
+
+parler-ui .chart-legend-toggle:focus-visible {
+  outline: 2px solid var(--parler-effective-color-focus);
+  outline-offset: 2px;
+}
+
+parler-ui .chart-legend-item[data-hidden] .chart-legend-toggle {
+  opacity: 0.55;
+  text-decoration: line-through;
+}
+
+parler-ui .chart-range {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  margin: 4px 0 0;
+  color: var(--parler-effective-chart-legend-text);
+  font-family: var(--parler-effective-chart-font-family);
+  font-size: clamp(6px, var(--parler-effective-chart-legend-font-size), 18px);
+}
+
+parler-ui .chart-range-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1 1 160px;
+  min-width: 0;
+}
+
+parler-ui .chart-range-input {
+  flex: 1 1 auto;
+  min-width: 80px;
+  accent-color: var(--parler-effective-color-accent);
+}
+
+parler-ui .chart-range-input:focus-visible {
+  outline: 2px solid var(--parler-effective-color-focus);
+  outline-offset: 2px;
+}
+
+parler-ui .chart-range-text {
+  flex: 1 1 100%;
+  overflow-wrap: anywhere;
+}
+
+parler-ui .chart-selection-text {
+  color: var(--parler-effective-chart-legend-text);
+  font-family: var(--parler-effective-chart-font-family);
+  font-size: clamp(6px, var(--parler-effective-chart-legend-font-size), 18px);
+  overflow-wrap: anywhere;
+}
+
+parler-ui .chart-card-meta,
+parler-ui .chart-view-note {
+  margin: 0 0 4px;
+  color: var(--parler-effective-chart-legend-text);
+  font-family: var(--parler-effective-chart-font-family);
+  font-size: clamp(6px, var(--parler-effective-chart-legend-font-size), 18px);
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+parler-ui .chart-view-note {
+  margin: 4px 0 0;
+}
+
+parler-ui .chart-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 6px 0 0;
+}
+
+parler-ui .chart-action {
+  padding: 2px 8px;
+  border: 1px solid var(--parler-effective-color-control-border);
+  border-radius: var(--parler-effective-radius-control);
+  background: var(--parler-effective-color-control-bg);
+  color: var(--parler-effective-color-control-text);
+  font-family: var(--parler-effective-chart-font-family);
+  font-size: clamp(6px, var(--parler-effective-chart-legend-font-size), 18px);
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+parler-ui .chart-action[aria-pressed="true"] {
+  background: var(--parler-effective-color-accent);
+  border-color: var(--parler-effective-color-accent);
+  color: var(--parler-effective-color-on-accent);
+}
+
+parler-ui .chart-action:focus-visible {
+  outline: 2px solid var(--parler-effective-color-focus);
+  outline-offset: 2px;
+}
+
+parler-ui .chart-data {
+  margin: 6px 0 0;
+  padding: 6px 8px;
+  border: 1px solid var(--parler-effective-color-border);
+  border-radius: var(--parler-effective-radius-control);
+  background: var(--parler-effective-color-surface-subtle);
+  color: var(--parler-effective-color-text);
+  font-family: var(--parler-effective-chart-font-family);
+  font-size: clamp(6px, var(--parler-effective-chart-legend-font-size), 18px);
+  line-height: 1.35;
+}
+
+parler-ui .chart-data-heading {
+  margin: 0 0 4px;
+  color: var(--parler-effective-chart-legend-text);
+}
+
+parler-ui .chart-data-heading:focus-visible {
+  outline: 2px solid var(--parler-effective-color-focus);
+  outline-offset: 2px;
+}
+
+parler-ui .chart-data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+parler-ui .chart-data-table th,
+parler-ui .chart-data-table td {
+  padding: 2px 6px;
+  text-align: left;
+  border-bottom: 1px solid var(--parler-effective-color-border);
+  overflow-wrap: anywhere;
+}
+
+parler-ui .chart-data-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+parler-ui .chart-data-page {
+  color: var(--parler-effective-chart-legend-text);
+}
+
+parler-ui .chart-action[disabled] {
+  opacity: 0.55;
+  cursor: default;
+}
+
+parler-ui .chart-notes {
+  margin: 6px 0 0;
+  color: var(--parler-effective-color-text);
+  font-family: var(--parler-effective-chart-font-family);
+  font-size: clamp(6px, var(--parler-effective-chart-legend-font-size), 18px);
+  line-height: 1.35;
+}
+
+parler-ui .chart-notes summary {
+  cursor: pointer;
+  color: var(--parler-effective-chart-legend-text);
+}
+
+parler-ui .chart-notes summary:focus-visible {
+  outline: 2px solid var(--parler-effective-color-focus);
+  outline-offset: 2px;
+}
+
+parler-ui .chart-notes-list {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 2px 12px;
+  margin: 4px 0 0;
+}
+
+parler-ui .chart-notes-list dt {
+  color: var(--parler-effective-chart-legend-text);
+}
+
+parler-ui .chart-notes-list dd {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+parler-ui .chart-root svg {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  box-sizing: border-box;
+}
+
+parler-ui .approval-gate {
+  flex-shrink: 0;
+  margin: 8px 0 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--parler-effective-color-border);
+  border-radius: var(--parler-effective-radius-panel);
+  background: var(--parler-effective-color-surface);
+  color: var(--parler-effective-color-text);
+  box-shadow: var(--parler-effective-shadow-panel);
+}
+
+parler-ui .approval-gate h3 {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+  font-weight: 650;
+  color: var(--parler-effective-color-text);
+}
+
+parler-ui .approval-gate dl {
+  margin: 0 0 10px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 12px;
+  font-size: 0.875rem;
+}
+
+parler-ui .approval-gate dt {
+  margin: 0;
+  color: var(--parler-effective-color-text-muted);
+}
+
+parler-ui .approval-gate dd {
+  margin: 0;
+  word-break: break-word;
+}
+
+parler-ui .approval-comment-label {
+  display: block;
+  margin: 0 0 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--parler-effective-color-text-muted);
+}
+
+parler-ui .approval-comment-field {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0 0 10px;
+  padding: 8px 10px;
+  border-radius: var(--parler-effective-radius-control);
+  border: 1px solid var(--parler-effective-color-control-border);
+  background: var(--parler-effective-color-control-bg);
+  color: var(--parler-effective-color-control-text);
+  font: inherit;
+  font-size: 0.875rem;
+  resize: vertical;
+  min-height: 3.5rem;
+}
+
+parler-ui .approval-comment-field::placeholder {
+  color: var(--parler-effective-color-placeholder);
+  opacity: 1;
+}
+
+parler-ui .approval-comment-field:focus-visible {
+  outline: 2px solid var(--parler-effective-color-focus);
+  outline-offset: 1px;
+}
+
+parler-ui .approval-submit-status {
+  margin: 0 0 10px;
+  font-size: 0.8rem;
+  color: var(--parler-effective-color-text-muted);
+}
+
+parler-ui .approval-submit-status--error {
+  color: var(--parler-effective-color-danger);
+}
+
+parler-ui .approval-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--parler-effective-space-unit) * 2);
+}
+
+parler-ui .approval-actions button {
+  padding: 8px 16px;
+  border-radius: var(--parler-effective-radius-control);
+  border: 1px solid var(--parler-effective-color-control-border);
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+parler-ui .approval-actions .btn-approve {
+  background: var(--parler-effective-color-accent);
+  color: var(--parler-effective-color-on-accent);
+  border-color: var(--parler-effective-color-accent);
+}
+
+parler-ui .approval-actions .btn-cancel {
+  background: var(--parler-effective-color-control-bg);
+  color: var(--parler-effective-color-control-text);
+}
+
+parler-ui .approval-actions .btn-reject-comment {
+  background: var(--parler-effective-color-danger);
+  color: var(--parler-effective-color-on-accent);
+  border-color: var(--parler-effective-color-danger);
+}
+
+parler-ui .approval-actions .btn-cancel:hover:not(:disabled) {
+  background: var(--parler-effective-color-control-hover);
+}
+
+parler-ui .approval-actions button:disabled {
+  background: var(--parler-effective-color-control-disabled);
+  color: var(--parler-effective-color-text-muted);
+  border-color: var(--parler-effective-color-control-border);
+  cursor: not-allowed;
+}
+
+parler-ui .approval-actions button:focus-visible {
+  outline: 2px solid var(--parler-effective-color-focus);
+  outline-offset: 2px;
+}
+
+@media (forced-colors: active) {
+  parler-ui [part="thread"]:focus-visible,
+  parler-ui [part="message-action"]:focus-visible,
+  parler-ui [part="host-context-disclosure"]:focus-visible,
+  parler-ui [part="data-table-disclosure"]:focus-visible,
+  parler-ui [part="approval-input"]:focus-visible,
+  parler-ui [part="approval-primary-action"]:focus-visible,
+  parler-ui [part="approval-secondary-action"]:focus-visible,
+  parler-ui [part="approval-danger-action"]:focus-visible,
+  parler-ui [part="composer-input"]:focus-visible,
+  parler-ui [part="primary-action"]:focus-visible,
+  parler-ui [part="stop-action"]:focus-visible,
+  parler-ui [part="floating-action"]:focus-visible,
+  parler-ui [part="popover-close"]:focus-visible {
+    outline-color: Highlight;
+  }
+
+  parler-ui button,
+  parler-ui textarea,
+  parler-ui [part="notice"],
+  parler-ui [part="task-state"] {
+    border-color: ButtonText;
+  }
+
+  parler-ui button:disabled,
+  parler-ui textarea:disabled {
+    color: GrayText;
+    border-color: GrayText;
+  }
+}

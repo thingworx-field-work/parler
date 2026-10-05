@@ -1,0 +1,65 @@
+# Playbook cross_region_health V1a eval suite (live ThingWorx).
+# Run skill baseline first, then playbook paths after engine lands.
+#   uv run agent-eval --suite docs/agent/evals/cross_region_health_v1a.yaml --agent-matrix env
+
+version: 1
+suite: cross-region-health-v1a
+
+baselineRef:
+  rateControl: tmp/agent-eval/rate-control-3provider-smoke/20260516-212537Z/
+  skillBaseline: tmp/agent-eval/cross-region-health-skill-baseline/
+
+agentMatrix:
+  gpt_5_5:
+    thingName: SCPA_Demo_Agent
+    defaultEnabled: true
+
+cases:
+  - id: cross_region_stacking_robot_nl
+    tags: [playbook, nl-start-playbook, happy-path]
+    turns:
+      - user: >
+          Please use playbook cross_region_health, compare current health of Stacking Robots
+          in USA and Germany. Focus on alerts and operational properties.
+        acceptableOutcomes:
+          - name: playbook_completed
+            score: 1.0
+            assertions:
+              - toolCalled: start_playbook
+              - finalRegex: "(?i)USA|Germany"
+              - finalRegex: "(?i)alert|evidence gap"
+
+  - id: cross_region_stacking_robot_slash
+    tags: [playbook, structured-slash, zero-routing-stretch]
+    turns:
+      - user: >
+          /cross_region_health {"assetType":"Stacking Robot","regions":["USA","Germany"],"timeWindow":"current"}
+        acceptableOutcomes:
+          - name: direct_playbook
+            score: 1.0
+            assertions:
+              - toolNotCalled: start_playbook
+              - finalRegex: "(?i)USA|Germany"
+
+  - id: cross_region_free_text_slash_clarify
+    tags: [playbook, slash-clarification]
+    turns:
+      - user: /cross_region_health
+        acceptableOutcomes:
+          - name: clarification
+            score: 1.0
+            assertions:
+              - finalRegex: "(?i)JSON|start_playbook|natural language|assetType|regions"
+
+  - id: region_health_skill_baseline
+    skill: region_health
+    tags: [skill-baseline, comparison]
+    turns:
+      - user: >
+          /region_health Compare current health of Stacking Robots in USA and Germany.
+        acceptableOutcomes:
+          - name: skill_completed
+            score: 1.0
+            assertions:
+              - toolCalled: query_entities_by_taxonomy
+              - toolCalled: query_alert_summary

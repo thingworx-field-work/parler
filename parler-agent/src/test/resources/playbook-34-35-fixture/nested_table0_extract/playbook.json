@@ -1,0 +1,53 @@
+{
+  "schema": "parler-playbook-v1",
+  "title": "Nested Table0 extract (workshop gaps C8 fragment)",
+  "budgets": {
+    "timeoutSeconds": 120,
+    "maxNodes": 8,
+    "maxToolCalls": 4,
+    "maxEvidenceBytes": 8000
+  },
+  "vars": {},
+  "nodes": [
+    {
+      "id": "lookup",
+      "kind": "tool_call",
+      "dependsOn": [],
+      "tool": "StubLookup",
+      "args": {
+        "name": { "$input": "lookupName" }
+      },
+      "evidence": {
+        "label": "Stub lookup returning nested Table0 envelope"
+      }
+    },
+    {
+      "id": "criteria_rows",
+      "kind": "derive",
+      "dependsOn": ["lookup"],
+      "op": "extract_from_tool_output",
+      "args": {
+        "sourceNodeId": "lookup",
+        "mode": "single",
+        "arrayPath": "result.Table0",
+        "maxRows": 25,
+        "fields": [
+          { "from": "FilterCriteria", "as": "FilterCriteria" },
+          { "from": "UIDValue", "as": "UIDValue", "type": "number" }
+        ]
+      },
+      "evidence": {
+        "label": "Extract uniform criteria rows from nested Table0"
+      }
+    },
+    {
+      "id": "end",
+      "kind": "llm_summary",
+      "dependsOn": ["criteria_rows"],
+      "evidenceRefs": ["criteria_rows"],
+      "prompt": "Summarize extracted lookup criteria rows."
+    }
+  ],
+  "finalNode": "end",
+  "description": "C8 recipe: extract_from_tool_output.arrayPath result.Table0 on JSON-envelope lookup tools."
+}

@@ -1,0 +1,111 @@
+# Multi-series eval suite (live ThingWorx) — thin-wrap for build_history_overlay_chart.
+# Primary suite: docs/agent/evals/history_overlay_v1.yaml
+# Replaces the retired model-facing multi-series tool; design: docs/agent/history-overlay-chart.md
+#
+# Run from repo root:
+#   export AGENT_EVAL_HAS_HISTORY_OVERLAY=1
+#   uv run agent-eval --suite docs/agent/evals/multi_series_v1.yaml --agent-filter gpt_5_5
+
+version: 1
+suite: multi-series-v1
+
+agentMatrix:
+  gpt_5_5:
+    thingName: SCPA_Demo_Agent
+    defaultEnabled: true
+
+cases:
+  - id: multi_series_history_same_window
+    tags: [multi-series, m2, happy-path, chart]
+    skipUnlessEnv: AGENT_EVAL_HAS_HISTORY_OVERLAY
+    skipReason: history_overlay_dev_assets_not_confirmed
+    turns:
+      - user: >
+          Compare current draw on ORD-Mixer-01 and REF-Mixer-02 for the last hour on one chart.
+        acceptableOutcomes:
+          - name: history_multi_series_tool
+            score: 1.0
+            assertions:
+              - toolCalled: build_history_overlay_chart
+              - finalRegex: "(?i)(chart|current draw|mixer)"
+          - name: history_without_explicit_tool_name
+            score: 0.75
+            assertions:
+              - finalRegex: "(?i)(two|both).*(device|mixer|pump)"
+              - finalRegex: "(?i)(chart|visual)"
+        rejectIf:
+          - finalRegex: "(?i)if you (?:need|want) a chart"
+
+  - id: multi_series_same_window_uses_overlay
+    tags: [overlay, absolute, chart]
+    skipUnlessEnv: AGENT_EVAL_HAS_HISTORY_OVERLAY
+    skipReason: history_overlay_dev_assets_not_confirmed
+    turns:
+      - user: >
+          Compare current draw on ORD-Mixer-01 and REF-Mixer-02 for the last hour on one chart.
+        acceptableOutcomes:
+          - name: direct_overlay_chart
+            score: 1.0
+            assertions:
+              - toolCalled: build_history_overlay_chart
+              - finalRegex: "(?i)(chart|current draw|mixer)"
+        rejectIf:
+          - toolResultRegex: POP_MULTI_SERIES_UNAVAILABLE
+          - toolCalled: build_period_over_period_chart
+
+  - id: multi_series_tabular_long_line
+    tags: [multi-series, m1, tabular, chart]
+    skipUnlessEnv: AGENT_EVAL_HAS_HISTORY_OVERLAY
+    skipReason: history_overlay_dev_assets_not_confirmed
+    turns:
+      - user: >
+          Compare running percentage over time for ORD-Contacting-01 and ORD-Contacting-02 between
+          2025-09-03 and 2025-09-14 as a line chart.
+        acceptableOutcomes:
+          - name: tabular_series_column_line
+            score: 1.0
+            assertions:
+              - toolCalled: build_chart_from_tabular_result
+              - toolNotCalled: build_history_overlay_chart
+          - name: tabular_path_without_explicit_chart_tool
+            score: 0.7
+            assertions:
+              - toolCalled: tabulate_cached_result
+              - finalRegex: "(?i)(running|utilization|percentage|line chart)"
+        rejectIf:
+          - toolCalled: build_history_overlay_chart
+
+  - id: negative_stays_pop_not_multi_series
+    tags: [multi-series, negative, pop]
+    skipUnlessEnv: AGENT_EVAL_HAS_HISTORY_OVERLAY
+    skipReason: history_overlay_dev_assets_not_confirmed
+    turns:
+      - user: >
+          For ORD-Mixer-01, plot current draw for the last hour and overlay yesterday's same
+          one-hour window on one chart.
+        acceptableOutcomes:
+          - name: pop_elapsed_overlay
+            score: 1.0
+            assertions:
+              - toolCalled: build_history_overlay_chart
+              - finalRegex: "(?i)(yesterday|overlay|elapsed|chart)"
+        rejectIf:
+          - toolCalled: build_period_over_period_chart
+          - toolCalled: build_multi_series_history_chart
+
+  - id: grouped_bar_regression
+    tags: [multi-series, regression, bar]
+    skipUnlessEnv: AGENT_EVAL_HAS_HISTORY_OVERLAY
+    skipReason: history_overlay_dev_assets_not_confirmed
+    turns:
+      - user: >
+          Compare utilization-state hours for ORD-Contacting-01 and ORD-Contacting-02 on 2025-09-10
+          as a grouped bar chart.
+        acceptableOutcomes:
+          - name: grouped_bar_series_column
+            score: 1.0
+            assertions:
+              - toolCalled: build_chart_from_tabular_result
+              - finalRegex: "(?i)(bar|grouped|utilization)"
+        rejectIf:
+          - toolCalled: build_history_overlay_chart

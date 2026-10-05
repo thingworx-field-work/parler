@@ -1,0 +1,286 @@
+{
+  "schema": "parler-playbook-v1",
+  "id": "cross_region_health",
+  "title": "Cross-region operational diagnosis",
+  "description": "Compare current operational health for one asset type across named regions.",
+  "whenToUse": "Use when the user asks to compare health, alerts, or operational problems between regions for one asset type.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "assetType": {
+        "type": "string"
+      },
+      "regions": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "timeWindow": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "assetType",
+      "regions"
+    ]
+  },
+  "execution": {
+    "timeoutSeconds": 900,
+    "maxNodes": 80,
+    "maxToolCalls": 200,
+    "maxEvidenceBytes": 12000
+  },
+  "budgets": {
+    "timeoutSeconds": 900,
+    "maxNodes": 80,
+    "maxToolCalls": 200,
+    "maxEvidenceBytes": 12000
+  },
+  "vars": {},
+  "nodes": [
+    {
+      "id": "taxonomy_row",
+      "kind": "derive",
+      "dependsOn": [],
+      "op": "pick_taxonomy_row",
+      "args": {
+        "assetType": {
+          "$input": "assetType"
+        },
+        "taxonomyRows": {
+          "$var": "assetTaxonomy.rows"
+        }
+      },
+      "evidence": {
+        "label": "Resolve asset type from taxonomy"
+      }
+    },
+    {
+      "id": "assets_by_region",
+      "kind": "fan_out",
+      "dependsOn": [
+        "taxonomy_row"
+      ],
+      "items": {
+        "$input": "regions"
+      },
+      "itemVar": "region",
+      "maxItems": 10,
+      "maxConcurrency": 1,
+      "node": {
+        "kind": "tool_call",
+        "tool": "query_entities_by_taxonomy",
+        "args": {
+          "EntityType": {
+            "$var": "taxonomy.EntityType"
+          },
+          "EntityName": {
+            "$var": "taxonomy.EntityName"
+          },
+          "CriticalProperties": {
+            "$var": "taxonomy.CriticalProperties"
+          },
+          "hierarchyNodeName": {
+            "$item": "region"
+          }
+        },
+        "evidence": {
+          "label": "List assets in region",
+          "include": [
+            "status",
+            "rowCount",
+            "totalCount"
+          ]
+        }
+      }
+    },
+    {
+      "id": "region_entities",
+      "kind": "derive",
+      "dependsOn": [
+        "assets_by_region"
+      ],
+      "op": "flatten_region_entities",
+      "args": {
+        "fanOutNodeId": "assets_by_region"
+      },
+      "evidence": {
+        "label": "Flatten region asset lists"
+      }
+    },
+    {
+      "id": "alert_thing_names",
+      "kind": "derive",
+      "dependsOn": [
+        "region_entities"
+      ],
+      "op": "collect_thing_names_from_assets",
+      "args": {
+        "assetsRef": "region_entities.output.assets",
+        "maxNames": 25
+      },
+      "evidence": {
+        "label": "Collect Thing names for alert comparison"
+      }
+    },
+    {
+      "id": "alerts_by_region",
+      "kind": "tool_call",
+      "dependsOn": [
+        "alert_thing_names"
+      ],
+      "tool": "query_alert_summary",
+      "args": {
+        "thingNames": {
+          "$ref": "alert_thing_names.output.names"
+        },
+        "ackState": "all",
+        "limit": 100
+      },
+      "evidence": {
+        "label": "Read current alert summaries (multi-Thing)",
+        "include": [
+          "status",
+          "resultKind",
+          "completeness",
+          "thingsRequested",
+          "thingsSucceeded",
+          "thingsFailedIdentity"
+        ]
+      }
+    },
+    {
+      "id": "alert_groups",
+      "kind": "derive",
+      "dependsOn": [
+        "alerts_by_region",
+        "region_entities"
+      ],
+      "op": "group_alerts_by_source_property",
+      "args": {
+        "assetsRef": "region_entities.output.assets",
+        "alertSummaryNodeId": "alerts_by_region"
+      },
+      "evidence": {
+        "label": "Group alerts by source property"
+      }
+    },
+    {
+      "id": "property_union",
+      "kind": "derive",
+      "dependsOn": [
+        "taxonomy_row",
+        "alert_groups"
+      ],
+      "op": "build_property_union",
+      "args": {
+        "criticalProperties": {
+          "$var": "taxonomy.CriticalProperties"
+        },
+        "alertGroupsRef": "alert_groups.output.groups"
+      },
+      "evidence": {
+        "label": "Build bounded property read list"
+      }
+    },
+    {
+      "id": "values_by_asset",
+      "kind": "fan_out",
+      "dependsOn": [
+        "property_union",
+        "region_entities"
+      ],
+      "items": {
+        "$ref": "region_entities.output.assets"
+      },
+      "itemVar": "asset",
+      "maxItems": 40,
+      "maxConcurrency": 1,
+      "node": {
+        "kind": "tool_call",
+        "tool": "get_property_values",
+        "args": {
+          "thingName": {
+            "$item": "name"
+          },
+          "propertyNames": {
+            "$var": "propertyUnion.names"
+          }
+        },
+        "evidence": {
+          "label": "Read current operational properties",
+          "include": [
+            "status",
+            "rowCount"
+          ]
+        }
+      }
+    },
+    {
+      "id": "current_value_stats",
+      "kind": "derive",
+      "dependsOn": [
+        "region_entities",
+        "property_union",
+        "values_by_asset"
+      ],
+      "op": "summarize_current_values_by_region",
+      "args": {
+        "assetsRef": "region_entities.output.assets",
+        "valuesFanOutNodeId": "values_by_asset",
+        "propertyNames": {
+          "$var": "propertyUnion.names"
+        },
+        "maxPropertiesPerRegion": 12,
+        "maxExamplesPerProperty": 1,
+        "excludePropertyNames": [
+          "PTCDisplayName",
+          "PTCMake",
+          "PTCModel",
+          "PTCSerialNumber"
+        ]
+      },
+      "evidence": {
+        "label": "Summarize current values by region"
+      }
+    },
+    {
+      "id": "region_summary",
+      "kind": "derive",
+      "dependsOn": [
+        "region_entities",
+        "alert_groups",
+        "values_by_asset",
+        "current_value_stats"
+      ],
+      "op": "summarize_region_health",
+      "args": {
+        "assetsRef": "region_entities.output.assets",
+        "alertGroupsRef": "alert_groups.output.groups",
+        "valuesFanOutNodeId": "values_by_asset",
+        "currentValueStatsRef": "current_value_stats.output"
+      },
+      "evidence": {
+        "label": "Summarize per-region health evidence"
+      }
+    },
+    {
+      "id": "final_summary",
+      "kind": "llm_summary",
+      "dependsOn": [
+        "region_summary"
+      ],
+      "prompt": "Write a concise cross-region operational diagnosis. Compare regions side by side, normalize by asset count when counts differ, recommend a first focus area, and list evidence gaps. Use only the provided playbook evidence. Treat alert evidence and current-value evidence as different signals: if a property has current-value stats but no alert rows, say the current values were read but no current alert evidence indicates that dimension is alerting. Only call something an evidence gap when neither alert evidence nor current-value stats were provided for that dimension.",
+      "evidenceRefs": [
+        "taxonomy_row",
+        "region_entities",
+        "alert_groups",
+        "current_value_stats",
+        "region_summary"
+      ],
+      "maxEvidenceBytes": 8000
+    }
+  ],
+  "finalNode": "final_summary"
+}

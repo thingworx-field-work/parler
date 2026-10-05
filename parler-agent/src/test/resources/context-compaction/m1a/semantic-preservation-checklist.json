@@ -1,0 +1,158 @@
+{
+  "version": 3,
+  "description": "CC-1.2 / CC-1.3 step 4 semantic mapping for the seven M1a priority tools after description reduction. Each entry records retained meaning, where it lives post-edit, local verification hooks, and appendix-independent fragments (routing guide may be disabled).",
+  "tools": {
+    "tabulate_cached_result": {
+      "originalLocations": ["BuiltInTools.tabulateCachedResultDef top-level", "TabulateCachedResultToolSchema mode/filters/measures/having"],
+      "retainedLocations": ["same", "docs/agent/query-spec.md §5.4 group_metric pipeline"],
+      "retainedMeaning": "Full-table cached transforms (not fetch paging); within-mode operation order (group_metric: filters → groupBy/measures → derived → having → sorts → maxItems/offset/fields projection); output completeness vs sampleRows/totalRows",
+      "verificationCases": [
+        "Off top-level: fetch_cached_result browse-only + named decision modes",
+        "Schema mode description states group_metric pipeline order (derived/having/sorts/pagination/projection)",
+        "filters/measures/having include ThingWorx predicate key shapes",
+        "Lazy blurb identifies cached tabular transforms"
+      ],
+      "topLevelMustContain": ["fetch_cached_result", "filter_count", "group_metric", "full table"],
+      "topLevelMustContainPhrase": ["fetch_cached_result is paging only"],
+      "schemaPropertyMustContain": {
+        "mode": ["group_metric", "derived, having", "maxItems, offset, fields"],
+        "having": ["sampleRows", "totalRows", "membership"]
+      },
+      "lazyBlurbMustContain": ["cached", "tabulate"]
+    },
+    "query_entities": {
+      "originalLocations": ["BuiltInTools.queryEntitiesDef top-level", "query parameter description"],
+      "retainedLocations": ["same", "llm_tool_routing_guide.txt Entity search"],
+      "retainedMeaning": "Template/shape XOR listing; taxonomy-first routing; hierarchy intersect; filter-field provenance (query.filters); totalRows vs totalCount semantics; not spotlight",
+      "verificationCases": [
+        "Top-level: exactly one of thingTemplate or thingShape (XOR)",
+        "Top-level: totalRowsInferred and not spotlight_search",
+        "Schema query: ThingWorx-shaped filters under query",
+        "Schema includeConcreteTemplate: inheritance column when thingTemplate set",
+        "Appendix-independent: hierarchy intersect + totalRows count semantics",
+        "Lazy blurb leads with listing Things by template/shape"
+      ],
+      "topLevelMustContain": ["exactly one", "thingTemplate", "thingShape", "totalRows", "totalRowsInferred", "spotlight_search"],
+      "topLevelMustContainPhrase": ["both or neither", "taxonomy first"],
+      "schemaPropertyMustContain": {
+        "query": ["ThingWorx-shaped", "filters"],
+        "includeConcreteTemplate": ["thingTemplate", "thingShape"]
+      },
+      "appendixIndependentMustContain": ["hierarchyNodeName", "intersectThingNames", "totalRowsInferred"],
+      "lazyBlurbMustContain": ["ThingTemplate", "ThingShape"]
+    },
+    "build_chart_from_tabular_result": {
+      "originalLocations": ["BuiltInTools.buildChartFromTabularResultDef", "BuildChartFromTabularResultToolSchema source/kind/intent"],
+      "retainedLocations": ["same"],
+      "retainedMeaning": "Qualifying tabular sources; cacheId handle rules; kind XOR intent; column shape (xColumn/yColumn/series); multi-chart + CHART_EMITTED success state",
+      "verificationCases": [
+        "Top-level: kind XOR intent phrase + CHART_EMITTED + multi-chart",
+        "Schema source: last_invoke latest-wins + cache_id arms",
+        "Schema kind/intent: mutually exclusive",
+        "Schema series/seriesColumn: multi-series column shape",
+        "Lazy blurb identifies tabular chart builder"
+      ],
+      "topLevelMustContain": ["last_invoke", "cache_id", "CHART_EMITTED"],
+      "topLevelMustContainPhrase": ["never both or neither", "one turn may emit several charts"],
+      "schemaPropertyMustContain": {
+        "source": ["last_invoke", "cache_id"],
+        "kind": ["Mutually exclusive"],
+        "intent": ["Mutually exclusive"],
+        "series": ["yColumn"],
+        "seriesColumn": ["long-format"]
+      },
+      "lazyBlurbMustContain": ["chart", "tabular"]
+    },
+    "invoke_service": {
+      "originalLocations": ["InvokeServiceToolSchemaFragment.invokeServiceDescription", "parameters nested rule"],
+      "retainedLocations": ["same", "llm_tool_routing_guide.txt Entity search"],
+      "retainedMeaning": "Generic service call; real signature via discovery; scope/widening when omitting filters; parameters nesting; no-input services omit parameters (no separate empty-object rule in this slice)",
+      "protectedMeaningNotes": {
+        "noArgVsEmptyArg": "Slice documents zero-input services called with no parameters (top-level) and optional parameters when the service has no inputs (schema). No distinct empty-object {} vs omit rule is stated."
+      },
+      "verificationCases": [
+        "Top-level: parameters nesting + discover before unknown inputs + no parameters for zero-input services",
+        "Schema parameters: nested under parameters + optional when no inputs",
+        "Appendix-independent: no list_entities_by_type substitute + scope widening warning",
+        "Lazy blurb identifies generic service invocation"
+      ],
+      "topLevelMustContain": ["parameters", "discover_thing_members", "entityType", "list_entities_by_type"],
+      "topLevelMustContainPhrase": ["no parameters", "Omitting a scope"],
+      "schemaPropertyMustContain": {
+        "parameters": ["nested", "parameters", "no inputs"]
+      },
+      "appendixIndependentMustContain": ["discover_thing_members", "parameters", "list_entities_by_type"],
+      "lazyBlurbMustContain": ["service"]
+    },
+    "query_entities_by_taxonomy": {
+      "originalLocations": ["BuiltInTools.queryEntitiesByTaxonomyDef"],
+      "retainedLocations": ["same", "routing guide taxonomy entry"],
+      "retainedMeaning": "resolve_asset_type first; CriticalProperties projection; LookupProperties OR filter; hierarchy scope; EMPTY/INLINE/LARGE completeness; totalCount (not totalRows)",
+      "verificationCases": [
+        "Top-level: resolve_asset_type + CriticalProperties + branch completeness + totalCount",
+        "Schema LookupProperties: OR exact match",
+        "Schema hierarchyNodeName present",
+        "Appendix-independent: taxonomy resolution + totalCount semantics",
+        "Lazy first-round advertised tool keeps EntityType/EntityName required"
+      ],
+      "topLevelMustContain": ["resolve_asset_type", "CriticalProperties", "LookupProperties", "totalCount"],
+      "topLevelMustContainPhrase": ["EMPTY | INLINE | LARGE", "not **totalRows**"],
+      "schemaPropertyMustContain": {
+        "LookupProperties": ["any", "OR"],
+        "hierarchyNodeName": ["hierarchy"]
+      },
+      "appendixIndependentMustContain": ["resolve_asset_type", "CriticalProperties", "totalCount"],
+      "lazyBlurbMustContain": ["taxonomy"]
+    },
+    "query_property_history": {
+      "originalLocations": ["BuiltInTools.queryPropertyHistoryDef"],
+      "retainedLocations": ["same", "routing guide Charts section"],
+      "retainedMeaning": "Canonical thingName; numeric vs value-stream paths; timezone-aware windows (ISO UTC vs calendarPhrase user_timezone); real query bounds vs chart-only requestedTimeRange; sampleRows vs exact aggregates via actions",
+      "protectedMeaningNotes": {
+        "propertyUnits": "No explicit property-unit prose remains in this tool's reduced descriptions; numeric values use server-resolved property metadata (see propertyName base-type routing) and optional y_label override only."
+      },
+      "verificationCases": [
+        "Top-level: canonical thingName + UTC alignment for chart/query bounds",
+        "Schema startTime/endTime: ISO-8601",
+        "Schema calendarPhrase: user_timezone",
+        "Schema relativeDuration/calendarPhrase: mutual exclusion",
+        "Schema actions: numeric aggregates (not sample inference)",
+        "Schema requestedTimeRange: chart-only window when query bounds omitted",
+        "Appendix-independent: timezone + sample vs aggregates",
+        "Lazy blurb mentions property history"
+      ],
+      "topLevelMustContain": ["thingName", "UTC", "actions"],
+      "topLevelMustContainPhrase": ["chart and query bounds align"],
+      "schemaPropertyMustContain": {
+        "startTime": ["ISO-8601"],
+        "calendarPhrase": ["user_timezone"],
+        "relativeDuration": ["Mutually exclusive"],
+        "actions": ["numeric", "aggregate"],
+        "requestedTimeRange": ["chart"]
+      },
+      "appendixIndependentMustContain": ["UTC", "sampleRows", "aggregate"],
+      "lazyBlurbMustContain": ["property", "history"]
+    },
+    "build_history_overlay_chart": {
+      "originalLocations": ["BuiltInTools.buildHistoryOverlayChartDef xAxisMode/series"],
+      "retainedLocations": ["same", "routing guide overlay section"],
+      "retainedMeaning": "2-6 numeric traces; per-series time windows; xAxisMode coordinate units (absolute timestamps; elapsed seconds from window start; normalized 0..1 shape); real history fetch boundaries",
+      "verificationCases": [
+        "Top-level: 2-6 traces + three xAxisMode modes including elapsed_time",
+        "Schema xAxisMode: seconds-from-start and 0..1 normalized coordinate semantics",
+        "Schema series: per-entry time window resolution",
+        "Schema propertyName: same numeric property on every series",
+        "Appendix-independent: prefer over repeated query_property_history",
+        "Lazy blurb mentions overlay traces"
+      ],
+      "topLevelMustContain": ["2–6", "absolute_time", "elapsed_time", "normalized_time", "query_property_history"],
+      "schemaPropertyMustContain": {
+        "series": ["time window", "anchorTime"],
+        "propertyName": ["numeric", "every series"],
+        "xAxisMode": ["absolute_time", "elapsed_time", "normalized_time", "seconds", "0..1"]
+      },
+      "appendixIndependentMustContain": ["2–6", "absolute_time", "query_property_history"],
+      "lazyBlurbMustContain": ["Overlay", "history"]
+    }
+  }
+}

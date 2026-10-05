@@ -1,0 +1,460 @@
+{
+    "alertConfigurations": {},
+    "aspects": {
+        "isEditableExtensionObject": true,
+        "isExtension": true,
+        "isSystemObject": false
+    },
+    "avatar": "",
+    "configurationTableDefinitions": {},
+    "configurationTables": {
+        "ManagerConfiguration": {
+            "aspects": {},
+            "dataShape": {
+                "fieldDefinitions": {
+                    "id": {
+                        "aspects": {
+                            "isPrimaryKey": true
+                        },
+                        "baseType": "STRING",
+                        "description": "unique identifier for the manager that needs to be configured",
+                        "name": "id",
+                        "ordinal": 1
+                    },
+                    "managerThingName": {
+                        "aspects": {
+                            "isPrimaryKey": false,
+                            "thingShape": "PTC.Base.CommonManagement_TS"
+                        },
+                        "baseType": "THINGNAME",
+                        "description": "Name of the Manager Thing to be configured",
+                        "name": "managerThingName",
+                        "ordinal": 2
+                    }
+                }
+            },
+            "dataShapeName": "",
+            "description": "Configuration table used to identify managers that the building block should use",
+            "isMultiRow": true,
+            "name": "ManagerConfiguration",
+            "ordinal": 0,
+            "rows": []
+        },
+        "MashupConfiguration": {
+            "aspects": {},
+            "dataShape": {
+                "fieldDefinitions": {
+                    "id": {
+                        "aspects": {
+                            "isPrimaryKey": true
+                        },
+                        "baseType": "STRING",
+                        "description": "unique identifier used to identify the thing or mashup that is being configured",
+                        "name": "id",
+                        "ordinal": 1
+                    },
+                    "mashupName": {
+                        "aspects": {
+                            "isPrimaryKey": false
+                        },
+                        "baseType": "MASHUPNAME",
+                        "description": "name of the mashup to configure",
+                        "name": "mashupName",
+                        "ordinal": 2
+                    }
+                }
+            },
+            "dataShapeName": "",
+            "description": "",
+            "isMultiRow": true,
+            "name": "MashupConfiguration",
+            "ordinal": 0,
+            "rows": []
+        },
+        "MenuConfiguration": {
+            "aspects": {},
+            "dataShape": {
+                "fieldDefinitions": {
+                    "menuItemMashupName": {
+                        "aspects": {
+                            "isPrimaryKey": false
+                        },
+                        "baseType": "STRING",
+                        "description": "",
+                        "name": "menuItemMashupName",
+                        "ordinal": 2
+                    },
+                    "menuName": {
+                        "aspects": {
+                            "isPrimaryKey": true
+                        },
+                        "baseType": "STRING",
+                        "description": "",
+                        "name": "menuName",
+                        "ordinal": 3
+                    },
+                    "menuOrderPreference": {
+                        "aspects": {
+                            "isPrimaryKey": false
+                        },
+                        "baseType": "INTEGER",
+                        "description": "An optional field to indicate the ordering of the menu items",
+                        "name": "menuOrderPreference",
+                        "ordinal": 5
+                    },
+                    "menuSectionKey": {
+                        "aspects": {
+                            "isPrimaryKey": false
+                        },
+                        "baseType": "STRING",
+                        "description": "Localization table key for the optional section that groups like menus together",
+                        "name": "menuSectionKey",
+                        "ordinal": 4
+                    },
+                    "menuTitleKey": {
+                        "aspects": {
+                            "isPrimaryKey": false
+                        },
+                        "baseType": "STRING",
+                        "description": "Localization table key for the menu label",
+                        "name": "menuTitleKey",
+                        "ordinal": 1
+                    },
+                    "submenu": {
+                        "aspects": {
+                            "dataShape": "PTC.Base.ComponentMenuConfiguration",
+                            "isPrimaryKey": false
+                        },
+                        "baseType": "INFOTABLE",
+                        "description": "",
+                        "name": "submenu",
+                        "ordinal": 6
+                    }
+                }
+            },
+            "dataShapeName": "",
+            "description": "Configuration table for dynamic menus. Menu Items can be specified here and they will show up for the given menu name. ",
+            "isMultiRow": true,
+            "name": "MenuConfiguration",
+            "ordinal": 0,
+            "rows": []
+        },
+        "ShiftConfiguration": {
+            "aspects": {},
+            "dataShape": {
+                "fieldDefinitions": {
+                    "ShiftDescription": {
+                        "aspects": {
+                            "isPrimaryKey": false
+                        },
+                        "baseType": "STRING",
+                        "description": "",
+                        "name": "ShiftDescription",
+                        "ordinal": 2
+                    },
+                    "ShiftID": {
+                        "aspects": {
+                            "isPrimaryKey": true
+                        },
+                        "baseType": "STRING",
+                        "description": "",
+                        "name": "ShiftID",
+                        "ordinal": 1
+                    }
+                }
+            },
+            "dataShapeName": "PTCSC.Utilization.Shift_DS",
+            "description": "Shift Configuration",
+            "isMultiRow": true,
+            "name": "ShiftConfiguration",
+            "ordinal": 1,
+            "rows": []
+        },
+        "ThingConfiguration": {
+            "aspects": {},
+            "dataShape": {
+                "fieldDefinitions": {
+                    "id": {
+                        "aspects": {
+                            "isPrimaryKey": true
+                        },
+                        "baseType": "STRING",
+                        "description": "unique identifier used to identify the thing or mashup that is being configured",
+                        "name": "id",
+                        "ordinal": 1
+                    },
+                    "thingName": {
+                        "aspects": {
+                            "isPrimaryKey": false
+                        },
+                        "baseType": "THINGNAME",
+                        "description": "Name of the Thing entity or Mashup entity that is to be configured",
+                        "name": "thingName",
+                        "ordinal": 2
+                    }
+                }
+            },
+            "dataShapeName": "",
+            "description": "Configuration table for any Things that need to be configured. This allows for OOTB things to be customized, and the new version that should be used can be configured here",
+            "isMultiRow": true,
+            "name": "ThingConfiguration",
+            "ordinal": 0,
+            "rows": []
+        },
+        "UtilizationConfiguration": {
+            "aspects": {},
+            "dataShape": {
+                "fieldDefinitions": {
+                    "DaysToKeepWhenPurging": {
+                        "aspects": {
+                            "isPrimaryKey": true
+                        },
+                        "baseType": "INTEGER",
+                        "description": "",
+                        "name": "DaysToKeepWhenPurging",
+                        "ordinal": 1
+                    },
+                    "DemoMode": {
+                        "aspects": {
+                            "defaultValue": true,
+                            "isPrimaryKey": false
+                        },
+                        "baseType": "BOOLEAN",
+                        "description": "",
+                        "name": "DemoMode",
+                        "ordinal": 8
+                    },
+                    "FilterReasonCodeEditByState": {
+                        "aspects": {
+                            "defaultValue": false,
+                            "isPrimaryKey": false
+                        },
+                        "baseType": "BOOLEAN",
+                        "description": "",
+                        "name": "FilterReasonCodeEditByState",
+                        "ordinal": 12
+                    },
+                    "HoursToLookBackOnUtilScreens": {
+                        "aspects": {
+                            "isPrimaryKey": false
+                        },
+                        "baseType": "INTEGER",
+                        "description": "",
+                        "name": "HoursToLookBackOnUtilScreens",
+                        "ordinal": 2
+                    },
+                    "InitialScreenRefreshDisabled": {
+                        "aspects": {
+                            "defaultValue": true,
+                            "isPrimaryKey": false
+                        },
+                        "baseType": "BOOLEAN",
+                        "description": "",
+                        "name": "InitialScreenRefreshDisabled",
+                        "ordinal": 3
+                    },
+                    "MaxEntitiesOnOverviewScreen": {
+                        "aspects": {
+                            "isPrimaryKey": false
+                        },
+                        "baseType": "INTEGER",
+                        "description": "",
+                        "name": "MaxEntitiesOnOverviewScreen",
+                        "ordinal": 7
+                    },
+                    "ReasonCodeEditEnabled": {
+                        "aspects": {
+                            "defaultValue": false,
+                            "isPrimaryKey": false
+                        },
+                        "baseType": "BOOLEAN",
+                        "description": "",
+                        "name": "ReasonCodeEditEnabled",
+                        "ordinal": 10
+                    },
+                    "ScreenRefreshRate": {
+                        "aspects": {
+                            "isPrimaryKey": false
+                        },
+                        "baseType": "INTEGER",
+                        "description": "Utilization screen refresh rate (seconds)",
+                        "name": "ScreenRefreshRate",
+                        "ordinal": 4
+                    },
+                    "ShiftFiltersEnabled": {
+                        "aspects": {
+                            "defaultValue": false,
+                            "isPrimaryKey": false
+                        },
+                        "baseType": "BOOLEAN",
+                        "description": "",
+                        "name": "ShiftFiltersEnabled",
+                        "ordinal": 9
+                    },
+                    "UseReasonCodeChangeSubscription": {
+                        "aspects": {
+                            "defaultValue": true,
+                            "isPrimaryKey": false
+                        },
+                        "baseType": "BOOLEAN",
+                        "description": "",
+                        "name": "UseReasonCodeChangeSubscription",
+                        "ordinal": 11
+                    },
+                    "UtilizationCriticalPercent": {
+                        "aspects": {
+                            "isPrimaryKey": false
+                        },
+                        "baseType": "INTEGER",
+                        "description": "",
+                        "name": "UtilizationCriticalPercent",
+                        "ordinal": 5
+                    },
+                    "UtilizationWarningPercent": {
+                        "aspects": {
+                            "isPrimaryKey": false
+                        },
+                        "baseType": "INTEGER",
+                        "description": "",
+                        "name": "UtilizationWarningPercent",
+                        "ordinal": 6
+                    }
+                }
+            },
+            "dataShapeName": "",
+            "description": "General configuration for the Utilization Application",
+            "isMultiRow": false,
+            "name": "UtilizationConfiguration",
+            "ordinal": 0,
+            "rows": [
+                {
+                    "DaysToKeepWhenPurging": 1000,
+                    "DemoMode": false,
+                    "FilterReasonCodeEditByState": false,
+                    "HoursToLookBackOnUtilScreens": 8,
+                    "InitialScreenRefreshDisabled": true,
+                    "MaxEntitiesOnOverviewScreen": 10,
+                    "ReasonCodeEditEnabled": false,
+                    "ScreenRefreshRate": 30,
+                    "ShiftFiltersEnabled": false,
+                    "UseReasonCodeChangeSubscription": true,
+                    "UtilizationCriticalPercent": 50,
+                    "UtilizationWarningPercent": 63
+                }
+            ]
+        },
+        "UtilizationStateColorConfiguration": {
+            "aspects": {},
+            "dataShape": {
+                "fieldDefinitions": {
+                    "Color": {
+                        "aspects": {
+                            "isPrimaryKey": false
+                        },
+                        "baseType": "STRING",
+                        "description": "",
+                        "name": "Color",
+                        "ordinal": 2
+                    },
+                    "UtilizationState": {
+                        "aspects": {
+                            "isPrimaryKey": true
+                        },
+                        "baseType": "STRING",
+                        "description": "",
+                        "name": "UtilizationState",
+                        "ordinal": 1
+                    }
+                }
+            },
+            "dataShapeName": "PTCSC.Utilization.StateColors_DS",
+            "description": "",
+            "isMultiRow": true,
+            "name": "UtilizationStateColorConfiguration",
+            "ordinal": 2,
+            "rows": [
+                {
+                    "Color": "#ee8686",
+                    "UtilizationState": "Down"
+                },
+                {
+                    "Color": "#f3cb78",
+                    "UtilizationState": "Idle"
+                },
+                {
+                    "Color": "#9ed287",
+                    "UtilizationState": "Running"
+                },
+                {
+                    "Color": "#53acff",
+                    "UtilizationState": "Setup"
+                },
+                {
+                    "Color": "#adb5bd",
+                    "UtilizationState": "Unavailable"
+                }
+            ]
+        }
+    },
+    "description": "Implementation of PTCSC.Utilization using ThingWorx data objects",
+    "designTimePermissions": {
+        "Create": [],
+        "Delete": [],
+        "Metadata": [],
+        "Read": [],
+        "Update": []
+    },
+    "documentationContent": "",
+    
+    "enabled": "true",
+    "homeMashup": "",
+    "identifier": "",
+    "implementedShapes": {},
+    "inheritedValueStream": "",
+    "name": "PTCSC.UtilizationTWImpl.Manager",
+    "projectName": "PTCSC.UtilizationTWImpl",
+    "propertyBindings": {},
+    "published": false,
+    "remoteEventBindings": {},
+    "remotePropertyBindings": {},
+    "remoteServiceBindings": {},
+    "runTimePermissions": {
+        "permissions": [
+            {
+                "EventInvoke": [],
+                "EventSubscribe": [],
+                "PropertyRead": [],
+                "PropertyWrite": [],
+                "ServiceInvoke": [],
+                "resourceName": "*"
+            }
+        ]
+    },
+    "sharedConfigurationTables": {},
+    "tags": [],
+    "thingProperties": {},
+    "thingShape": {
+        "eventDefinitions": {},
+        "propertyDefinitions": {},
+        "serviceDefinitions": {},
+        "serviceImplementations": {},
+        "serviceMappings": {},
+        "subscriptions": {}
+    },
+    "thingTemplate": "PTCSC.UtilizationTWImpl.Manager_TT",
+    "valueStream": "",
+    "visibilityPermissions": {
+        "Visibility": [
+            {
+                "isPermitted": true,
+                "name": "PTCSC.UtilizationTWImpl.Default_OR:PTCSC.UtilizationTWImpl.Admin_UG",
+                "type": "OrganizationalUnit"
+            },
+            {
+                "isPermitted": true,
+                "name": "PTCSC.UtilizationTWImpl.Default_OR",
+                "type": "Organization"
+            }
+        ]
+    }
+}

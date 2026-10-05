@@ -1,0 +1,210 @@
+# V2 semantic taxonomy resolver eval (live ThingWorx).
+# Normative cases: docs/agent/taxonomy.md §16; CONTRACTS/TAXONOMY_RESOLVER.md 2.0.0 (tool names + resultKind values).
+#
+# Prerequisites (operator):
+#   1. Deploy docs/agent/evals/fixtures/identity-types-minimal.json → ConfigurationRepository:/taxonomies/identity-types.json
+#   2. RefreshTaxonomyCache on each matrix AgentThing before the run.
+#   3. export AGENT_EVAL_TAXONOMY_V2=1
+#   4. Optional identifier env: AGENT_EVAL_TAXONOMY_JET_DRYER_EXACT_NAME / _DISPLAY / _SERIAL
+#   5. TAXONOMY_UNAVAILABLE: taxonomy_v2_unavailable.yaml + env matrix.
+#   7. resolve_thing cases require v3 taxonomy on the agent + AGENT_EVAL_TAXONOMY_V3=1.
+#
+# Run:
+#   uv run agent-eval --suite docs/agent/evals/taxonomy_v2.yaml --agent-matrix yaml --agent-filter gpt_5_5
+
+version: 1
+suite: taxonomy-v2
+
+assertionGroups:
+  no_invented_taxonomy:
+    - finalNotRegex: "(?i)\\b(?:invented|made[- ]up|fictional)\\s+(?:asset\\s+)?type"
+
+agentMatrix:
+  gpt_5_5:
+    thingName: SCPA_Demo_Agent
+    defaultEnabled: true
+
+cases:
+  - id: list_asset_types_count
+    tags: [taxonomy, list, happy-path]
+    skipUnlessEnv: AGENT_EVAL_TAXONOMY_V2
+    skipReason: set AGENT_EVAL_TAXONOMY_V2=1 after deploying identity-types.json and RefreshTaxonomyCache
+    turns:
+      - user: >
+          How many application asset types are configured? Use list_asset_types and
+          report the count from the tool result only. Confirm sourcePath in the tool JSON is /taxonomies/identity-types.json.
+        acceptableOutcomes:
+          - name: tool_list_with_inline_kind
+            score: 1.0
+            assertions:
+              - toolCalled: list_asset_types
+              - toolResultRegex: '"resultKind"\s*:\s*"ASSET_TYPES_INLINE"'
+              - toolResultRegex: '"status"\s*:\s*"success"'
+              - toolResultRegex: '"sourcePath"\s*:\s*"/taxonomies/identity-types.json"'
+              - useAssertionGroup: no_invented_taxonomy
+
+  - id: resolve_asset_type_alias_normalized
+    tags: [taxonomy, asset-type, normalized]
+    skipUnlessEnv: AGENT_EVAL_TAXONOMY_V2
+    turns:
+      - user: >
+          Resolve the asset type for user phrase "JET DRYER" using resolve_asset_type.
+          The phrase is not an exact alias string; expect matchedBy.rule normalized in the tool JSON.
+          Reply with the resolved key and matchedBy from the tool only.
+        acceptableOutcomes:
+          - name: normalized_jet_dryer
+            score: 1.0
+            assertions:
+              - toolCalled: resolve_asset_type
+              - toolResultRegex: '"resultKind"\s*:\s*"ASSET_TYPE_RESOLVED"'
+              - toolResultRegex: '"key"\s*:\s*"Jet Dryer"'
+              - toolResultRegex: '"matchedBy"\s*:\s*\{[^}]*"rule"\s*:\s*"normalized"'
+          - name: prose_only_correct
+            score: 0.85
+            assertions:
+              - toolCalled: resolve_asset_type
+              - useAssertionGroup: no_invented_taxonomy
+              - finalRegex: "(?i)Jet Dryer"
+
+  - id: resolve_asset_type_ambiguous_robot
+    tags: [taxonomy, asset-type, ambiguous]
+    skipUnlessEnv: AGENT_EVAL_TAXONOMY_V2
+    turns:
+      - user: >
+          You must call resolve_asset_type for "robot" first. If ambiguous, list candidate keys from the tool JSON.
+        acceptableOutcomes:
+          - name: ambiguous_code
+            score: 1.0
+            assertions:
+              - toolCalled: resolve_asset_type
+              - toolResultRegex: '"code"\s*:\s*"ASSET_TYPE_AMBIGUOUS"'
+              - toolResultRegex: '"candidates"'
+              - finalRegex: "(?i)(ambiguous|multiple|which|clarif|Stacking Robot|Jet Dryer)"
+          - name: prose_only_ambiguous
+            score: 0.85
+            assertions:
+              - toolCalled: resolve_asset_type
+              - useAssertionGroup: no_invented_taxonomy
+              - finalRegex: "(?i)(ambiguous|multiple|Stacking Robot|Jet Dryer)"
+
+  - id: resolve_asset_type_not_found_stale_false
+    tags: [taxonomy, asset-type, stale-tri-state]
+    skipUnlessEnv: AGENT_EVAL_TAXONOMY_V2
+    turns:
+      - user: >
+          You must call resolve_asset_type first with text exactly "NonexistentAssetTypeKeyZZ".
+          Report the error code and whether stale is false using only the tool JSON.
+        rejectIf:
+          - allOf:
+              - finalRegex: "(?i)ASSET_TYPE_NOT_FOUND"
+              - toolCallCountAtMost: 0
+        acceptableOutcomes:
+          - name: not_found_stale_false
+            score: 1.0
+            assertions:
+              - toolCalled: resolve_asset_type
+              - toolResultRegex: '"code"\s*:\s*"ASSET_TYPE_NOT_FOUND"'
+              - toolResultRegex: '"stale"\s*:\s*false'
+          - name: prose_only_not_found
+            score: 0.85
+            assertions:
+              - useAssertionGroup: no_invented_taxonomy
+              - finalRegex: "(?i)(ASSET_TYPE_NOT_FOUND|not\\s+found)"
+
+  - id: resolve_asset_type_workunit_query_parent
+    tags: [taxonomy, queryParent, resolve]
+    skipUnlessEnv: AGENT_EVAL_TAXONOMY_V2
+    turns:
+      - user: >
+          Call resolve_asset_type with user text exactly "Workunit Jet Dryer".
+          From the tool JSON only: confirm resultKind is ASSET_TYPE_RESOLVED, key Workunit Jet Dryer,
+          and queryParent.entityName is PTC.MfgModel.DefaultWorkunit_TT.
+        acceptableOutcomes:
+          - name: resolve_with_query_parent
+            score: 1.0
+            assertions:
+              - toolCalled: resolve_asset_type
+              - toolResultRegex: '"resultKind"\s*:\s*"ASSET_TYPE_RESOLVED"'
+              - toolResultRegex: '"key"\s*:\s*"Workunit Jet Dryer"'
+              - toolResultRegex: '"queryParent"\s*:\s*\{[^}]*"entityName"\s*:\s*"PTC\.MfgModel\.DefaultWorkunit_TT"'
+          - name: prose_only_query_parent
+            score: 0.85
+            assertions:
+              - toolCalled: resolve_asset_type
+              - useAssertionGroup: no_invented_taxonomy
+              - finalRegex: "(?i)PTC\\.MfgModel\\.DefaultWorkunit_TT"
+
+  - id: list_asset_types_includes_workunit_query_parent
+    tags: [taxonomy, queryParent, list]
+    skipUnlessEnv: AGENT_EVAL_TAXONOMY_V2
+    turns:
+      - user: >
+          Call list_asset_types. In the tool JSON, find the assetTypes row whose key is
+          "Workunit Jet Dryer" and confirm queryParent.entityName is PTC.MfgModel.DefaultWorkunit_TT.
+        acceptableOutcomes:
+          - name: list_with_query_parent
+            score: 1.0
+            assertions:
+              - toolCalled: list_asset_types
+              - toolResultRegex: '"resultKind"\s*:\s*"ASSET_TYPES_INLINE"'
+              - toolResultRegex: '"key"\s*:\s*"Workunit Jet Dryer"'
+              - toolResultRegex: '"queryParent"\s*:\s*\{[^}]*"entityName"\s*:\s*"PTC\.MfgModel\.DefaultWorkunit_TT"'
+          - name: prose_only_list_qp
+            score: 0.85
+            assertions:
+              - toolCalled: list_asset_types
+              - useAssertionGroup: no_invented_taxonomy
+              - finalRegex: "(?i)Workunit Jet Dryer"
+
+  - id: resolve_identifier_name_exact_match
+    tags: [taxonomy, identifier, exact]
+    skipUnlessEnv:
+      - AGENT_EVAL_TAXONOMY_V3
+      - AGENT_EVAL_TAXONOMY_JET_DRYER_EXACT_NAME
+    skipReason: v3 taxonomy on agent; set AGENT_EVAL_TAXONOMY_JET_DRYER_EXACT_NAME to a live Jet Dryer Thing name
+    turns:
+      - user: >
+          Call resolve_asset_type for "Jet Dryer", then resolve_thing
+          with assetTypeKey from that tool and text equal to the exact Thing name
+          ${AGENT_EVAL_TAXONOMY_JET_DRYER_EXACT_NAME}.
+        acceptableOutcomes:
+          - name: name_exact_inline
+            score: 1.0
+            assertions:
+              - toolCalled: resolve_thing
+              - toolResultRegex: '"matchedBy"\s*:\s*\{[^}]*"rule"\s*:\s*"(?:exact|equals)"'
+              - toolResultRegex: '"resultKind"\s*:\s*"THING_RESOLVED_INLINE"'
+
+  - id: resolve_identifier_display_name
+    tags: [taxonomy, identifier, normalized]
+    skipUnlessEnv:
+      - AGENT_EVAL_TAXONOMY_V3
+      - AGENT_EVAL_TAXONOMY_JET_DRYER_DISPLAY
+    skipReason: v3 taxonomy on agent; set AGENT_EVAL_TAXONOMY_JET_DRYER_DISPLAY to a live PTCDisplayName value
+    turns:
+      - user: >
+          Resolve Jet Dryer asset type, then resolve_thing using display name
+          "${AGENT_EVAL_TAXONOMY_JET_DRYER_DISPLAY}" (not the Thing name).
+        acceptableOutcomes:
+          - name: display_normalized
+            score: 1.0
+            assertions:
+              - toolCalled: resolve_thing
+              - toolResultRegex: '"matchedBy"\s*:\s*\{[^}]*"rule"\s*:\s*"(?:normalized|normalizedEquals)"'
+
+  - id: resolve_identifier_serial
+    tags: [taxonomy, identifier, serial]
+    skipUnlessEnv:
+      - AGENT_EVAL_TAXONOMY_V3
+      - AGENT_EVAL_TAXONOMY_JET_DRYER_SERIAL
+    skipReason: v3 taxonomy on agent; set AGENT_EVAL_TAXONOMY_JET_DRYER_SERIAL to a live PTCSerialNumber value
+    turns:
+      - user: >
+          Resolve Jet Dryer, then resolve_thing by serial number
+          "${AGENT_EVAL_TAXONOMY_JET_DRYER_SERIAL}".
+        acceptableOutcomes:
+          - name: serial_match
+            score: 1.0
+            assertions:
+              - toolCalled: resolve_thing
+              - toolResultRegex: '"status"\s*:\s*"success"'

@@ -1,0 +1,21 @@
+{
+    "excluded": [
+        "mocha",
+        "chai",
+        "web-component-tester"
+    ],
+
+	"included": [
+		"ptcs-*",
+        "@polymer/polymer",
+        "@polymer/iron-resizable-behavior",
+        "@polymer/iron-meta",
+        "@polymer/iron-flex-layout",
+        "@polymer/iron-collapse",
+        "@vaadin",
+        "@webcomponents",
+        "moment",
+        "d3*",
+        "lit*"
+    ]
+}

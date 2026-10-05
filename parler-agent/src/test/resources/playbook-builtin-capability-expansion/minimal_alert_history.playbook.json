@@ -1,0 +1,43 @@
+{
+  "schema": "parler-playbook-v1",
+  "title": "Minimal alert history fixture (CI)",
+  "budgets": {
+    "timeoutSeconds": 120,
+    "maxNodes": 8,
+    "maxToolCalls": 4,
+    "maxEvidenceBytes": 12000
+  },
+  "nodes": [
+    {
+      "id": "alert_hist",
+      "kind": "tool_call",
+      "dependsOn": [],
+      "tool": "query_alert_history",
+      "args": {
+        "thingName": "DemoThing",
+        "relativeDuration": "24h"
+      },
+      "evidence": {
+        "label": "Alert history window",
+        "includeToolOutputRootFields": [
+          "appliedStartTime",
+          "appliedEndTime",
+          "rowCount",
+          "thingName"
+        ],
+        "table": {
+          "maxRows": 5,
+          "columns": ["sourceProperty", "timestamp", "severity"]
+        }
+      }
+    },
+    {
+      "id": "final_summary",
+      "kind": "llm_summary",
+      "dependsOn": ["alert_hist"],
+      "prompt": "Summarize alert history evidence only.",
+      "evidenceRefs": ["alert_hist"]
+    }
+  ],
+  "finalNode": "final_summary"
+}

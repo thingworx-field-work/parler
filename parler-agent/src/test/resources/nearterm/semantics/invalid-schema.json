@@ -1,0 +1,20 @@
+{
+  "schema": "parler-semantic-profile-v0",
+  "profileId": "cell-a-operations",
+  "version": "2026.07.1",
+  "assetTypes": {
+    "StackingRobot": {
+      "propertyRoles": {
+        "operating_temperature": {
+          "binding": {
+            "kind": "PROPERTY",
+            "propertyName": "Wrst1"
+          },
+          "unit": "Cel",
+          "dimension": "temperature",
+          "grain": "sample"
+        }
+      }
+    }
+  }
+}

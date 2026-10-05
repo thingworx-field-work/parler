@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "suite": "context-compaction-m1a-ten-turns",
+  "description": "Fixed ten-turn M1a validation suite (docs/agent/nearterm/context-compaction-adv.md §11.3).",
+  "variables": {
+    "deviceA": "SE.CellFab.Model.Workunit.ORD-Contacting-01",
+    "deviceB": "SE.CellFab.Model.Workunit.ORD-Contacting-02",
+    "deviceC": "SE.CellFab.Model.Workunit.ORD-Contacting-01",
+    "propertyP": "CurrentDraw",
+    "utilDateU": "2025-09-10",
+    "historyWindowH": "2026-09-14T18:00:00Z/2026-09-14T18:30:00Z"
+  },
+  "helperCapture": {
+    "intervalSeconds": 30,
+    "reads": 2
+  },
+  "clientWaitSeconds": 600,
+  "turnGapSeconds": 0,
+  "goldenRef": "ten_turns_golden.json",
+  "turns": [
+    {
+      "id": 1,
+      "prompt": "Show a UTC utilization status pie chart for {{deviceA}} on {{utilDateU}}.",
+      "judgmentFocus": "Real UTC date query, full aggregation, chart delivered."
+    },
+    {
+      "id": 2,
+      "prompt": "Show the same kind of chart for {{deviceB}} on {{utilDateU}}.",
+      "judgmentFocus": "Same date and semantics; device B must not reuse device A."
+    },
+    {
+      "id": 3,
+      "prompt": "Compare hours and percentages for each status between the turn 1 and turn 2 charts.",
+      "judgmentFocus": "Consistent with prior evidence; correct percentage denominators."
+    },
+    {
+      "id": 4,
+      "prompt": "Sort the comparison by downtime duration and present it as a table.",
+      "judgmentFocus": "May reuse cached evidence; no fabricated columns or handles."
+    },
+    {
+      "id": 5,
+      "prompt": "Replot {{deviceA}} utilization for {{utilDateU}} using America/New_York calendar date interpretation.",
+      "judgmentFocus": "Re-resolve actual UTC boundaries; not label-only change."
+    },
+    {
+      "id": 6,
+      "prompt": "Explain numeric differences between turn 1 and turn 5.",
+      "judgmentFocus": "Distinguish window change from data/device change."
+    },
+    {
+      "id": 7,
+      "prompt": "Trend {{propertyP}} for {{deviceC}} over {{historyWindowH}} with average and extrema.",
+      "judgmentFocus": "Full-window statistics; correct chart units and completeness."
+    },
+    {
+      "id": 8,
+      "prompt": "Query alert history for {{deviceC}} over {{historyWindowH}} and relate it to the trend timing.",
+      "judgmentFocus": "Historical alerts, not current summary; no causal over-claim."
+    },
+    {
+      "id": 9,
+      "prompt": "Return to the turn 1/2 comparison and show both devices together again.",
+      "judgmentFocus": "Preserve early dates, devices, denominators; re-fetch if references stale."
+    },
+    {
+      "id": 10,
+      "prompt": "Summarize findings, data gaps, and evidence limits from this conversation.",
+      "judgmentFocus": "No alert-to-downtime overreach; preserve multi-turn semantics."
+    }
+  ]
+}

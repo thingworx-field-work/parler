@@ -1,0 +1,79 @@
+{
+  "version": 1,
+  "suite": "user-context-baseline-ten-turns-v1",
+  "description": "User-selected prompts: implicit year/timezone, asset continuity, year correction, charts and Pearson correlation. Keep prompt text identical across all four groups.",
+  "variables": {
+    "userTimezone": "America/New_York",
+    "hostContext": ""
+  },
+  "helperCapture": { "intervalSeconds": 30, "reads": 2 },
+  "clientWaitSeconds": 600,
+  "turnGapSeconds": 0,
+  "goldenRef": "reference-manifest.json",
+  "datasetManifest": {
+    "baseline": "User-restored ThingWorx Stream/ValueStream history; exact restored snapshot and coverage must be recorded with live results",
+    "expectedExtensionVersion": "0.1.234",
+    "referenceDataStatus": "not_independently_verified",
+    "promptPolicy": "Do not insert a timezone or a year into the prompts. Record actual execution date and model-resolved year in turns 3-5; turn 6 explicitly corrects the window to 2026.",
+    "userTimezone": "America/New_York",
+    "expectedUtcWindows": {
+      "turn1": ["2025-09-10T04:00:00Z", "2025-09-11T04:00:00Z"],
+      "turn2": ["2025-09-14T04:00:00Z", "2025-09-15T04:00:00Z"],
+      "turn6Through10": ["2026-09-15T02:00:00Z", "2026-09-15T06:00:00Z"]
+    },
+    "boundaryPolicy": "UTC values describe intended local windows; retain the called service's end-bound semantics when checking data.",
+    "comparisonPolicy": "Record actual model/provider, AgentSettings, price configuration, data coverage and execution date. Four configurations are not assumed otherwise identical. Usage costs remain observed-only lower bounds."
+  },
+  "turns": [
+    {
+      "id": 1,
+      "prompt": "Show me the utilization-state breakdown for SE.CellFab.Model.Workunit.ORD-Contacting-01 on 2025-09-10 as a pie chart.",
+      "judgmentFocus": "Correct full asset identity, local calendar day, complete utilization aggregation and delivered pie chart."
+    },
+    {
+      "id": 2,
+      "prompt": "Show separate pie charts for the utilization-state breakdowns of ORD-Contacting-01 and ORD-Contacting-02 on 2025-09-14.",
+      "judgmentFocus": "Resolve both short names; deliver two distinct correctly labelled pie charts for the local day without reusing turn 1 data."
+    },
+    {
+      "id": 3,
+      "prompt": "Show me the alert history for ORD-Contacting-01 from September 14 at 22:00 to September 15 at 02:00.",
+      "judgmentFocus": "Record the year inferred from current date and preceding context, or any clarification. Use user timezone and historical alerts; do not silently score an inferred year as the explicit 2026 correction."
+    },
+    {
+      "id": 4,
+      "prompt": "How about ORD-Contacting-02 during the same time window?",
+      "judgmentFocus": "Switch asset while preserving the alert-history task and the window actually established in turn 3."
+    },
+    {
+      "id": 5,
+      "prompt": "How about MUC BenchScale 02?",
+      "judgmentFocus": "Resolve this asset label and preserve the preceding alert-history task and window; record the resolved Thing identity."
+    },
+    {
+      "id": 6,
+      "prompt": "Oh, sorry, I meant that time window in 2026. Please check again for all three assets.",
+      "judgmentFocus": "Apply the 2026 correction to all three assets, preserving local clock times; re-query or justify reuse of matching evidence."
+    },
+    {
+      "id": 7,
+      "prompt": "Show me the contactForce trends for both ORD-Contacting-01 and ORD-Contacting-02 during the same time window.",
+      "judgmentFocus": "Deliver both contactForce trends for the corrected 2026 window with correct identities, units and data-coverage disclosure."
+    },
+    {
+      "id": 8,
+      "prompt": "Show me the operationalVoltage trends for both MUC BenchScale 02 and ORD-Contacting-02 during the same time window.",
+      "judgmentFocus": "Switch property and asset pair without losing the corrected window; deliver both trends or identify verified property/data unavailability."
+    },
+    {
+      "id": 9,
+      "prompt": "Calculate the Pearson correlation between operationalVoltage and contactForce on ORD-Contacting-02 during the same time window. Explain how you align the readings and handle missing values, and report the number of paired observations.",
+      "judgmentFocus": "Check Pearson computation against independent paired observations, alignment, missing-value policy and sample count; unsupported computation or undefined correlation must not become a fabricated coefficient."
+    },
+    {
+      "id": 10,
+      "prompt": "Perform the same correlation analysis on ORD-Contacting-01 using the same method and time window, and compare the results for the two assets.",
+      "judgmentFocus": "Apply the same method and corrected window to ORD-Contacting-01; compare each asset's coefficient and paired count only where supported, keeping correlation distinct from causation."
+    }
+  ]
+}

@@ -1,0 +1,166 @@
+{
+  "version": 7,
+  "suite": "context-compaction-m1a-ten-turns-golden",
+  "description": "Judge expectations for fake-transport runs. Producer payloads live in fake_evidence.json. Live --execute requires a User-supplied golden manifest.",
+  "turns": {
+    "1": {
+      "terminal": "done",
+      "requireAckBeforeDone": true,
+      "reference": {
+        "chart": {
+          "kind": "pie",
+          "source": {
+            "sourceResolved": "cache_id",
+            "sourceColumns": ["status", "hours"],
+            "rowCount": 10,
+            "pointCount": 3,
+            "truncationApplied": false
+          },
+          "series": [{ "x": ["Running", "Idle", "Down"], "y": [6, 2, 1] }]
+        }
+      }
+    },
+    "2": {
+      "terminal": "done",
+      "reference": {
+        "chart": {
+          "kind": "pie",
+          "source": {
+            "sourceResolved": "cache_id",
+            "sourceColumns": ["status", "hours"],
+            "rowCount": 10,
+            "pointCount": 3,
+            "truncationApplied": false
+          },
+          "series": [{ "x": ["Running", "Idle", "Down"], "y": [5, 3, 1] }]
+        }
+      }
+    },
+    "3": {
+      "terminal": "done",
+      "reference": {
+        "comparison": {
+          "requiresPercentDenominator": true,
+          "percentDenominatorHours": [10, 10],
+          "hoursByStatus": {
+            "Running": [6, 5],
+            "Idle": [2, 3],
+            "Down": [1, 1]
+          },
+          "percentByStatus": {
+            "Running": [60, 50],
+            "Idle": [20, 30],
+            "Down": [10, 10]
+          }
+        }
+      }
+    },
+    "4": {
+      "terminal": "done",
+      "reference": {
+        "table": {
+          "rowOrder": { "sortBy": "downtimeDuration", "sortOrder": "desc" },
+          "rows": [
+            { "status": "Idle", "deviceA_hours": 2, "deviceB_hours": 3, "downtimeDuration": 3 },
+            { "status": "Down", "deviceA_hours": 1, "deviceB_hours": 1, "downtimeDuration": 1 },
+            { "status": "Running", "deviceA_hours": 6, "deviceB_hours": 5, "downtimeDuration": 0 }
+          ]
+        }
+      }
+    },
+    "5": {
+      "terminal": "done",
+      "reference": {
+        "chart": {
+          "kind": "pie",
+          "source": {
+            "sourceResolved": "cache_id",
+            "sourceColumns": ["status", "hours"],
+            "rowCount": 10,
+            "pointCount": 3,
+            "truncationApplied": false
+          },
+          "series": [{ "x": ["Running", "Idle", "Down"], "y": [7, 2, 1] }]
+        }
+      }
+    },
+    "6": {
+      "terminal": "done",
+      "reference": {
+        "explanation": {
+          "requiresWindowDistinction": true
+        }
+      }
+    },
+    "7": {
+      "terminal": "done",
+      "reference": {
+        "chart": {
+          "kind": "line",
+          "source": {
+            "sourceResolved": "history_overlay",
+            "rowCount": 3,
+            "pointCount": 3,
+            "truncationApplied": false
+          },
+          "series": [
+            {
+              "x": [
+                "2026-09-14T18:00:00.000Z",
+                "2026-09-14T18:15:00.000Z",
+                "2026-09-14T18:30:00.000Z"
+              ],
+              "y": [12.1, 11.8, 12.4]
+            }
+          ]
+        },
+        "statistics": {
+          "average": 12.1,
+          "min": 11.8,
+          "max": 12.4
+        }
+      }
+    },
+    "8": {
+      "terminal": "done",
+      "reference": {
+        "alerts": {
+          "device": "SE.CellFab.Model.Workunit.ORD-Contacting-01",
+          "count": 2,
+          "requiresHistoricalQuery": true
+        }
+      }
+    },
+    "9": {
+      "terminal": "done",
+      "reference": {
+        "chart": {
+          "kind": "pie",
+          "source": {
+            "sourceResolved": "cache_id",
+            "sourceColumns": ["device", "runningHours"],
+            "rowCount": 2,
+            "pointCount": 2,
+            "truncationApplied": false
+          },
+          "series": [{ "x": ["ORD-Contacting-01", "ORD-Contacting-02"], "y": [6, 5] }]
+        },
+        "comparison": {
+          "devices": [
+            "SE.CellFab.Model.Workunit.ORD-Contacting-01",
+            "SE.CellFab.Model.Workunit.ORD-Contacting-02"
+          ]
+        }
+      }
+    },
+    "10": {
+      "terminal": "done",
+      "reference": {
+        "summary": {
+          "requiresEvidenceLimits": true,
+          "forbidsAlertToDowntimeOverreach": true
+        }
+      }
+    }
+  }
+}

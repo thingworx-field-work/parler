@@ -1,0 +1,533 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Entities build="b390" majorVersion="10" minorVersion="1" modelPersistenceProviderPackage="PostgresPersistenceProviderPackage" revision="2" schemaVersion="1210" universal="">
+	<Things>
+		<Thing aspect.isEditableExtensionObject="true" aspect.isExtension="true" description="Default manager for the Asset Monitoring Building Block." documentationContent="" effectiveThingPackage="ConfiguredThing" enabled="true" homeMashup="" identifier="" inheritedValueStream="" lastModifiedDate="2026-06-30T04:06:47.509Z" name="PTCTS.AssetMonitoring.Manager" projectName="PTCTS.AssetMonitoring" published="false" tags="" thingTemplate="PTCTS.AssetMonitoring.Manager_TT" valueStream="">
+			<Owner name="Administrator" type="User"/>
+			<avatar/>
+			<DesignTimePermissions>
+				<Create/>
+				<Read/>
+				<Update/>
+				<Delete/>
+				<Metadata/>
+			</DesignTimePermissions>
+			<RunTimePermissions>
+				<Permissions resourceName="*">
+					<PropertyRead/>
+					<PropertyWrite/>
+					<ServiceInvoke>
+						<Principal isPermitted="true" name="PTCTS.AssetMonitoring.Admin_UG" type="Group"/>
+					</ServiceInvoke>
+					<EventInvoke/>
+					<EventSubscribe/>
+				</Permissions>
+			</RunTimePermissions>
+			<VisibilityPermissions>
+				<Visibility>
+					<Principal isPermitted="true" name="PTCTS.AssetMonitoring.Default_OR" type="Organization"/>
+					<Principal isPermitted="true" name="PTCTS.AssetMonitoring.Default_OR:PTCTS.AssetMonitoring.Admin_UG" type="OrganizationalUnit"/>
+				</Visibility>
+			</VisibilityPermissions>
+			<ConfigurationTableDefinitions>
+				<ConfigurationTableDefinition category="" dataShapeName="PTCTS.ConfigurationManagement.EditableConfigurationTables_DS" description="" isHidden="false" isMultiRow="true" name="EditableConfigurationTables" ordinal="0" source="IMPORT"/>
+			</ConfigurationTableDefinitions>
+			<ConfigurationTables>
+				<ConfigurationTable dataShapeName="PTCTS.AssetMonitoring.AdminPropertyOrderedMenu_DS" description="" isMultiRow="true" name="AdminPropertyConfigurationMenu" ordinal="0">
+					<DataShape>
+						<FieldDefinitions>
+							<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="" name="ConfigurationTableName" ordinal="6"/>
+							<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="" name="Description" ordinal="7"/>
+							<FieldDefinition aspect.isPrimaryKey="false" baseType="MASHUPNAME" description="" name="Mashup" ordinal="4"/>
+							<FieldDefinition aspect.isPrimaryKey="false" baseType="INTEGER" description="" name="OrderPreference" ordinal="3"/>
+							<FieldDefinition aspect.isPrimaryKey="false" baseType="MASHUPNAME" description="" name="PreviewMashup" ordinal="5"/>
+							<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="" name="Section" ordinal="1"/>
+							<FieldDefinition aspect.isPrimaryKey="true" baseType="STRING" description="" name="Title" ordinal="2"/>
+						</FieldDefinitions>
+					</DataShape>
+					<Rows>
+						<Row>
+							<ConfigurationTableName><![CDATA[AssetCardConfig]]></ConfigurationTableName>
+							<Description><![CDATA[Select up to 3 values for display on main page cards.  Properties without a current value will not be shown on cards.]]></Description>
+							<Mashup><![CDATA[PTCTS.AssetMonitoring.AdminUpdatePropertyDisplay_MU]]></Mashup>
+							<OrderPreference>1</OrderPreference>
+							<PreviewMashup><![CDATA[PTCTS.AssetMonitoring.AssetCardPreviewWrapper_CMU]]></PreviewMashup>
+							<Section/>
+							<Title><![CDATA[Card]]></Title>
+						</Row>
+						<Row>
+							<ConfigurationTableName><![CDATA[AssetTooltipConfig]]></ConfigurationTableName>
+							<Description><![CDATA[Select up to 5 values for display on main page map tooltips.  Properties without a current value will not be shown on tooltips.]]></Description>
+							<Mashup><![CDATA[PTCTS.AssetMonitoring.AdminUpdatePropertyDisplay_MU]]></Mashup>
+							<OrderPreference>2</OrderPreference>
+							<PreviewMashup><![CDATA[PTCTS.AssetMonitoring.MapToolTipPreviewWrapper_MU]]></PreviewMashup>
+							<Section/>
+							<Title><![CDATA[Map Tooltip]]></Title>
+						</Row>
+						<Row>
+							<ConfigurationTableName><![CDATA[AssetHeaderConfig]]></ConfigurationTableName>
+							<Description><![CDATA[Select up to 4 values for display on the asset detail page header.  Properties without a current value will not be shown on the header.]]></Description>
+							<Mashup><![CDATA[PTCTS.AssetMonitoring.AdminUpdatePropertyDisplay_MU]]></Mashup>
+							<OrderPreference>4</OrderPreference>
+							<PreviewMashup><![CDATA[PTCTS.AssetMonitoring.AssetDetailsHeaderPreviewWrapper_MU]]></PreviewMashup>
+							<Section/>
+							<Title><![CDATA[Details Header]]></Title>
+						</Row>
+						<Row>
+							<ConfigurationTableName><![CDATA[AssetInformationConfig]]></ConfigurationTableName>
+							<Description><![CDATA[Select an unlimited number of values for display on the asset information page.  Properties without a current value will not be shown on the information page.]]></Description>
+							<Mashup><![CDATA[PTCTS.AssetMonitoring.AdminUpdatePropertyDisplay_MU]]></Mashup>
+							<OrderPreference>5</OrderPreference>
+							<PreviewMashup><![CDATA[PTCTS.AssetMonitoring.Information_MU]]></PreviewMashup>
+							<Section/>
+							<Title><![CDATA[Information]]></Title>
+						</Row>
+					</Rows>
+				</ConfigurationTable>
+				<ConfigurationTable dataShapeName="" description="" isMultiRow="true" name="AssetDetailHeaderMashups" ordinal="0">
+					<DataShape>
+						<FieldDefinitions>
+							<FieldDefinition aspect.isPrimaryKey="true" baseType="STRING" description="" name="MashupName" ordinal="1"/>
+							<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="" name="MashupVisibilityService" ordinal="3"/>
+							<FieldDefinition aspect.defaultValue="200.0" aspect.isPrimaryKey="false" baseType="NUMBER" description="" name="MashupWidth" ordinal="2"/>
+						</FieldDefinitions>
+					</DataShape>
+					<Rows>
+						<Row>
+							<MashupName><![CDATA[PTCTS.Weather.AssetHeader_CMU]]></MashupName>
+							<MashupVisibilityService><![CDATA[PTCTS.Weather.EntryPoint|GetMenuVisibilityWeather]]></MashupVisibilityService>
+							<MashupWidth>120.0</MashupWidth>
+						</Row>
+					</Rows>
+				</ConfigurationTable>
+				<ConfigurationTable dataShapeName="" description="Settings that control the behavior of asset monitoring mashups" isMultiRow="false" name="AssetMonitoringSettingsConfiguration" ordinal="0">
+					<DataShape>
+						<FieldDefinitions>
+							<FieldDefinition aspect.defaultValue="Vertical" aspect.isPrimaryKey="false" baseType="STRING" description="Whether the asset detail menu is Horizontal or Vertical" name="AssetDetailMenuOrientation" ordinal="2"/>
+							<FieldDefinition aspect.defaultValue="false" aspect.isPrimaryKey="false" baseType="BOOLEAN" description="If the properties displayed on the cards do not change and are persistent, then the card contents can be cached for quick display.  Do not check if card properties are changing." name="CardPropertiesArePersistentSoCache" ordinal="3"/>
+							<FieldDefinition aspect.defaultValue="true" aspect.isPrimaryKey="false" baseType="BOOLEAN" description="" name="TurnOnMapTooltips" ordinal="1"/>
+						</FieldDefinitions>
+					</DataShape>
+					<Rows>
+						<Row>
+							<AssetDetailMenuOrientation><![CDATA[Vertical]]></AssetDetailMenuOrientation>
+							<CardPropertiesArePersistentSoCache>false</CardPropertiesArePersistentSoCache>
+							<TurnOnMapTooltips>true</TurnOnMapTooltips>
+						</Row>
+					</Rows>
+				</ConfigurationTable>
+				<ConfigurationTable dataShapeName="" description="Doodads mashups available for selection" isMultiRow="true" name="DoodadMashupConfiguration" ordinal="0">
+					<DataShape>
+						<FieldDefinitions>
+							<FieldDefinition aspect.isPrimaryKey="false" baseType="BASETYPENAME" description="Name of the base type this mashup applies to" name="baseTypeName" ordinal="3"/>
+							<FieldDefinition aspect.defaultValue="250.0" aspect.isPrimaryKey="false" baseType="NUMBER" description="Height of the mashup to be passed on to the collection" name="mashupHeight" ordinal="9"/>
+							<FieldDefinition aspect.isPrimaryKey="false" baseType="MASHUPNAME" description="Name of the mashup used to render the data property" name="mashupName" ordinal="2"/>
+							<FieldDefinition aspect.defaultValue="250.0" aspect.isPrimaryKey="false" baseType="NUMBER" description="Width of the mashup to be passed on to the collection" name="mashupWidth" ordinal="10"/>
+							<FieldDefinition aspect.isPrimaryKey="true" baseType="STRING" description="Display Name of the mashup for selection in data properties" name="name" ordinal="1"/>
+							<FieldDefinition aspect.defaultValue="0.0" aspect.isPrimaryKey="false" baseType="NUMBER" description="" name="numberOfMultiProperties" ordinal="11"/>
+							<FieldDefinition aspect.isPrimaryKey="false" baseType="BOOLEAN" description="" name="SystemUseOnly" ordinal="12"/>
+							<FieldDefinition aspect.defaultValue="false" aspect.isPrimaryKey="false" baseType="BOOLEAN" description="" name="usesLoggedValues" ordinal="8"/>
+							<FieldDefinition aspect.defaultValue="false" aspect.isPrimaryKey="false" baseType="BOOLEAN" description="" name="usesMultiProperty" ordinal="7"/>
+							<FieldDefinition aspect.isPrimaryKey="false" baseType="BOOLEAN" description="This field designates that the mashup requires a range setting including minimum and maximum" name="usesRange" ordinal="4"/>
+							<FieldDefinition aspect.isPrimaryKey="false" baseType="BOOLEAN" description="This field designates that the mashup requires a threshold and threshold compare setting" name="usesThreshold" ordinal="6"/>
+							<FieldDefinition aspect.isPrimaryKey="false" baseType="BOOLEAN" description="This field designates that the mashup requires a units setting" name="usesUnits" ordinal="5"/>
+						</FieldDefinitions>
+					</DataShape>
+					<Rows>
+						<Row>
+							<SystemUseOnly>true</SystemUseOnly>
+							<baseTypeName><![CDATA[LOCATION]]></baseTypeName>
+							<mashupHeight>500.0</mashupHeight>
+							<mashupName><![CDATA[PTCTS.AssetMonitoring.PropertyDisplay_Map_CMU]]></mashupName>
+							<mashupWidth>500.0</mashupWidth>
+							<name><![CDATA[Map]]></name>
+							<numberOfMultiProperties>0.0</numberOfMultiProperties>
+							<usesLoggedValues>false</usesLoggedValues>
+							<usesMultiProperty>false</usesMultiProperty>
+							<usesRange>false</usesRange>
+							<usesThreshold>false</usesThreshold>
+							<usesUnits>false</usesUnits>
+						</Row>
+					</Rows>
+				</ConfigurationTable>
+				<ConfigurationTable dataShapeName="" description="" isMultiRow="true" name="EditableConfigurationTables" ordinal="0">
+					<DataShape>
+						<FieldDefinitions>
+							<FieldDefinition aspect.isPrimaryKey="false" baseType="BOOLEAN" description="" name="AllowAdd" ordinal="3"/>
+							<FieldDefinition aspect.isPrimaryKey="false" baseType="BOOLEAN" description="" name="AllowDelete" ordinal="5"/>
+							<FieldDefinition aspect.isPrimaryKey="false" baseType="BOOLEAN" description="" name="AllowEdit" ordinal="4"/>
+							<FieldDefinition aspect.isPrimaryKey="true" baseType="STRING" description="" name="ConfigurationTableName" ordinal="1"/>
+							<FieldDefinition aspect.defaultValue="{}" aspect.isPrimaryKey="false" baseType="JSON" description="Default JSON to use when adding rows that store values in the configurableJSON field" name="DefaultConfigurableJSON" ordinal="7"/>
+							<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="" name="Description" ordinal="6"/>
+							<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="" name="DisplayName" ordinal="2"/>
+						</FieldDefinitions>
+					</DataShape>
+					<Rows>
+						<Row>
+							<AllowAdd>true</AllowAdd>
+							<AllowDelete>true</AllowDelete>
+							<AllowEdit>true</AllowEdit>
+							<ConfigurationTableName><![CDATA[AssetDetailHeaderMashups]]></ConfigurationTableName>
+							<DefaultConfigurableJSON>
+								<json><![CDATA[{}]]></json>
+							</DefaultConfigurableJSON>
+							<Description><![CDATA[Name of custom mashups that will appear in the Asset Detail header.  Note that these mashups receive a property called thingName.]]></Description>
+							<DisplayName><![CDATA[Asset Detail Header Mashups]]></DisplayName>
+						</Row>
+					</Rows>
+				</ConfigurationTable>
+				<ConfigurationTable dataShapeName="" description="Configuration table used to identify managers that the building block should use" isMultiRow="true" name="ManagerConfiguration" ordinal="0">
+					<DataShape>
+						<FieldDefinitions>
+							<FieldDefinition aspect.isPrimaryKey="true" baseType="STRING" description="unique identifier for the manager that needs to be configured" name="id" ordinal="1"/>
+							<FieldDefinition aspect.isPrimaryKey="false" aspect.thingShape="PTC.Base.CommonManagement_TS" baseType="THINGNAME" description="Name of the Manager Thing to be configured" name="managerThingName" ordinal="2"/>
+						</FieldDefinitions>
+					</DataShape>
+					<Rows/>
+				</ConfigurationTable>
+				<ConfigurationTable dataShapeName="" description="" isMultiRow="true" name="MashupConfiguration" ordinal="0">
+					<DataShape>
+						<FieldDefinitions>
+							<FieldDefinition aspect.isPrimaryKey="true" baseType="STRING" description="unique identifier used to identify the thing or mashup that is being configured" name="id" ordinal="1"/>
+							<FieldDefinition aspect.isPrimaryKey="false" baseType="MASHUPNAME" description="name of the mashup to configure" name="mashupName" ordinal="2"/>
+						</FieldDefinitions>
+					</DataShape>
+					<Rows>
+						<Row>
+							<id><![CDATA[AssetDetailMainMashup]]></id>
+							<mashupName><![CDATA[PTCTS.AssetMonitoring.AssetDetailsDefault_MU]]></mashupName>
+						</Row>
+					</Rows>
+				</ConfigurationTable>
+				<ConfigurationTable dataShapeName="" description="Configuration table for dynamic menus. Menu Items can be specified here and they will show up for the given menu name. " isMultiRow="true" name="MenuConfiguration" ordinal="0">
+					<DataShape>
+						<FieldDefinitions>
+							<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="" name="menuItemMashupName" ordinal="2"/>
+							<FieldDefinition aspect.isPrimaryKey="true" baseType="STRING" description="" name="menuName" ordinal="3"/>
+							<FieldDefinition aspect.isPrimaryKey="false" baseType="INTEGER" description="An optional field to indicate the ordering of the menu items" name="menuOrderPreference" ordinal="5"/>
+							<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="Localization table key for the optional section that groups like menus together" name="menuSectionKey" ordinal="4"/>
+							<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="Localization table key for the menu label" name="menuTitleKey" ordinal="1"/>
+							<FieldDefinition aspect.dataShape="PTC.Base.ComponentMenuConfiguration" aspect.isPrimaryKey="false" baseType="INFOTABLE" description="" name="submenu" ordinal="6"/>
+						</FieldDefinitions>
+					</DataShape>
+					<Rows>
+						<Row>
+							<menuItemMashupName><![CDATA[PTCTS.AssetMonitoring.AdminConfiguration_MU]]></menuItemMashupName>
+							<menuName><![CDATA[AdminMenu]]></menuName>
+							<menuOrderPreference>40</menuOrderPreference>
+							<menuSectionKey><![CDATA[PTCTS.AssetMonitoring.AdminMenuSectionKey]]></menuSectionKey>
+							<menuTitleKey><![CDATA[PTCTS.AssetMonitoring.AdminConfigurationMenu]]></menuTitleKey>
+							<submenu>
+								<infoTable>
+									<DataShape>
+										<FieldDefinitions>
+											<FieldDefinition aspect.isPrimaryKey="true" baseType="GUID" description="Unique identifier used to identify the menu" name="guid" ordinal="1"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="" name="menuItemMashupName" ordinal="3"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="" name="menuName" ordinal="4"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="INTEGER" description="An optional field to indicate the ordering of the menu items" name="menuOrderPreference" ordinal="6"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="Localization table key for the optional section that groups like menus together" name="menuSectionKey" ordinal="5"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="Localization table key for the menu label" name="menuTitleKey" ordinal="2"/>
+											<FieldDefinition aspect.dataShape="PTC.Base.ComponentMenuConfiguration" aspect.isPrimaryKey="false" baseType="INFOTABLE" description="" name="submenu" ordinal="7"/>
+										</FieldDefinitions>
+									</DataShape>
+									<Rows/>
+								</infoTable>
+							</submenu>
+						</Row>
+						<Row>
+							<menuItemMashupName><![CDATA[PTCTS.AssetMonitoring.Main_MU]]></menuItemMashupName>
+							<menuName><![CDATA[MasterMenuNavigation]]></menuName>
+							<menuOrderPreference>5</menuOrderPreference>
+							<menuSectionKey><![CDATA[{"imageURL": "PTCTS.UserInterface.MonitorIcon_MD"}]]></menuSectionKey>
+							<menuTitleKey><![CDATA[PTCTS.AssetMonitoring.MonitorMenu]]></menuTitleKey>
+							<submenu>
+								<infoTable>
+									<DataShape>
+										<FieldDefinitions>
+											<FieldDefinition aspect.isPrimaryKey="true" baseType="GUID" description="Unique identifier used to identify the menu" name="guid" ordinal="1"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="" name="menuItemMashupName" ordinal="3"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="" name="menuName" ordinal="4"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="INTEGER" description="An optional field to indicate the ordering of the menu items" name="menuOrderPreference" ordinal="6"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="Localization table key for the optional section that groups like menus together" name="menuSectionKey" ordinal="5"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="Localization table key for the menu label" name="menuTitleKey" ordinal="2"/>
+											<FieldDefinition aspect.dataShape="PTC.Base.ComponentMenuConfiguration" aspect.isPrimaryKey="false" baseType="INFOTABLE" description="" name="submenu" ordinal="7"/>
+										</FieldDefinitions>
+									</DataShape>
+									<Rows/>
+								</infoTable>
+							</submenu>
+						</Row>
+						<Row>
+							<menuItemMashupName><![CDATA[PTCTS.AssetMonitoring.Information_MU]]></menuItemMashupName>
+							<menuName><![CDATA[AssetDetailsMenu]]></menuName>
+							<menuOrderPreference>50</menuOrderPreference>
+							<menuSectionKey><![CDATA[PTCTS.AssetMonitoring.EntryPoint|GetMenuVisibilityInformation]]></menuSectionKey>
+							<menuTitleKey><![CDATA[PTCTS.AssetMonitoring.InformationMenu]]></menuTitleKey>
+							<submenu>
+								<infoTable>
+									<DataShape>
+										<FieldDefinitions>
+											<FieldDefinition aspect.isPrimaryKey="true" baseType="GUID" description="Unique identifier used to identify the menu" name="guid" ordinal="1"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="" name="menuItemMashupName" ordinal="3"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="" name="menuName" ordinal="4"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="INTEGER" description="An optional field to indicate the ordering of the menu items" name="menuOrderPreference" ordinal="6"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="Localization table key for the optional section that groups like menus together" name="menuSectionKey" ordinal="5"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="Localization table key for the menu label" name="menuTitleKey" ordinal="2"/>
+											<FieldDefinition aspect.dataShape="PTC.Base.ComponentMenuConfiguration" aspect.isPrimaryKey="false" baseType="INFOTABLE" description="" name="submenu" ordinal="7"/>
+										</FieldDefinitions>
+									</DataShape>
+									<Rows/>
+								</infoTable>
+							</submenu>
+						</Row>
+						<Row>
+							<menuItemMashupName><![CDATA[PTCTS.AssetMonitoring.AdminSetupModelLogic_MU]]></menuItemMashupName>
+							<menuName><![CDATA[AdminMenu]]></menuName>
+							<menuOrderPreference>50</menuOrderPreference>
+							<menuSectionKey><![CDATA[PTCTS.AssetMonitoring.AdminMenuSectionKey]]></menuSectionKey>
+							<menuTitleKey><![CDATA[PTCTS.AssetMonitoring.DemoDataMenu]]></menuTitleKey>
+							<submenu>
+								<infoTable>
+									<DataShape>
+										<FieldDefinitions>
+											<FieldDefinition aspect.isPrimaryKey="true" baseType="GUID" description="Unique identifier used to identify the menu" name="guid" ordinal="1"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="" name="menuItemMashupName" ordinal="3"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="" name="menuName" ordinal="4"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="INTEGER" description="An optional field to indicate the ordering of the menu items" name="menuOrderPreference" ordinal="6"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="Localization table key for the optional section that groups like menus together" name="menuSectionKey" ordinal="5"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="Localization table key for the menu label" name="menuTitleKey" ordinal="2"/>
+											<FieldDefinition aspect.dataShape="PTC.Base.ComponentMenuConfiguration" aspect.isPrimaryKey="false" baseType="INFOTABLE" description="" name="submenu" ordinal="7"/>
+										</FieldDefinitions>
+									</DataShape>
+									<Rows/>
+								</infoTable>
+							</submenu>
+						</Row>
+						<Row>
+							<menuItemMashupName><![CDATA[PTCTS.AssetMonitoring.AdminUpdateCardsTooltipsHeader_MU]]></menuItemMashupName>
+							<menuName><![CDATA[AdminMenu]]></menuName>
+							<menuOrderPreference>20</menuOrderPreference>
+							<menuSectionKey><![CDATA[PTCTS.AssetMonitoring.AdminMenuSectionKey]]></menuSectionKey>
+							<menuTitleKey><![CDATA[PTCTS.AssetMonitoring.AdminCardsTooltipHeaderMenu]]></menuTitleKey>
+							<submenu>
+								<infoTable>
+									<DataShape>
+										<FieldDefinitions>
+											<FieldDefinition aspect.isPrimaryKey="true" baseType="GUID" description="Unique identifier used to identify the menu" name="guid" ordinal="1"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="" name="menuItemMashupName" ordinal="3"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="" name="menuName" ordinal="4"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="INTEGER" description="An optional field to indicate the ordering of the menu items" name="menuOrderPreference" ordinal="6"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="Localization table key for the optional section that groups like menus together" name="menuSectionKey" ordinal="5"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="Localization table key for the menu label" name="menuTitleKey" ordinal="2"/>
+											<FieldDefinition aspect.dataShape="PTC.Base.ComponentMenuConfiguration" aspect.isPrimaryKey="false" baseType="INFOTABLE" description="" name="submenu" ordinal="7"/>
+										</FieldDefinitions>
+									</DataShape>
+									<Rows/>
+								</infoTable>
+							</submenu>
+						</Row>
+						<Row>
+							<menuItemMashupName><![CDATA[PTCTS.AssetMonitoring.ContainedCardsAndMapParler_MU]]></menuItemMashupName>
+							<menuName><![CDATA[MainPageMenu]]></menuName>
+							<menuOrderPreference>10</menuOrderPreference>
+							<menuSectionKey><![CDATA[{"menuIdentifier":"6da4a5d8-06c4-467b-9d84-558a1b4af192","imageURL": "PTCTS.AssetMonitoring.CardIcon_MD"}]]></menuSectionKey>
+							<menuTitleKey><![CDATA[PTCTS.AssetMonitoring.CardsAndMapMenu]]></menuTitleKey>
+							<submenu>
+								<infoTable>
+									<DataShape>
+										<FieldDefinitions>
+											<FieldDefinition aspect.isPrimaryKey="true" baseType="GUID" description="Unique identifier used to identify the menu" name="guid" ordinal="1"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="" name="menuItemMashupName" ordinal="3"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="" name="menuName" ordinal="4"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="INTEGER" description="An optional field to indicate the ordering of the menu items" name="menuOrderPreference" ordinal="6"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="Localization table key for the optional section that groups like menus together" name="menuSectionKey" ordinal="5"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="Localization table key for the menu label" name="menuTitleKey" ordinal="2"/>
+											<FieldDefinition aspect.dataShape="PTC.Base.ComponentMenuConfiguration" aspect.isPrimaryKey="false" baseType="INFOTABLE" description="" name="submenu" ordinal="7"/>
+										</FieldDefinitions>
+									</DataShape>
+									<Rows/>
+								</infoTable>
+							</submenu>
+						</Row>
+						<Row>
+							<menuItemMashupName><![CDATA[PTCTS.AssetMonitoring.ContainedMap_MU]]></menuItemMashupName>
+							<menuName><![CDATA[MainPageMenu]]></menuName>
+							<menuOrderPreference>20</menuOrderPreference>
+							<menuSectionKey><![CDATA[{"menuIdentifier":"972f1e04-155e-4ab5-a81a-1861bfa66e55","imageURL": "PTCTS.AssetMonitoring.MapViewIcon_MD"}]]></menuSectionKey>
+							<menuTitleKey><![CDATA[PTCTS.AssetMonitoring.MapMenu]]></menuTitleKey>
+							<submenu>
+								<infoTable>
+									<DataShape>
+										<FieldDefinitions>
+											<FieldDefinition aspect.isPrimaryKey="true" baseType="GUID" description="Unique identifier used to identify the menu" name="guid" ordinal="1"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="" name="menuItemMashupName" ordinal="3"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="" name="menuName" ordinal="4"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="INTEGER" description="An optional field to indicate the ordering of the menu items" name="menuOrderPreference" ordinal="6"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="Localization table key for the optional section that groups like menus together" name="menuSectionKey" ordinal="5"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="Localization table key for the menu label" name="menuTitleKey" ordinal="2"/>
+											<FieldDefinition aspect.dataShape="PTC.Base.ComponentMenuConfiguration" aspect.isPrimaryKey="false" baseType="INFOTABLE" description="" name="submenu" ordinal="7"/>
+										</FieldDefinitions>
+									</DataShape>
+									<Rows/>
+								</infoTable>
+							</submenu>
+						</Row>
+						<Row>
+							<menuItemMashupName><![CDATA[PTCTS.AssetMonitoring.ContainedAssetListParler_MU]]></menuItemMashupName>
+							<menuName><![CDATA[MainPageMenu]]></menuName>
+							<menuOrderPreference>30</menuOrderPreference>
+							<menuSectionKey><![CDATA[{"menuIdentifier":"18f7b403-e224-4a44-b09f-6972ac99488b","imageURL": "PTCTS.AssetMonitoring.ListIcon_MD"}]]></menuSectionKey>
+							<menuTitleKey><![CDATA[PTCTS.AssetMonitoring.ListMenu]]></menuTitleKey>
+							<submenu>
+								<infoTable>
+									<DataShape>
+										<FieldDefinitions>
+											<FieldDefinition aspect.isPrimaryKey="true" baseType="GUID" description="Unique identifier used to identify the menu" name="guid" ordinal="1"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="" name="menuItemMashupName" ordinal="3"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="" name="menuName" ordinal="4"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="INTEGER" description="An optional field to indicate the ordering of the menu items" name="menuOrderPreference" ordinal="6"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="Localization table key for the optional section that groups like menus together" name="menuSectionKey" ordinal="5"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="Localization table key for the menu label" name="menuTitleKey" ordinal="2"/>
+											<FieldDefinition aspect.dataShape="PTC.Base.ComponentMenuConfiguration" aspect.isPrimaryKey="false" baseType="INFOTABLE" description="" name="submenu" ordinal="7"/>
+										</FieldDefinitions>
+									</DataShape>
+									<Rows/>
+								</infoTable>
+							</submenu>
+						</Row>
+						<Row>
+							<menuItemMashupName><![CDATA[PTCTS.AssetMonitoring.ContainedCards_Mobile_MU]]></menuItemMashupName>
+							<menuName><![CDATA[MainPageMobileMenu]]></menuName>
+							<menuOrderPreference>10</menuOrderPreference>
+							<menuSectionKey><![CDATA[{"imageURL": "PTCTS.AssetMonitoring.CardIcon_MD"}]]></menuSectionKey>
+							<menuTitleKey><![CDATA[PTCTS.AssetMonitoring.Cards]]></menuTitleKey>
+							<submenu>
+								<infoTable>
+									<DataShape>
+										<FieldDefinitions>
+											<FieldDefinition aspect.isPrimaryKey="true" baseType="GUID" description="Unique identifier used to identify the menu" name="guid" ordinal="1"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="" name="menuItemMashupName" ordinal="3"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="" name="menuName" ordinal="4"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="INTEGER" description="An optional field to indicate the ordering of the menu items" name="menuOrderPreference" ordinal="6"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="Localization table key for the optional section that groups like menus together" name="menuSectionKey" ordinal="5"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="Localization table key for the menu label" name="menuTitleKey" ordinal="2"/>
+											<FieldDefinition aspect.dataShape="PTC.Base.ComponentMenuConfiguration" aspect.isPrimaryKey="false" baseType="INFOTABLE" description="" name="submenu" ordinal="7"/>
+										</FieldDefinitions>
+									</DataShape>
+									<Rows/>
+								</infoTable>
+							</submenu>
+						</Row>
+						<Row>
+							<menuItemMashupName><![CDATA[PTCTS.AssetMonitoring.ContainedAssetList_MU]]></menuItemMashupName>
+							<menuName><![CDATA[MainPageMobileMenu]]></menuName>
+							<menuOrderPreference>20</menuOrderPreference>
+							<menuSectionKey><![CDATA[{"imageURL": "PTCTS.AssetMonitoring.ListIcon_MD"}]]></menuSectionKey>
+							<menuTitleKey><![CDATA[PTCTS.AssetMonitoring.ListMenu]]></menuTitleKey>
+							<submenu>
+								<infoTable>
+									<DataShape>
+										<FieldDefinitions>
+											<FieldDefinition aspect.isPrimaryKey="true" baseType="GUID" description="Unique identifier used to identify the menu" name="guid" ordinal="1"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="" name="menuItemMashupName" ordinal="3"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="" name="menuName" ordinal="4"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="INTEGER" description="An optional field to indicate the ordering of the menu items" name="menuOrderPreference" ordinal="6"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="Localization table key for the optional section that groups like menus together" name="menuSectionKey" ordinal="5"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="Localization table key for the menu label" name="menuTitleKey" ordinal="2"/>
+											<FieldDefinition aspect.dataShape="PTC.Base.ComponentMenuConfiguration" aspect.isPrimaryKey="false" baseType="INFOTABLE" description="" name="submenu" ordinal="7"/>
+										</FieldDefinitions>
+									</DataShape>
+									<Rows/>
+								</infoTable>
+							</submenu>
+						</Row>
+						<Row>
+							<menuItemMashupName><![CDATA[PTCTS.AssetMonitoring.AdminSettings_MU]]></menuItemMashupName>
+							<menuName><![CDATA[AdminMenu]]></menuName>
+							<menuOrderPreference>45</menuOrderPreference>
+							<menuSectionKey><![CDATA[PTCTS.AssetMonitoring.AdminMenuSectionKey]]></menuSectionKey>
+							<menuTitleKey><![CDATA[PTCTS.AssetMonitoring.AdminSettingsMenu]]></menuTitleKey>
+							<submenu>
+								<infoTable>
+									<DataShape>
+										<FieldDefinitions>
+											<FieldDefinition aspect.isPrimaryKey="true" baseType="GUID" description="Unique identifier used to identify the menu" name="guid" ordinal="1"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="" name="menuItemMashupName" ordinal="3"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="" name="menuName" ordinal="4"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="INTEGER" description="An optional field to indicate the ordering of the menu items" name="menuOrderPreference" ordinal="6"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="Localization table key for the optional section that groups like menus together" name="menuSectionKey" ordinal="5"/>
+											<FieldDefinition aspect.isPrimaryKey="false" baseType="STRING" description="Localization table key for the menu label" name="menuTitleKey" ordinal="2"/>
+											<FieldDefinition aspect.dataShape="PTC.Base.ComponentMenuConfiguration" aspect.isPrimaryKey="false" baseType="INFOTABLE" description="" name="submenu" ordinal="7"/>
+										</FieldDefinitions>
+									</DataShape>
+									<Rows/>
+								</infoTable>
+							</submenu>
+						</Row>
+					</Rows>
+				</ConfigurationTable>
+				<ConfigurationTable dataShapeName="" description="Used to specify the mashups available for display on the data values pages." isMultiRow="true" name="PropertyDisplayMashups" ordinal="0">
+					<DataShape>
+						<FieldDefinitions>
+							<FieldDefinition aspect.isPrimaryKey="false" baseType="BASETYPENAME" description="Name of the base type this mashup applies to" name="baseTypeName" ordinal="3"/>
+							<FieldDefinition aspect.defaultValue="250.0" aspect.isPrimaryKey="false" baseType="NUMBER" description="Height of the mashup to be passed on to the collection" name="mashupHeight" ordinal="8"/>
+							<FieldDefinition aspect.isPrimaryKey="false" baseType="MASHUPNAME" description="Name of the mashup used to render the data property" name="mashupName" ordinal="2"/>
+							<FieldDefinition aspect.defaultValue="250.0" aspect.isPrimaryKey="false" baseType="NUMBER" description="Width of the mashup to be passed on to the collection" name="mashupWidth" ordinal="9"/>
+							<FieldDefinition aspect.isPrimaryKey="true" baseType="STRING" description="Display Name of the mashup for selection in data properties" name="name" ordinal="1"/>
+							<FieldDefinition aspect.isPrimaryKey="false" baseType="BOOLEAN" description="" name="SystemUseOnly" ordinal="10"/>
+							<FieldDefinition aspect.defaultValue="false" aspect.isPrimaryKey="false" baseType="BOOLEAN" description="" name="usesLoggedValues" ordinal="7"/>
+							<FieldDefinition aspect.isPrimaryKey="false" baseType="BOOLEAN" description="This field designates that the mashup requires a range setting including minimum and maximum" name="usesRange" ordinal="4"/>
+							<FieldDefinition aspect.isPrimaryKey="false" baseType="BOOLEAN" description="This field designates that the mashup requires a threshold and threshold compare setting" name="usesThreshold" ordinal="6"/>
+							<FieldDefinition aspect.isPrimaryKey="false" baseType="BOOLEAN" description="This field designates that the mashup requires a units setting" name="usesUnits" ordinal="5"/>
+						</FieldDefinitions>
+					</DataShape>
+					<Rows/>
+				</ConfigurationTable>
+				<ConfigurationTable dataShapeName="" description="Configuration table for any Things that need to be configured. This allows for OOTB things to be customized, and the new version that should be used can be configured here" isMultiRow="true" name="ThingConfiguration" ordinal="0">
+					<DataShape>
+						<FieldDefinitions>
+							<FieldDefinition aspect.isPrimaryKey="true" baseType="STRING" description="unique identifier used to identify the thing or mashup that is being configured" name="id" ordinal="1"/>
+							<FieldDefinition aspect.isPrimaryKey="false" baseType="THINGNAME" description="Name of the Thing entity or Mashup entity that is to be configured" name="thingName" ordinal="2"/>
+						</FieldDefinitions>
+					</DataShape>
+					<Rows/>
+				</ConfigurationTable>
+			</ConfigurationTables>
+			<ThingShape>
+				<PropertyDefinitions/>
+				<ServiceDefinitions/>
+				<EventDefinitions/>
+				<ServiceMappings/>
+				<ServiceImplementations/>
+				<Subscriptions/>
+			</ThingShape>
+			<PropertyBindings/>
+			<RemotePropertyBindings/>
+			<RemoteServiceBindings/>
+			<RemoteEventBindings/>
+			<AlertConfigurations/>
+			<ImplementedShapes/>
+			<ThingProperties>
+				<PTCTS_AssetMonitoring_CompareMenuIcon>
+					<Value><![CDATA[PTCTS.UserInterface.CompareIcon_MD]]></Value>
+					<Timestamp>1970-01-01T00:00:00.000Z</Timestamp>
+					<Quality>UNKNOWN</Quality>
+				</PTCTS_AssetMonitoring_CompareMenuIcon>
+				<PTCTS_AssetMonitoring_MonitorMenuIcon>
+					<Value><![CDATA[PTCTS.UserInterface.MonitorIcon_MD]]></Value>
+					<Timestamp>1970-01-01T00:00:00.000Z</Timestamp>
+					<Quality>UNKNOWN</Quality>
+				</PTCTS_AssetMonitoring_MonitorMenuIcon>
+			</ThingProperties>
+			<ConfigurationChanges>
+				<ConfigurationChange changeAction="CREATE" changeReason="Importing Extension Package Metadata" timestamp="2026-06-29T05:37:07.139Z" user="SuperUser"/>
+				<ConfigurationChange changeAction="MODIFY" changeReason="" timestamp="2026-06-29T05:37:28.806Z" user="Administrator"/>
+				<ConfigurationChange changeAction="MODIFY" changeReason="configuration : MenuConfiguration : updated
+" timestamp="2026-06-29T05:51:00.739Z" user="Administrator"/>
+				<ConfigurationChange changeAction="MODIFY" changeReason="configuration : MenuConfiguration : updated
+" timestamp="2026-06-29T06:39:40.043Z" user="Administrator"/>
+				<ConfigurationChange changeAction="MODIFY" changeReason="configuration : MashupConfiguration : updated
+" timestamp="2026-06-30T04:06:47.508Z" user="Administrator"/>
+			</ConfigurationChanges>
+		</Thing>
+	</Things>
+</Entities>

@@ -1,0 +1,1765 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Entities build="b390" majorVersion="10" minorVersion="1" modelPersistenceProviderPackage="PostgresPersistenceProviderPackage" revision="2" schemaVersion="1210" universal="password">
+	<StyleDefinitions/>
+	<Networks/>
+	<PersistenceProviderPackages/>
+	<QueueProviders/>
+	<Mashups/>
+	<ScriptFunctionLibraries/>
+	<Projects>
+		<Project artifactId="" aspect.projectType="Component" dependsOn="{&quot;extensions&quot;:&quot;parler-ui-widget:0.1.92,parler-agent:0.1.224,PTCTS.UserInterface:1.1.300000198,GoogleWidgets_ExtensionPackage:3.1.7,PTCTS.ConfigurationManagement:1.1.300000198,PTCTS.AssetMonitoring:1.1.300000198,PTCTS.UIComponents:1.1.300000198&quot;,&quot;projects&quot;:&quot;ParlerAgentBasic:1.0.0&quot;}" description="" documentationContent="" groupId="" homeMashup="" lastModifiedDate="2026-07-16T17:25:35.051Z" minPlatformVersion="" name="Parler_SCPA_Guidance" packageVersion="1.0.0" projectName="Parler_SCPA_Guidance" publishResult="" state="DRAFT" tags="">
+			<Owner name="Administrator" type="User"/>
+			<avatar/>
+			<DesignTimePermissions>
+				<Create/>
+				<Read/>
+				<Update/>
+				<Delete/>
+				<Metadata/>
+			</DesignTimePermissions>
+			<RunTimePermissions/>
+			<VisibilityPermissions>
+				<Visibility/>
+			</VisibilityPermissions>
+			<ConfigurationTableDefinitions/>
+			<ConfigurationTables/>
+			<ConfigurationChanges/>
+		</Project>
+	</Projects>
+	<Users/>
+	<DirectoryServices/>
+	<Widgets/>
+	<MediaEntities/>
+	<Groups/>
+	<PersistenceProviders/>
+	<ModelTags/>
+	<LocalizationTables/>
+	<Dashboards/>
+	<StyleThemes/>
+	<DataShapes/>
+	<Things>
+		<Thing description="" documentationContent="" effectiveThingPackage="AgentThing" enabled="true" homeMashup="" identifier="" inheritedValueStream="" lastModifiedDate="2026-07-16T17:28:51.021Z" name="SCPA_Demo_Agent" projectName="Parler_SCPA_Guidance" published="false" tags="" thingTemplate="AIAgent" valueStream="">
+			<Owner name="Administrator" type="User"/>
+			<avatar/>
+			<DesignTimePermissions>
+				<Create/>
+				<Read/>
+				<Update/>
+				<Delete/>
+				<Metadata/>
+			</DesignTimePermissions>
+			<RunTimePermissions/>
+			<VisibilityPermissions>
+				<Visibility/>
+			</VisibilityPermissions>
+			<ConfigurationTableDefinitions/>
+			<ConfigurationTables>
+				<ConfigurationTable dataShapeName="" description="Agent Behavior Settings" isMultiRow="false" name="AgentSettings" ordinal="0">
+					<DataShape>
+						<FieldDefinitions>
+							<FieldDefinition aspect.defaultValue="false" baseType="BOOLEAN" description="When true, legacy discover_services and get_service_definition are included in the merged LLM tool list; discover_properties remains executor-only for merge. Default false. See docs/agent/legacy-discovery-executor-only.md." name="advertiseLegacyServiceDiscoveryTools" ordinal="16"/>
+							<FieldDefinition aspect.defaultValue="3600000.0" baseType="NUMBER" description="Total agent loop timeout in milliseconds" name="agentTimeout" ordinal="4"/>
+							<FieldDefinition aspect.defaultValue="false" baseType="BOOLEAN" description="When true, the agent may in the future auto-load skill bodies when the user message matches skill metadata (reserved). When false (default), skill full text loads only via /SkillName in the message or the get_agent_skill tool." name="allowImplicitInvocation" ordinal="8"/>
+							<FieldDefinition aspect.defaultValue="true" baseType="BOOLEAN" description="Append bundled tool-routing instructions (query_entities, query_entities_by_taxonomy, EntityServices, spotlight) to the system prompt sent to the LLM. Repo markdown like AGENT-CONTEXT.md is not auto-loaded." name="appendBuiltInToolRoutingGuide" ordinal="6"/>
+							<FieldDefinition aspect.friendlyName="Artifact Cache File Repository" aspect.thingTemplate="FileRepository" baseType="THINGNAME" description="Dedicated FileRepository Thing for Parler artifact cache payloads. Empty fails closed; there is no in-memory fallback." name="artifactCacheFileRepository" ordinal="29"/><FieldDefinition aspect.friendlyName="Configuration Repository" aspect.thingTemplate="FileRepository" baseType="THINGNAME" description="File Repository containing AgentThing configuration files (skills, taxonomy Markdown, policies, extended tools). Empty disables repository-backed configuration without log." name="configurationRepository" ordinal="12"/>
+							<FieldDefinition aspect.defaultValue="false" baseType="BOOLEAN" description="When true, advertise internal Java search_document_chunks, get_document_chunk, and resolve_document_set built-ins. When false, do not register those names (extended tools may use the same names). Default false. See docs/agent/document-chunk-tools.md." name="documentKnowledgeBuiltinsEnabled" ordinal="17"/>
+							<FieldDefinition aspect.defaultValue="6000" baseType="INTEGER" description="Maximum markdown chars returned by get_document_chunk. Clamped 500..500000; default 6000." name="documentKnowledgeChunkMaxChars" ordinal="26"/>
+							<FieldDefinition aspect.defaultValue="300" baseType="INTEGER" description="JVM cache TTL for the document-knowledge index. Clamped 30..86400; default 300." name="documentKnowledgeIndexTtlSeconds" ordinal="20"/>
+							<FieldDefinition aspect.defaultValue="10000" baseType="INTEGER" description="v1 cap for total indexed chunks. Clamped 1..1000000; default 10000." name="documentKnowledgeMaxChunks" ordinal="22"/>
+							<FieldDefinition aspect.defaultValue="100" baseType="INTEGER" description="v1 scan cap for package manifests. Clamped 1..10000; default 100." name="documentKnowledgeMaxDocuments" ordinal="21"/>
+							<FieldDefinition aspect.friendlyName="Document Knowledge Repository" aspect.thingTemplate="FileRepository" baseType="THINGNAME" description="FileRepository Thing containing document-knowledge packages. Empty disables repository-backed document tools. See docs/agent/document-chunk-tools.md." name="documentKnowledgeRepository" ordinal="18"/>
+							<FieldDefinition aspect.defaultValue="/document-knowledge" baseType="STRING" description="Root folder below documentKnowledgeRepository for packages. Default /document-knowledge." name="documentKnowledgeRootPath" ordinal="19"/>
+							<FieldDefinition aspect.defaultValue="5" baseType="INTEGER" description="Default search result count. Clamped 1..100; default 5." name="documentKnowledgeSearchDefaultLimit" ordinal="23"/>
+							<FieldDefinition aspect.defaultValue="10" baseType="INTEGER" description="Maximum search result count. Clamped to searchDefaultLimit..100; default 10." name="documentKnowledgeSearchMaxLimit" ordinal="24"/>
+							<FieldDefinition aspect.defaultValue="400" baseType="INTEGER" description="Maximum chars per search-match snippet. Clamped 50..10000; default 400." name="documentKnowledgeSearchSnippetMaxChars" ordinal="25"/>
+							<FieldDefinition aspect.defaultValue="false" baseType="BOOLEAN" description="When true, disable document_search-only turn tool narrowing (D2). Default false (narrowing on). Set true to revert to the full merged tool list. TWX unset/false both mean not disabled. See docs/operations/doc-index-enhance.md D2." name="documentTurnToolNarrowingDisabled" ordinal="27"/>
+							<FieldDefinition aspect.defaultValue="true" baseType="BOOLEAN" description="Enable built-in ThingWorx tools (invoke_service, describe_entity_schema, discover_thing_members, query_entities, …)" name="enableBuiltInTools" ordinal="7"/>
+							<FieldDefinition aspect.friendlyName="Export File Repository" aspect.thingTemplate="FileRepository" baseType="THINGNAME" description="Optional FileRepository Thing for Parler list-class table CSV export when totalRows exceeds tableCsvExportRowThreshold or the wire carries a partial sample (see docs/ui/table-view-solution.md §5). Empty disables export." name="exportFileRepository" ordinal="10"/>
+							<FieldDefinition aspect.defaultValue="false" baseType="BOOLEAN" description="When true, DEBUG-tier PARLER_HITL decision_rejected lines also log at WARN for this agent (lab). Restart this Thing after changing; save-only may not refresh registration. See docs/agent/AGENT-ALWAYSON-TWX.md and ParlerHitlAuditLog." name="hitlAuditDebugAll" ordinal="9"/>
+							<FieldDefinition aspect.friendlyName="LLM API Provider" aspect.thingShape="LLMAPIProviderShape" baseType="THINGNAME" description="LLM API Provider Thing (implements LLMAPIProviderShape). Required for Chat/Parler; endpoint, credentials, and model/deployment live on that Thing (see docs/agent/llm-api-provider.md §5.9)." name="llmApiProviderRef" ordinal="0"/>
+							<FieldDefinition aspect.defaultValue="750000" baseType="INTEGER" description="Upper bound on model-facing request size for context budget planning (characters). Provider-specific limits are still applied as min(providerLimit*3.5, this value). See docs/agent/context-compaction.md. Clamped 10_000..2_000_000." name="llmContextMaxChars" ordinal="15"/>
+							<FieldDefinition aspect.defaultValue="10" baseType="INTEGER" description="Max agent loop iterations (tool call rounds). Safety limit." name="maxIterations" ordinal="3"/>
+							<FieldDefinition aspect.defaultValue="-1" baseType="INTEGER" description="Max tokens in LLM response. -1 for provider default." name="maxTokens" ordinal="2"/>
+							<FieldDefinition aspect.defaultValue="You are a ThingWorx AI assistant. Use the available tools to help the user interact with the ThingWorx platform." baseType="TEXT" description="Default system prompt. Can be overridden per Chat call." name="systemPrompt" ordinal="5"/>
+							<FieldDefinition aspect.defaultValue="50000000" baseType="INTEGER" description="Max UTF-16 code units (Java String length) for one large-table CSV before Parler skips export (skipped_limit). Platform SaveText still applies; this caps agent-side CSV materialization. Clamped 1_000_000..200_000_000." name="tableCsvExportMaxChars" ordinal="14"/>
+							<FieldDefinition aspect.defaultValue="200" baseType="INTEGER" description="When a table's totalRows exceeds this integer, or totalRows is greater than the inline row count, the agent attempts UTF-8 CSV export via SaveText on exportFileRepository before emitting type:table." name="tableCsvExportRowThreshold" ordinal="11"/>
+							<FieldDefinition aspect.defaultValue="full_table" baseType="STRING" description="Controls LLM-visible taxonomy prompt injection: full_table (default), resolver_guidance_only, or none. See docs/agent/taxonomy.md." name="taxonomyPromptInjection" ordinal="13"/>
+							<FieldDefinition aspect.defaultValue="0.1" baseType="NUMBER" description="Sampling temperature (0.0–2.0). Lower = more deterministic." name="temperature" ordinal="1"/>
+							<FieldDefinition aspect.defaultValue="off" baseType="STRING" description="Tool-schema admission mode: off (default; advertise all tools), narrow (drop irrelevant tool buckets up front by deterministic host-context/intent signals, keep the core set), or lazy (opt-in; advertise only the core set plus a load_tool_schemas meta-tool whose catalog lets the model load tool schemas on demand). Unknown/blank means off. See docs/operations/tool-schema-admission-control.md." name="toolAdmissionMode" ordinal="28"/>
+						</FieldDefinitions>
+					</DataShape>
+					<Rows>
+						<Row>
+							<advertiseLegacyServiceDiscoveryTools>false</advertiseLegacyServiceDiscoveryTools>
+							<agentTimeout>3600000.0</agentTimeout>
+							<allowImplicitInvocation>true</allowImplicitInvocation>
+							<appendBuiltInToolRoutingGuide>true</appendBuiltInToolRoutingGuide>
+							<artifactCacheFileRepository><![CDATA[AIArtifactRepository]]></artifactCacheFileRepository><configurationRepository><![CDATA[ConfigurationRepository]]></configurationRepository>
+							<documentKnowledgeBuiltinsEnabled>false</documentKnowledgeBuiltinsEnabled>
+							<documentKnowledgeChunkMaxChars>6000</documentKnowledgeChunkMaxChars>
+							<documentKnowledgeIndexTtlSeconds>300</documentKnowledgeIndexTtlSeconds>
+							<documentKnowledgeMaxChunks>10000</documentKnowledgeMaxChunks>
+							<documentKnowledgeMaxDocuments>100</documentKnowledgeMaxDocuments>
+							<documentKnowledgeRepository/>
+							<documentKnowledgeRootPath><![CDATA[/document-knowledge]]></documentKnowledgeRootPath>
+							<documentKnowledgeSearchDefaultLimit>5</documentKnowledgeSearchDefaultLimit>
+							<documentKnowledgeSearchMaxLimit>10</documentKnowledgeSearchMaxLimit>
+							<documentKnowledgeSearchSnippetMaxChars>400</documentKnowledgeSearchSnippetMaxChars>
+							<documentTurnToolNarrowingDisabled>false</documentTurnToolNarrowingDisabled>
+							<enableBuiltInTools>true</enableBuiltInTools>
+							<exportFileRepository><![CDATA[AIDocRepository]]></exportFileRepository>
+							<hitlAuditDebugAll>true</hitlAuditDebugAll>
+							<llmApiProviderRef><![CDATA[AzureOpenAI54]]></llmApiProviderRef>
+							<llmContextMaxChars>750000</llmContextMaxChars>
+							<maxIterations>10</maxIterations>
+							<maxTokens>-1</maxTokens>
+							<systemPrompt><![CDATA[You are a ThingWorx AI assistant. Use the available tools to help the user interact with the ThingWorx platform.]]></systemPrompt>
+							<tableCsvExportMaxChars>50000000</tableCsvExportMaxChars>
+							<tableCsvExportRowThreshold>200</tableCsvExportRowThreshold>
+							<taxonomyPromptInjection><![CDATA[full_table]]></taxonomyPromptInjection>
+							<temperature>0.1</temperature>
+							<toolAdmissionMode><![CDATA[off]]></toolAdmissionMode>
+						</Row>
+					</Rows>
+				</ConfigurationTable>
+			</ConfigurationTables>
+			<ThingShape>
+				<PropertyDefinitions/>
+				<ServiceDefinitions/>
+				<EventDefinitions/>
+				<ServiceMappings/>
+				<ServiceImplementations>
+					<ServiceImplementation description="" handlerName="Script" name="GetAssetList">
+						<ConfigurationTables>
+							<ConfigurationTable dataShapeName="" description="" isMultiRow="false" name="Script" ordinal="0">
+								<DataShape>
+									<FieldDefinitions>
+										<FieldDefinition baseType="STRING" description="code" name="code" ordinal="0"/>
+									</FieldDefinitions>
+								</DataShape>
+								<Rows>
+									<Row>
+										<code><![CDATA[let query_result=me.GetChildNodes({
+	id: id /* STRING */
+});
+let result=DataShapes["EntityList"].CreateValues();
+let assetList=[];
+let IAMEntryPoint = "PTCTS.IAMAdmin.EntryPoint";
+	let IAMManager = Things[IAMEntryPoint].GetConfiguredComponentManager();
+
+query_result.rows.toArray().forEach(row=>{
+  let thingName=row['id'];
+  if (Things[thingName] && Things[thingName].ImplementsShape({
+						thingShapeName: "PTCTS.IAMAdmin.ModelLogic_TS"
+	})) {
+    let thisAssociationName = thingName; // currently processing an association
+					var associationThingGroup = Things[thingName].PTCIAMAssociationThingGroup;
+					if (associationThingGroup && ThingGroups[associationThingGroup]) {
+						var associationNodes = Things[IAMManager].GetThingGroupThingMembers({
+							thingGroupName: associationThingGroup
+						});
+						associationNodes.rows.toArray().forEach(associationNode =>{
+							var thingName = associationNode.name;
+							if (thisAssociationName !== thingName) {
+								// Include without configuration check
+								if (assetList.includes(thingName) == false) {
+									let newEntry = {};
+									newEntry.name = thingName; // STRING
+									newEntry.description=Things[thingName].PTCDisplayName;
+									result.AddRow(newEntry);
+									assetList.push(thingName);
+								}
+//							} else {
+//								// Only add associations to the results if they are configured in the asset model
+//								// This is unusual, and only happens when you want to include assoctions as assets for display
+//								if (assetList.includes(thingName) == false && me.IsConfiguredThing({
+//										thingName: thingName
+//									})) {
+//									let newEntry = {};
+//									newEntry.name = thingName; // STRING
+//									newEntry.descriptipn=Things[thingName].PTCDisplayName;
+//									result.AddRow(newEntry);
+//									assetList.push(thingName);
+//								}
+							}
+						});
+					}
+  }
+})]]></code>
+									</Row>
+								</Rows>
+							</ConfigurationTable>
+						</ConfigurationTables>
+					</ServiceImplementation>
+					<ServiceImplementation description="" handlerName="Script" name="GetChildNodes">
+						<ConfigurationTables>
+							<ConfigurationTable dataShapeName="" description="" isMultiRow="false" name="Script" ordinal="0">
+								<DataShape>
+									<FieldDefinitions>
+										<FieldDefinition baseType="STRING" description="code" name="code" ordinal="0"/>
+									</FieldDefinitions>
+								</DataShape>
+								<Rows>
+									<Row>
+										<code><![CDATA[let result=DataShapes["HierarchyNode_DS"].CreateValues();
+let network = Things["PTCTS.IAMAdmin.Manager"].GetConfiguredNetwork({
+	projectName: undefined /* STRING */
+});
+let query_result = Networks[network].GetSubNetworkConnections({
+	maxDepth: undefined, /* NUMBER */
+    start: id
+});
+
+query_result.rows.toArray().forEach(row=>{
+  let thing_name=row['to'];
+  let newEntry={};
+  newEntry.id=thing_name;
+  newEntry.name=Things[thing_name].PTCDisplayName;
+  result.AddRow(newEntry);
+});]]></code>
+									</Row>
+								</Rows>
+							</ConfigurationTable>
+						</ConfigurationTables>
+					</ServiceImplementation>
+					<ServiceImplementation description="" handlerName="Script" name="GetFlattenNameDescription">
+						<ConfigurationTables>
+							<ConfigurationTable dataShapeName="" description="" isMultiRow="false" name="Script" ordinal="0">
+								<DataShape>
+									<FieldDefinitions>
+										<FieldDefinition baseType="STRING" description="code" name="code" ordinal="0"/>
+									</FieldDefinitions>
+								</DataShape>
+								<Rows>
+									<Row>
+										<code><![CDATA[let result=DataShapes["HierarchyNode_DS"].CreateValues();
+let network = Things["PTCTS.IAMAdmin.Manager"].GetConfiguredNetwork({
+	projectName: undefined /* STRING */
+});
+let query_result = Networks[network].GetNetworkConnections({
+	maxDepth: undefined /* NUMBER */
+});
+
+query_result.rows.toArray().forEach(row=>{
+  let thing_name=row['to'];
+  let newEntry={};
+  newEntry.id=thing_name;
+  newEntry.name=Things[thing_name].PTCDisplayName;
+  result.AddRow(newEntry);
+});]]></code>
+									</Row>
+								</Rows>
+							</ConfigurationTable>
+						</ConfigurationTables>
+					</ServiceImplementation>
+					<ServiceImplementation description="" handlerName="Script" name="GetRootNode">
+						<ConfigurationTables>
+							<ConfigurationTable dataShapeName="" description="" isMultiRow="false" name="Script" ordinal="0">
+								<DataShape>
+									<FieldDefinitions>
+										<FieldDefinition baseType="STRING" description="code" name="code" ordinal="0"/>
+									</FieldDefinitions>
+								</DataShape>
+								<Rows>
+									<Row>
+										<code><![CDATA[// result: STRING
+let network = Things["PTCTS.IAMAdmin.Manager"].GetConfiguredNetwork({
+	projectName: undefined /* STRING */
+});
+// var network="PTCTDD.Cellfab.AssociationNetwork_NW";
+
+// result: INFOTABLE dataShape: "NetworkConnection"
+let query_result = Networks[network].GetNetworkConnections({
+	maxDepth: 1 /* NUMBER */
+});
+
+let result=DataShapes["HierarchyNode_DS"].CreateValues();
+query_result.rows.toArray().forEach(row=>{
+  let thing_name=row['to'];
+  let newEntry = {};
+  newEntry.id=thing_name;
+  newEntry.name=Things[thing_name].PTCDisplayName;
+  result.AddRow(newEntry);
+});]]></code>
+									</Row>
+								</Rows>
+							</ConfigurationTable>
+						</ConfigurationTables>
+					</ServiceImplementation>
+					<ServiceImplementation description="" handlerName="Script" name="ResolveNetworkID">
+						<ConfigurationTables>
+							<ConfigurationTable dataShapeName="" description="" isMultiRow="false" name="Script" ordinal="0">
+								<DataShape>
+									<FieldDefinitions>
+										<FieldDefinition baseType="STRING" description="code" name="code" ordinal="0"/>
+									</FieldDefinitions>
+								</DataShape>
+								<Rows>
+									<Row>
+										<code><![CDATA[//this service will be optimized from 2 sides in the future:
+//1. using cachething to cache the flattened name description infotable;
+//2. using regex to search the name
+
+let result=DataShapes["HierarchyNode_DS"].CreateValues();
+
+// result: INFOTABLE dataShape: "HierarchyNode_DS"
+let query_result = me.GetFlattenNameDescription();
+
+query_result.rows.toArray().forEach(row=>{
+  let newEntry={};
+  if(row.name===name){
+    newEntry.id=row.id;
+    newEntry.name=row.name;
+    result.AddRow(newEntry);
+  }
+  
+});]]></code>
+									</Row>
+								</Rows>
+							</ConfigurationTable>
+						</ConfigurationTables>
+					</ServiceImplementation>
+				</ServiceImplementations>
+				<Subscriptions/>
+			</ThingShape>
+			<PropertyBindings/>
+			<RemotePropertyBindings/>
+			<RemoteServiceBindings/>
+			<RemoteEventBindings/>
+			<AlertConfigurations/>
+			<ImplementedShapes/>
+			<ThingProperties/>
+			<ConfigurationChanges/>
+		</Thing>
+		<Thing description="" documentationContent="" effectiveThingPackage="AzureOpenAIChatV5Provider" enabled="true" homeMashup="" identifier="" inheritedValueStream="" lastModifiedDate="2026-07-15T18:39:25.411Z" name="AzureFoundryGPT54" projectName="Parler_SCPA_Guidance" published="false" tags="" thingTemplate="AzureOpenAIChatV5Provider" valueStream="">
+			<Owner name="Administrator" type="User"/>
+			<avatar/>
+			<DesignTimePermissions>
+				<Create/>
+				<Read/>
+				<Update/>
+				<Delete/>
+				<Metadata/>
+			</DesignTimePermissions>
+			<RunTimePermissions/>
+			<VisibilityPermissions>
+				<Visibility/>
+			</VisibilityPermissions>
+			<ConfigurationTableDefinitions/>
+			<ConfigurationTables>
+				<ConfigurationTable dataShapeName="" description="Azure OpenAI Chat Completions v5 settings" isMultiRow="false" name="AzureOpenAIChatV5Settings" ordinal="0">
+					<DataShape>
+						<FieldDefinitions>
+							<FieldDefinition baseType="PASSWORD" description="Azure OpenAI API key" name="apiKey" ordinal="1"/>
+							<FieldDefinition aspect.defaultValue="2025-01-01-preview" baseType="STRING" description="Azure api-version query param" name="apiVersion" ordinal="3"/>
+							<FieldDefinition baseType="STRING" description="Azure deployment name" name="deployment" ordinal="2"/>
+							<FieldDefinition baseType="STRING" description="Azure resource endpoint" name="endpoint" ordinal="0"/>
+							<FieldDefinition aspect.defaultValue="8192" baseType="INTEGER" description="Default max_completion_tokens (includes reasoning tokens on v5)" name="maxCompletionTokens" ordinal="5"/>
+							<FieldDefinition aspect.defaultValue="low" baseType="STRING" description="Default reasoning_effort" name="reasoningEffort" ordinal="6"/>
+							<FieldDefinition aspect.defaultValue="120000" baseType="INTEGER" description="" name="timeoutMs" ordinal="4"/>
+						</FieldDefinitions>
+					</DataShape>
+					<Rows>
+						<Row>
+							<apiKey/>
+							<apiVersion><![CDATA[2025-01-01-preview]]></apiVersion>
+							<deployment><![CDATA[gpt-5.4]]></deployment>
+							<endpoint><![CDATA[https://your-resource.openai.azure.com/]]></endpoint>
+							<maxCompletionTokens>4096</maxCompletionTokens>
+							<reasoningEffort><![CDATA[low]]></reasoningEffort>
+							<timeoutMs>120000</timeoutMs>
+						</Row>
+					</Rows>
+				</ConfigurationTable>
+				<ConfigurationTable dataShapeName="" description="Provider-local token/RPM/concurrency admission control" isMultiRow="false" name="LLMAPIProviderRateControl" ordinal="0">
+					<DataShape>
+						<FieldDefinitions>
+							<FieldDefinition aspect.defaultValue="1.15" baseType="NUMBER" description="Multiplier on estimated tokens before admission (minimum 1.0)" name="estimateSafetyMultiplier" ordinal="6"/>
+							<FieldDefinition aspect.defaultValue="false" baseType="BOOLEAN" description="Log every allow/wait decision; rejections are always logged" name="logAdmissions" ordinal="8"/>
+							<FieldDefinition aspect.defaultValue="0" baseType="INTEGER" description="Max in-flight upstream calls; 0 disables concurrency checks" name="maxConcurrentRequests" ordinal="3"/>
+							<FieldDefinition aspect.defaultValue="0" baseType="INTEGER" description="Bounded wait for capacity; 0 means fail fast" name="maxLocalWaitMs" ordinal="4"/>
+							<FieldDefinition aspect.defaultValue="0" baseType="INTEGER" description="Hard cap per reservation; 0 means tokensPerMinuteLimit when TPM enabled" name="maxSingleRequestTokens" ordinal="7"/>
+							<FieldDefinition aspect.defaultValue="disabled" baseType="STRING" description="disabled, observe, or enforce" name="rateControlMode" ordinal="0"/>
+							<FieldDefinition aspect.defaultValue="0" baseType="INTEGER" description="Request bucket capacity; 0 disables RPM checks" name="requestsPerMinuteLimit" ordinal="2"/>
+							<FieldDefinition baseType="STRING" description="Blank uses Provider template default: input_only or input_plus_requested_output" name="tokenReserveStrategy" ordinal="5"/>
+							<FieldDefinition aspect.defaultValue="0" baseType="INTEGER" description="Token bucket capacity; 0 disables token checks" name="tokensPerMinuteLimit" ordinal="1"/>
+						</FieldDefinitions>
+					</DataShape>
+					<Rows>
+						<Row>
+							<estimateSafetyMultiplier>1.15</estimateSafetyMultiplier>
+							<logAdmissions>false</logAdmissions>
+							<maxConcurrentRequests>1</maxConcurrentRequests>
+							<maxLocalWaitMs>120000</maxLocalWaitMs>
+							<maxSingleRequestTokens>0</maxSingleRequestTokens>
+							<rateControlMode><![CDATA[enforce]]></rateControlMode>
+							<requestsPerMinuteLimit>0</requestsPerMinuteLimit>
+							<tokenReserveStrategy/>
+							<tokensPerMinuteLimit>50000</tokensPerMinuteLimit>
+						</Row>
+					</Rows>
+				</ConfigurationTable>
+			</ConfigurationTables>
+			<ThingShape>
+				<PropertyDefinitions/>
+				<ServiceDefinitions/>
+				<EventDefinitions/>
+				<ServiceMappings/>
+				<ServiceImplementations/>
+				<Subscriptions/>
+			</ThingShape>
+			<PropertyBindings/>
+			<RemotePropertyBindings/>
+			<RemoteServiceBindings/>
+			<RemoteEventBindings/>
+			<AlertConfigurations/>
+			<ImplementedShapes/>
+			<ThingProperties/>
+			<ConfigurationChanges/>
+		</Thing>
+		<Thing description="" documentationContent="" effectiveThingPackage="AnthropicMessagesProvider" enabled="true" homeMashup="" identifier="" inheritedValueStream="" lastModifiedDate="2026-07-15T18:39:25.412Z" name="AzureSonnet46" projectName="Parler_SCPA_Guidance" published="false" tags="" thingTemplate="AnthropicMessagesProvider" valueStream="">
+			<Owner name="Administrator" type="User"/>
+			<avatar/>
+			<DesignTimePermissions>
+				<Create/>
+				<Read/>
+				<Update/>
+				<Delete/>
+				<Metadata/>
+			</DesignTimePermissions>
+			<RunTimePermissions/>
+			<VisibilityPermissions>
+				<Visibility/>
+			</VisibilityPermissions>
+			<ConfigurationTableDefinitions/>
+			<ConfigurationTables>
+				<ConfigurationTable dataShapeName="" description="Anthropic Messages API settings" isMultiRow="false" name="AnthropicMessagesSettings" ordinal="0">
+					<DataShape>
+						<FieldDefinitions>
+							<FieldDefinition aspect.defaultValue="2023-06-01" baseType="STRING" description="anthropic-version request header" name="anthropicVersion" ordinal="3"/>
+							<FieldDefinition baseType="PASSWORD" description="Anthropic API key" name="apiKey" ordinal="1"/>
+							<FieldDefinition aspect.defaultValue="https://api.anthropic.com" baseType="STRING" description="Anthropic API host without path" name="baseUrl" ordinal="0"/>
+							<FieldDefinition aspect.defaultValue="8192" baseType="INTEGER" description="Default max_tokens when Agent maxTokens is &lt;= 0" name="maxTokens" ordinal="5"/>
+							<FieldDefinition baseType="STRING" description="Anthropic model id" name="model" ordinal="2"/>
+							<FieldDefinition aspect.defaultValue="legacy" baseType="STRING" description="legacy sends temperature when thinking is off; omit suppresses Anthropic sampling parameters." name="samplingParametersMode" ordinal="7"/>
+							<FieldDefinition aspect.defaultValue="0" baseType="INTEGER" description="Extended thinking budget; 0 omits thinking. When positive, must be &gt;= 1024 and &lt; maxTokens." name="thinkingBudgetTokens" ordinal="6"/>
+							<FieldDefinition aspect.defaultValue="120000" baseType="INTEGER" description="" name="timeoutMs" ordinal="4"/>
+						</FieldDefinitions>
+					</DataShape>
+					<Rows>
+						<Row>
+							<anthropicVersion><![CDATA[2023-06-01]]></anthropicVersion>
+							<apiKey/>
+							<baseUrl><![CDATA[https://your-resource.services.ai.azure.com/anthropic]]></baseUrl>
+							<maxTokens>4096</maxTokens>
+							<model><![CDATA[claude-sonnet-4-6]]></model>
+							<samplingParametersMode><![CDATA[legacy]]></samplingParametersMode>
+							<thinkingBudgetTokens>0</thinkingBudgetTokens>
+							<timeoutMs>120000</timeoutMs>
+						</Row>
+					</Rows>
+				</ConfigurationTable>
+				<ConfigurationTable dataShapeName="" description="Provider-local token/RPM/concurrency admission control" isMultiRow="false" name="LLMAPIProviderRateControl" ordinal="0">
+					<DataShape>
+						<FieldDefinitions>
+							<FieldDefinition aspect.defaultValue="1.15" baseType="NUMBER" description="Multiplier on estimated tokens before admission (minimum 1.0)" name="estimateSafetyMultiplier" ordinal="6"/>
+							<FieldDefinition aspect.defaultValue="false" baseType="BOOLEAN" description="Log every allow/wait decision; rejections are always logged" name="logAdmissions" ordinal="8"/>
+							<FieldDefinition aspect.defaultValue="0" baseType="INTEGER" description="Max in-flight upstream calls; 0 disables concurrency checks" name="maxConcurrentRequests" ordinal="3"/>
+							<FieldDefinition aspect.defaultValue="0" baseType="INTEGER" description="Bounded wait for capacity; 0 means fail fast" name="maxLocalWaitMs" ordinal="4"/>
+							<FieldDefinition aspect.defaultValue="0" baseType="INTEGER" description="Hard cap per reservation; 0 means tokensPerMinuteLimit when TPM enabled" name="maxSingleRequestTokens" ordinal="7"/>
+							<FieldDefinition aspect.defaultValue="disabled" baseType="STRING" description="disabled, observe, or enforce" name="rateControlMode" ordinal="0"/>
+							<FieldDefinition aspect.defaultValue="0" baseType="INTEGER" description="Request bucket capacity; 0 disables RPM checks" name="requestsPerMinuteLimit" ordinal="2"/>
+							<FieldDefinition baseType="STRING" description="Blank uses Provider template default: input_only or input_plus_requested_output" name="tokenReserveStrategy" ordinal="5"/>
+							<FieldDefinition aspect.defaultValue="0" baseType="INTEGER" description="Token bucket capacity; 0 disables token checks" name="tokensPerMinuteLimit" ordinal="1"/>
+						</FieldDefinitions>
+					</DataShape>
+					<Rows>
+						<Row>
+							<estimateSafetyMultiplier>1.15</estimateSafetyMultiplier>
+							<logAdmissions>false</logAdmissions>
+							<maxConcurrentRequests>1</maxConcurrentRequests>
+							<maxLocalWaitMs>120000</maxLocalWaitMs>
+							<maxSingleRequestTokens>0</maxSingleRequestTokens>
+							<rateControlMode><![CDATA[enforce]]></rateControlMode>
+							<requestsPerMinuteLimit>0</requestsPerMinuteLimit>
+							<tokenReserveStrategy/>
+							<tokensPerMinuteLimit>200000</tokensPerMinuteLimit>
+						</Row>
+					</Rows>
+				</ConfigurationTable>
+			</ConfigurationTables>
+			<ThingShape>
+				<PropertyDefinitions/>
+				<ServiceDefinitions/>
+				<EventDefinitions/>
+				<ServiceMappings/>
+				<ServiceImplementations/>
+				<Subscriptions/>
+			</ThingShape>
+			<PropertyBindings/>
+			<RemotePropertyBindings/>
+			<RemoteServiceBindings/>
+			<RemoteEventBindings/>
+			<AlertConfigurations/>
+			<ImplementedShapes/>
+			<ThingProperties/>
+			<ConfigurationChanges/>
+		</Thing>
+		<Thing description="" documentationContent="" effectiveThingPackage="FileRepositoryThing" enabled="true" homeMashup="" identifier="" inheritedValueStream="" lastModifiedDate="2026-07-15T18:39:25.461Z" name="ConfigurationRepository" projectName="Parler_SCPA_Guidance" published="false" tags="" thingTemplate="FileRepository" valueStream="">
+			<Owner name="Administrator" type="User"/>
+			<avatar/>
+			<DesignTimePermissions>
+				<Create/>
+				<Read/>
+				<Update/>
+				<Delete/>
+				<Metadata/>
+			</DesignTimePermissions>
+			<RunTimePermissions/>
+			<VisibilityPermissions>
+				<Visibility/>
+			</VisibilityPermissions>
+			<ConfigurationTableDefinitions/>
+			<ConfigurationTables>
+				<ConfigurationTable dataShapeName="" description="File Repository Configurations" isMultiRow="false" name="File Repository Settings" ordinal="0">
+					<DataShape>
+						<FieldDefinitions>
+							<FieldDefinition aspect.defaultValue="false" aspect.friendlyName="Enable ETag" baseType="BOOLEAN" description="Enable HTTP ETag header" name="ETagEnabled" ordinal="0"/>
+						</FieldDefinitions>
+					</DataShape>
+					<Rows>
+						<Row>
+							<ETagEnabled>false</ETagEnabled>
+						</Row>
+					</Rows>
+				</ConfigurationTable>
+			</ConfigurationTables>
+			<ThingShape>
+				<PropertyDefinitions/>
+				<ServiceDefinitions/>
+				<EventDefinitions/>
+				<ServiceMappings/>
+				<ServiceImplementations/>
+				<Subscriptions/>
+			</ThingShape>
+			<PropertyBindings/>
+			<RemotePropertyBindings/>
+			<RemoteServiceBindings/>
+			<RemoteEventBindings/>
+			<AlertConfigurations/>
+			<ImplementedShapes/>
+			<ThingProperties/>
+			<ConfigurationChanges/>
+		</Thing>
+		<Thing description="" documentationContent="" effectiveThingPackage="FileRepositoryThing" enabled="true" homeMashup="" identifier="" inheritedValueStream="" lastModifiedDate="2026-07-15T18:39:25.430Z" name="AIDocRepository" projectName="Parler_SCPA_Guidance" published="false" tags="" thingTemplate="FileRepository" valueStream="">
+			<Owner name="Administrator" type="User"/>
+			<avatar/>
+			<DesignTimePermissions>
+				<Create/>
+				<Read/>
+				<Update/>
+				<Delete/>
+				<Metadata/>
+			</DesignTimePermissions>
+			<RunTimePermissions/>
+			<VisibilityPermissions>
+				<Visibility/>
+			</VisibilityPermissions>
+			<ConfigurationTableDefinitions/>
+			<ConfigurationTables>
+				<ConfigurationTable dataShapeName="" description="File Repository Configurations" isMultiRow="false" name="File Repository Settings" ordinal="0">
+					<DataShape>
+						<FieldDefinitions>
+							<FieldDefinition aspect.defaultValue="false" aspect.friendlyName="Enable ETag" baseType="BOOLEAN" description="Enable HTTP ETag header" name="ETagEnabled" ordinal="0"/>
+						</FieldDefinitions>
+					</DataShape>
+					<Rows>
+						<Row>
+							<ETagEnabled>false</ETagEnabled>
+						</Row>
+					</Rows>
+				</ConfigurationTable>
+			</ConfigurationTables>
+			<ThingShape>
+				<PropertyDefinitions/>
+				<ServiceDefinitions/>
+				<EventDefinitions/>
+				<ServiceMappings/>
+				<ServiceImplementations/>
+				<Subscriptions/>
+			</ThingShape>
+			<PropertyBindings/>
+			<RemotePropertyBindings/>
+			<RemoteServiceBindings/>
+			<RemoteEventBindings/>
+			<AlertConfigurations/>
+			<ImplementedShapes/>
+			<ThingProperties/>
+			<ConfigurationChanges/>
+		</Thing>
+		<Thing description="" documentationContent="" effectiveThingPackage="AzureOpenAIChatV5Provider" enabled="true" homeMashup="" identifier="" inheritedValueStream="" lastModifiedDate="2026-07-15T18:39:25.397Z" name="AzureOpenAI54" projectName="Parler_SCPA_Guidance" published="false" tags="" thingTemplate="AzureOpenAIChatV5Provider" valueStream="">
+			<Owner name="Administrator" type="User"/>
+			<avatar/>
+			<DesignTimePermissions>
+				<Create/>
+				<Read/>
+				<Update/>
+				<Delete/>
+				<Metadata/>
+			</DesignTimePermissions>
+			<RunTimePermissions/>
+			<VisibilityPermissions>
+				<Visibility/>
+			</VisibilityPermissions>
+			<ConfigurationTableDefinitions/>
+			<ConfigurationTables>
+				<ConfigurationTable dataShapeName="" description="Azure OpenAI Chat Completions v5 settings" isMultiRow="false" name="AzureOpenAIChatV5Settings" ordinal="0">
+					<DataShape>
+						<FieldDefinitions>
+							<FieldDefinition baseType="PASSWORD" description="Azure OpenAI API key" name="apiKey" ordinal="1"/>
+							<FieldDefinition aspect.defaultValue="2025-01-01-preview" baseType="STRING" description="Azure api-version query param" name="apiVersion" ordinal="3"/>
+							<FieldDefinition baseType="STRING" description="Azure deployment name" name="deployment" ordinal="2"/>
+							<FieldDefinition baseType="STRING" description="Azure resource endpoint" name="endpoint" ordinal="0"/>
+							<FieldDefinition aspect.defaultValue="8192" baseType="INTEGER" description="Default max_completion_tokens (includes reasoning tokens on v5)" name="maxCompletionTokens" ordinal="5"/>
+							<FieldDefinition aspect.defaultValue="low" baseType="STRING" description="Default reasoning_effort" name="reasoningEffort" ordinal="6"/>
+							<FieldDefinition aspect.defaultValue="120000" baseType="INTEGER" description="" name="timeoutMs" ordinal="4"/>
+						</FieldDefinitions>
+					</DataShape>
+					<Rows>
+						<Row>
+							<apiKey/>
+							<apiVersion><![CDATA[2025-01-01-preview]]></apiVersion>
+							<deployment><![CDATA[gpt-5.4]]></deployment>
+							<endpoint><![CDATA[https://your-resource.openai.azure.com/]]></endpoint>
+							<maxCompletionTokens>4096</maxCompletionTokens>
+							<reasoningEffort><![CDATA[low]]></reasoningEffort>
+							<timeoutMs>120000</timeoutMs>
+						</Row>
+					</Rows>
+				</ConfigurationTable>
+				<ConfigurationTable dataShapeName="" description="Provider-local token/RPM/concurrency admission control" isMultiRow="false" name="LLMAPIProviderRateControl" ordinal="0">
+					<DataShape>
+						<FieldDefinitions>
+							<FieldDefinition aspect.defaultValue="1.15" baseType="NUMBER" description="Multiplier on estimated tokens before admission (minimum 1.0)" name="estimateSafetyMultiplier" ordinal="6"/>
+							<FieldDefinition aspect.defaultValue="false" baseType="BOOLEAN" description="Log every allow/wait decision; rejections are always logged" name="logAdmissions" ordinal="8"/>
+							<FieldDefinition aspect.defaultValue="0" baseType="INTEGER" description="Max in-flight upstream calls; 0 disables concurrency checks" name="maxConcurrentRequests" ordinal="3"/>
+							<FieldDefinition aspect.defaultValue="0" baseType="INTEGER" description="Bounded wait for capacity; 0 means fail fast" name="maxLocalWaitMs" ordinal="4"/>
+							<FieldDefinition aspect.defaultValue="0" baseType="INTEGER" description="Hard cap per reservation; 0 means tokensPerMinuteLimit when TPM enabled" name="maxSingleRequestTokens" ordinal="7"/>
+							<FieldDefinition aspect.defaultValue="disabled" baseType="STRING" description="disabled, observe, or enforce" name="rateControlMode" ordinal="0"/>
+							<FieldDefinition aspect.defaultValue="0" baseType="INTEGER" description="Request bucket capacity; 0 disables RPM checks" name="requestsPerMinuteLimit" ordinal="2"/>
+							<FieldDefinition baseType="STRING" description="Blank uses Provider template default: input_only or input_plus_requested_output" name="tokenReserveStrategy" ordinal="5"/>
+							<FieldDefinition aspect.defaultValue="0" baseType="INTEGER" description="Token bucket capacity; 0 disables token checks" name="tokensPerMinuteLimit" ordinal="1"/>
+						</FieldDefinitions>
+					</DataShape>
+					<Rows>
+						<Row>
+							<estimateSafetyMultiplier>1.15</estimateSafetyMultiplier>
+							<logAdmissions>false</logAdmissions>
+							<maxConcurrentRequests>1</maxConcurrentRequests>
+							<maxLocalWaitMs>120000</maxLocalWaitMs>
+							<maxSingleRequestTokens>0</maxSingleRequestTokens>
+							<rateControlMode><![CDATA[enforce]]></rateControlMode>
+							<requestsPerMinuteLimit>0</requestsPerMinuteLimit>
+							<tokenReserveStrategy/>
+							<tokensPerMinuteLimit>50000</tokensPerMinuteLimit>
+						</Row>
+					</Rows>
+				</ConfigurationTable>
+			</ConfigurationTables>
+			<ThingShape>
+				<PropertyDefinitions/>
+				<ServiceDefinitions/>
+				<EventDefinitions/>
+				<ServiceMappings/>
+				<ServiceImplementations/>
+				<Subscriptions/>
+			</ThingShape>
+			<PropertyBindings/>
+			<RemotePropertyBindings/>
+			<RemoteServiceBindings/>
+			<RemoteEventBindings/>
+			<AlertConfigurations/>
+			<ImplementedShapes/>
+			<ThingProperties/>
+			<ConfigurationChanges/>
+		</Thing>
+		<Thing description="" documentationContent="" effectiveThingPackage="AgentThing" enabled="true" homeMashup="" identifier="" inheritedValueStream="" lastModifiedDate="2026-07-16T17:28:58.477Z" name="SCPA_Agent_Sonnet" projectName="Parler_SCPA_Guidance" published="false" tags="" thingTemplate="AIAgent" valueStream="">
+			<Owner name="Administrator" type="User"/>
+			<avatar/>
+			<DesignTimePermissions>
+				<Create/>
+				<Read/>
+				<Update/>
+				<Delete/>
+				<Metadata/>
+			</DesignTimePermissions>
+			<RunTimePermissions/>
+			<VisibilityPermissions>
+				<Visibility/>
+			</VisibilityPermissions>
+			<ConfigurationTableDefinitions/>
+			<ConfigurationTables>
+				<ConfigurationTable dataShapeName="" description="Agent Behavior Settings" isMultiRow="false" name="AgentSettings" ordinal="0">
+					<DataShape>
+						<FieldDefinitions>
+							<FieldDefinition aspect.defaultValue="false" baseType="BOOLEAN" description="When true, legacy discover_services and get_service_definition are included in the merged LLM tool list; discover_properties remains executor-only for merge. Default false. See docs/agent/legacy-discovery-executor-only.md." name="advertiseLegacyServiceDiscoveryTools" ordinal="16"/>
+							<FieldDefinition aspect.defaultValue="3600000.0" baseType="NUMBER" description="Total agent loop timeout in milliseconds" name="agentTimeout" ordinal="4"/>
+							<FieldDefinition aspect.defaultValue="false" baseType="BOOLEAN" description="When true, the agent may in the future auto-load skill bodies when the user message matches skill metadata (reserved). When false (default), skill full text loads only via /SkillName in the message or the get_agent_skill tool." name="allowImplicitInvocation" ordinal="8"/>
+							<FieldDefinition aspect.defaultValue="true" baseType="BOOLEAN" description="Append bundled tool-routing instructions (query_entities, query_entities_by_taxonomy, EntityServices, spotlight) to the system prompt sent to the LLM. Repo markdown like AGENT-CONTEXT.md is not auto-loaded." name="appendBuiltInToolRoutingGuide" ordinal="6"/>
+							<FieldDefinition aspect.friendlyName="Artifact Cache File Repository" aspect.thingTemplate="FileRepository" baseType="THINGNAME" description="Dedicated FileRepository Thing for Parler artifact cache payloads. Empty fails closed; there is no in-memory fallback." name="artifactCacheFileRepository" ordinal="29"/><FieldDefinition aspect.friendlyName="Configuration Repository" aspect.thingTemplate="FileRepository" baseType="THINGNAME" description="File Repository containing AgentThing configuration files (skills, taxonomy Markdown, policies, extended tools). Empty disables repository-backed configuration without log." name="configurationRepository" ordinal="12"/>
+							<FieldDefinition aspect.defaultValue="false" baseType="BOOLEAN" description="When true, advertise internal Java search_document_chunks, get_document_chunk, and resolve_document_set built-ins. When false, do not register those names (extended tools may use the same names). Default false. See docs/agent/document-chunk-tools.md." name="documentKnowledgeBuiltinsEnabled" ordinal="17"/>
+							<FieldDefinition aspect.defaultValue="6000" baseType="INTEGER" description="Maximum markdown chars returned by get_document_chunk. Clamped 500..500000; default 6000." name="documentKnowledgeChunkMaxChars" ordinal="26"/>
+							<FieldDefinition aspect.defaultValue="300" baseType="INTEGER" description="JVM cache TTL for the document-knowledge index. Clamped 30..86400; default 300." name="documentKnowledgeIndexTtlSeconds" ordinal="20"/>
+							<FieldDefinition aspect.defaultValue="10000" baseType="INTEGER" description="v1 cap for total indexed chunks. Clamped 1..1000000; default 10000." name="documentKnowledgeMaxChunks" ordinal="22"/>
+							<FieldDefinition aspect.defaultValue="100" baseType="INTEGER" description="v1 scan cap for package manifests. Clamped 1..10000; default 100." name="documentKnowledgeMaxDocuments" ordinal="21"/>
+							<FieldDefinition aspect.friendlyName="Document Knowledge Repository" aspect.thingTemplate="FileRepository" baseType="THINGNAME" description="FileRepository Thing containing document-knowledge packages. Empty disables repository-backed document tools. See docs/agent/document-chunk-tools.md." name="documentKnowledgeRepository" ordinal="18"/>
+							<FieldDefinition aspect.defaultValue="/document-knowledge" baseType="STRING" description="Root folder below documentKnowledgeRepository for packages. Default /document-knowledge." name="documentKnowledgeRootPath" ordinal="19"/>
+							<FieldDefinition aspect.defaultValue="5" baseType="INTEGER" description="Default search result count. Clamped 1..100; default 5." name="documentKnowledgeSearchDefaultLimit" ordinal="23"/>
+							<FieldDefinition aspect.defaultValue="10" baseType="INTEGER" description="Maximum search result count. Clamped to searchDefaultLimit..100; default 10." name="documentKnowledgeSearchMaxLimit" ordinal="24"/>
+							<FieldDefinition aspect.defaultValue="400" baseType="INTEGER" description="Maximum chars per search-match snippet. Clamped 50..10000; default 400." name="documentKnowledgeSearchSnippetMaxChars" ordinal="25"/>
+							<FieldDefinition aspect.defaultValue="false" baseType="BOOLEAN" description="When true, disable document_search-only turn tool narrowing (D2). Default false (narrowing on). Set true to revert to the full merged tool list. TWX unset/false both mean not disabled. See docs/operations/doc-index-enhance.md D2." name="documentTurnToolNarrowingDisabled" ordinal="27"/>
+							<FieldDefinition aspect.defaultValue="true" baseType="BOOLEAN" description="Enable built-in ThingWorx tools (invoke_service, describe_entity_schema, discover_thing_members, query_entities, …)" name="enableBuiltInTools" ordinal="7"/>
+							<FieldDefinition aspect.friendlyName="Export File Repository" aspect.thingTemplate="FileRepository" baseType="THINGNAME" description="Optional FileRepository Thing for Parler list-class table CSV export when totalRows exceeds tableCsvExportRowThreshold or the wire carries a partial sample (see docs/ui/table-view-solution.md §5). Empty disables export." name="exportFileRepository" ordinal="10"/>
+							<FieldDefinition aspect.defaultValue="false" baseType="BOOLEAN" description="When true, DEBUG-tier PARLER_HITL decision_rejected lines also log at WARN for this agent (lab). Restart this Thing after changing; save-only may not refresh registration. See docs/agent/AGENT-ALWAYSON-TWX.md and ParlerHitlAuditLog." name="hitlAuditDebugAll" ordinal="9"/>
+							<FieldDefinition aspect.friendlyName="LLM API Provider" aspect.thingShape="LLMAPIProviderShape" baseType="THINGNAME" description="LLM API Provider Thing (implements LLMAPIProviderShape). Required for Chat/Parler; endpoint, credentials, and model/deployment live on that Thing (see docs/agent/llm-api-provider.md §5.9)." name="llmApiProviderRef" ordinal="0"/>
+							<FieldDefinition aspect.defaultValue="750000" baseType="INTEGER" description="Upper bound on model-facing request size for context budget planning (characters). Provider-specific limits are still applied as min(providerLimit*3.5, this value). See docs/agent/context-compaction.md. Clamped 10_000..2_000_000." name="llmContextMaxChars" ordinal="15"/>
+							<FieldDefinition aspect.defaultValue="10" baseType="INTEGER" description="Max agent loop iterations (tool call rounds). Safety limit." name="maxIterations" ordinal="3"/>
+							<FieldDefinition aspect.defaultValue="-1" baseType="INTEGER" description="Max tokens in LLM response. -1 for provider default." name="maxTokens" ordinal="2"/>
+							<FieldDefinition aspect.defaultValue="You are a ThingWorx AI assistant. Use the available tools to help the user interact with the ThingWorx platform." baseType="TEXT" description="Default system prompt. Can be overridden per Chat call." name="systemPrompt" ordinal="5"/>
+							<FieldDefinition aspect.defaultValue="50000000" baseType="INTEGER" description="Max UTF-16 code units (Java String length) for one large-table CSV before Parler skips export (skipped_limit). Platform SaveText still applies; this caps agent-side CSV materialization. Clamped 1_000_000..200_000_000." name="tableCsvExportMaxChars" ordinal="14"/>
+							<FieldDefinition aspect.defaultValue="200" baseType="INTEGER" description="When a table's totalRows exceeds this integer, or totalRows is greater than the inline row count, the agent attempts UTF-8 CSV export via SaveText on exportFileRepository before emitting type:table." name="tableCsvExportRowThreshold" ordinal="11"/>
+							<FieldDefinition aspect.defaultValue="full_table" baseType="STRING" description="Controls LLM-visible taxonomy prompt injection: full_table (default), resolver_guidance_only, or none. See docs/agent/taxonomy.md." name="taxonomyPromptInjection" ordinal="13"/>
+							<FieldDefinition aspect.defaultValue="0.1" baseType="NUMBER" description="Sampling temperature (0.0–2.0). Lower = more deterministic." name="temperature" ordinal="1"/>
+							<FieldDefinition aspect.defaultValue="off" baseType="STRING" description="Tool-schema admission mode: off (default; advertise all tools), narrow (drop irrelevant tool buckets up front by deterministic host-context/intent signals, keep the core set), or lazy (opt-in; advertise only the core set plus a load_tool_schemas meta-tool whose catalog lets the model load tool schemas on demand). Unknown/blank means off. See docs/operations/tool-schema-admission-control.md." name="toolAdmissionMode" ordinal="28"/>
+						</FieldDefinitions>
+					</DataShape>
+					<Rows>
+						<Row>
+							<advertiseLegacyServiceDiscoveryTools>false</advertiseLegacyServiceDiscoveryTools>
+							<agentTimeout>3600000.0</agentTimeout>
+							<allowImplicitInvocation>true</allowImplicitInvocation>
+							<appendBuiltInToolRoutingGuide>true</appendBuiltInToolRoutingGuide>
+							<artifactCacheFileRepository><![CDATA[AIArtifactRepository]]></artifactCacheFileRepository><configurationRepository><![CDATA[ConfigurationRepository]]></configurationRepository>
+							<documentKnowledgeBuiltinsEnabled>true</documentKnowledgeBuiltinsEnabled>
+							<documentKnowledgeChunkMaxChars>6000</documentKnowledgeChunkMaxChars>
+							<documentKnowledgeIndexTtlSeconds>300</documentKnowledgeIndexTtlSeconds>
+							<documentKnowledgeMaxChunks>10000</documentKnowledgeMaxChunks>
+							<documentKnowledgeMaxDocuments>100</documentKnowledgeMaxDocuments>
+							<documentKnowledgeRepository><![CDATA[AIDocRepository]]></documentKnowledgeRepository>
+							<documentKnowledgeRootPath><![CDATA[/document-knowledge]]></documentKnowledgeRootPath>
+							<documentKnowledgeSearchDefaultLimit>5</documentKnowledgeSearchDefaultLimit>
+							<documentKnowledgeSearchMaxLimit>10</documentKnowledgeSearchMaxLimit>
+							<documentKnowledgeSearchSnippetMaxChars>400</documentKnowledgeSearchSnippetMaxChars>
+							<documentTurnToolNarrowingDisabled>false</documentTurnToolNarrowingDisabled>
+							<enableBuiltInTools>true</enableBuiltInTools>
+							<exportFileRepository><![CDATA[AIDocRepository]]></exportFileRepository>
+							<hitlAuditDebugAll>true</hitlAuditDebugAll>
+							<llmApiProviderRef><![CDATA[AzureSonnet46]]></llmApiProviderRef>
+							<llmContextMaxChars>750000</llmContextMaxChars>
+							<maxIterations>10</maxIterations>
+							<maxTokens>-1</maxTokens>
+							<systemPrompt><![CDATA[You are a ThingWorx AI assistant. Use the available tools to help the user interact with the ThingWorx platform.]]></systemPrompt>
+							<tableCsvExportMaxChars>50000000</tableCsvExportMaxChars>
+							<tableCsvExportRowThreshold>200</tableCsvExportRowThreshold>
+							<taxonomyPromptInjection><![CDATA[full_table]]></taxonomyPromptInjection>
+							<temperature>0.1</temperature>
+							<toolAdmissionMode><![CDATA[off]]></toolAdmissionMode>
+						</Row>
+					</Rows>
+				</ConfigurationTable>
+			</ConfigurationTables>
+			<ThingShape>
+				<PropertyDefinitions/>
+				<ServiceDefinitions/>
+				<EventDefinitions/>
+				<ServiceMappings/>
+				<ServiceImplementations>
+					<ServiceImplementation description="" handlerName="Script" name="GetAssetList">
+						<ConfigurationTables>
+							<ConfigurationTable dataShapeName="" description="" isMultiRow="false" name="Script" ordinal="0">
+								<DataShape>
+									<FieldDefinitions>
+										<FieldDefinition baseType="STRING" description="code" name="code" ordinal="0"/>
+									</FieldDefinitions>
+								</DataShape>
+								<Rows>
+									<Row>
+										<code><![CDATA[let query_result=me.GetChildNodes({
+	id: id /* STRING */
+});
+let result=DataShapes["EntityList"].CreateValues();
+let assetList=[];
+let IAMEntryPoint = "PTCTS.IAMAdmin.EntryPoint";
+	let IAMManager = Things[IAMEntryPoint].GetConfiguredComponentManager();
+
+query_result.rows.toArray().forEach(row=>{
+  let thingName=row['id'];
+  if (Things[thingName] && Things[thingName].ImplementsShape({
+						thingShapeName: "PTCTS.IAMAdmin.ModelLogic_TS"
+	})) {
+    let thisAssociationName = thingName; // currently processing an association
+					var associationThingGroup = Things[thingName].PTCIAMAssociationThingGroup;
+					if (associationThingGroup && ThingGroups[associationThingGroup]) {
+						var associationNodes = Things[IAMManager].GetThingGroupThingMembers({
+							thingGroupName: associationThingGroup
+						});
+						associationNodes.rows.toArray().forEach(associationNode =>{
+							var thingName = associationNode.name;
+							if (thisAssociationName !== thingName) {
+								// Include without configuration check
+								if (assetList.includes(thingName) == false) {
+									let newEntry = {};
+									newEntry.name = thingName; // STRING
+									newEntry.description=Things[thingName].PTCDisplayName;
+									result.AddRow(newEntry);
+									assetList.push(thingName);
+								}
+//							} else {
+//								// Only add associations to the results if they are configured in the asset model
+//								// This is unusual, and only happens when you want to include assoctions as assets for display
+//								if (assetList.includes(thingName) == false && me.IsConfiguredThing({
+//										thingName: thingName
+//									})) {
+//									let newEntry = {};
+//									newEntry.name = thingName; // STRING
+//									newEntry.descriptipn=Things[thingName].PTCDisplayName;
+//									result.AddRow(newEntry);
+//									assetList.push(thingName);
+//								}
+							}
+						});
+					}
+  }
+})]]></code>
+									</Row>
+								</Rows>
+							</ConfigurationTable>
+						</ConfigurationTables>
+					</ServiceImplementation>
+					<ServiceImplementation description="" handlerName="Script" name="GetChildNodes">
+						<ConfigurationTables>
+							<ConfigurationTable dataShapeName="" description="" isMultiRow="false" name="Script" ordinal="0">
+								<DataShape>
+									<FieldDefinitions>
+										<FieldDefinition baseType="STRING" description="code" name="code" ordinal="0"/>
+									</FieldDefinitions>
+								</DataShape>
+								<Rows>
+									<Row>
+										<code><![CDATA[let result=DataShapes["HierarchyNode_DS"].CreateValues();
+let network = Things["PTCTS.IAMAdmin.Manager"].GetConfiguredNetwork({
+	projectName: undefined /* STRING */
+});
+let query_result = Networks[network].GetSubNetworkConnections({
+	maxDepth: undefined, /* NUMBER */
+    start: id
+});
+
+query_result.rows.toArray().forEach(row=>{
+  let thing_name=row['to'];
+  let newEntry={};
+  newEntry.id=thing_name;
+  newEntry.name=Things[thing_name].PTCDisplayName;
+  result.AddRow(newEntry);
+});]]></code>
+									</Row>
+								</Rows>
+							</ConfigurationTable>
+						</ConfigurationTables>
+					</ServiceImplementation>
+					<ServiceImplementation description="" handlerName="Script" name="GetFlattenNameDescription">
+						<ConfigurationTables>
+							<ConfigurationTable dataShapeName="" description="" isMultiRow="false" name="Script" ordinal="0">
+								<DataShape>
+									<FieldDefinitions>
+										<FieldDefinition baseType="STRING" description="code" name="code" ordinal="0"/>
+									</FieldDefinitions>
+								</DataShape>
+								<Rows>
+									<Row>
+										<code><![CDATA[let result=DataShapes["HierarchyNode_DS"].CreateValues();
+let network = Things["PTCTS.IAMAdmin.Manager"].GetConfiguredNetwork({
+	projectName: undefined /* STRING */
+});
+let query_result = Networks[network].GetNetworkConnections({
+	maxDepth: undefined /* NUMBER */
+});
+
+query_result.rows.toArray().forEach(row=>{
+  let thing_name=row['to'];
+  let newEntry={};
+  newEntry.id=thing_name;
+  newEntry.name=Things[thing_name].PTCDisplayName;
+  result.AddRow(newEntry);
+});]]></code>
+									</Row>
+								</Rows>
+							</ConfigurationTable>
+						</ConfigurationTables>
+					</ServiceImplementation>
+					<ServiceImplementation description="" handlerName="Script" name="GetRootNode">
+						<ConfigurationTables>
+							<ConfigurationTable dataShapeName="" description="" isMultiRow="false" name="Script" ordinal="0">
+								<DataShape>
+									<FieldDefinitions>
+										<FieldDefinition baseType="STRING" description="code" name="code" ordinal="0"/>
+									</FieldDefinitions>
+								</DataShape>
+								<Rows>
+									<Row>
+										<code><![CDATA[// result: STRING
+let network = Things["PTCTS.IAMAdmin.Manager"].GetConfiguredNetwork({
+	projectName: undefined /* STRING */
+});
+// var network="PTCTDD.Cellfab.AssociationNetwork_NW";
+
+// result: INFOTABLE dataShape: "NetworkConnection"
+let query_result = Networks[network].GetNetworkConnections({
+	maxDepth: 1 /* NUMBER */
+});
+
+let result=DataShapes["HierarchyNode_DS"].CreateValues();
+query_result.rows.toArray().forEach(row=>{
+  let thing_name=row['to'];
+  let newEntry = {};
+  newEntry.id=thing_name;
+  newEntry.name=Things[thing_name].PTCDisplayName;
+  result.AddRow(newEntry);
+});]]></code>
+									</Row>
+								</Rows>
+							</ConfigurationTable>
+						</ConfigurationTables>
+					</ServiceImplementation>
+					<ServiceImplementation description="" handlerName="Script" name="ResolveNetworkID">
+						<ConfigurationTables>
+							<ConfigurationTable dataShapeName="" description="" isMultiRow="false" name="Script" ordinal="0">
+								<DataShape>
+									<FieldDefinitions>
+										<FieldDefinition baseType="STRING" description="code" name="code" ordinal="0"/>
+									</FieldDefinitions>
+								</DataShape>
+								<Rows>
+									<Row>
+										<code><![CDATA[//this service will be optimized from 2 sides in the future:
+//1. using cachething to cache the flattened name description infotable;
+//2. using regex to search the name
+
+let result=DataShapes["HierarchyNode_DS"].CreateValues();
+
+// result: INFOTABLE dataShape: "HierarchyNode_DS"
+let query_result = me.GetFlattenNameDescription();
+
+query_result.rows.toArray().forEach(row=>{
+  let newEntry={};
+  if(row.name===name){
+    newEntry.id=row.id;
+    newEntry.name=row.name;
+    result.AddRow(newEntry);
+  }
+  
+});]]></code>
+									</Row>
+								</Rows>
+							</ConfigurationTable>
+						</ConfigurationTables>
+					</ServiceImplementation>
+				</ServiceImplementations>
+				<Subscriptions/>
+			</ThingShape>
+			<PropertyBindings/>
+			<RemotePropertyBindings/>
+			<RemoteServiceBindings/>
+			<RemoteEventBindings/>
+			<AlertConfigurations/>
+			<ImplementedShapes/>
+			<ThingProperties/>
+			<ConfigurationChanges/>
+		</Thing>
+		<Thing description="" documentationContent="" effectiveThingPackage="ConfiguredThing" enabled="true" homeMashup="" identifier="" inheritedValueStream="" lastModifiedDate="2026-07-15T18:39:25.416Z" name="SCPA_Utilization_helper" projectName="Parler_SCPA_Guidance" published="false" tags="" thingTemplate="GenericThing" valueStream="">
+			<Owner name="Administrator" type="User"/>
+			<avatar/>
+			<DesignTimePermissions>
+				<Create/>
+				<Read/>
+				<Update/>
+				<Delete/>
+				<Metadata/>
+			</DesignTimePermissions>
+			<RunTimePermissions/>
+			<VisibilityPermissions>
+				<Visibility/>
+			</VisibilityPermissions>
+			<ConfigurationTableDefinitions/>
+			<ConfigurationTables/>
+			<ThingShape>
+				<PropertyDefinitions/>
+				<ServiceDefinitions>
+					<ServiceDefinition aspect.isAsync="false" category="" description="" isAllowOverride="false" isLocalOnly="false" isOpen="false" isPrivate="false" name="GetAggregatesByUtilizationState">
+						<ResultType baseType="INFOTABLE" description="" name="result" ordinal="0"/>
+						<ParameterDefinitions>
+							<FieldDefinition aspect.dataShape="PTCSC.Utilization.UtilizationWithDuration" baseType="INFOTABLE" description="" name="UtilizationRecords" ordinal="1"/>
+						</ParameterDefinitions>
+					</ServiceDefinition>
+					<ServiceDefinition aspect.isAsync="false" category="" description="Service that returns a listing of machines that have the PTCSC.Utilization.ModelLogic_TS Thing Shape. This listing is limited to a maximum number of machines based on the UtilizationConfiguration &quot;MaxEntitiesOnOverviewScreen&quot; on the PTCSC.UtilizationTWImpl.Manager thing.  If a listing of machines is passed in, it will just retun those machines." isAllowOverride="false" isLocalOnly="false" isOpen="false" isPrivate="false" name="GetMachineListing">
+						<ResultType aspect.dataShape="RootEntityList" baseType="INFOTABLE" description="" name="result" ordinal="0"/>
+						<ParameterDefinitions>
+							<FieldDefinition aspect.dataShape="RootEntityList" baseType="INFOTABLE" description="" name="Machines" ordinal="1"/>
+							<FieldDefinition baseType="BOOLEAN" description="" name="UsesSelection" ordinal="2"/>
+						</ParameterDefinitions>
+					</ServiceDefinition>
+					<ServiceDefinition aspect.isAsync="false" category="" description="" isAllowOverride="false" isLocalOnly="false" isOpen="false" isPrivate="false" name="GetMachineListingWithDates">
+						<ResultType aspect.dataShape="PTCSC.Utilization.Machine" baseType="INFOTABLE" description="" name="result" ordinal="0"/>
+						<ParameterDefinitions>
+							<FieldDefinition baseType="DATETIME" description="" name="EndDate" ordinal="4"/>
+							<FieldDefinition aspect.dataShape="RootEntityList" baseType="INFOTABLE" description="" name="Machines" ordinal="1"/>
+							<FieldDefinition baseType="STRING" description="" name="ShiftID" ordinal="2"/>
+							<FieldDefinition baseType="DATETIME" description="" name="StartDate" ordinal="3"/>
+						</ParameterDefinitions>
+					</ServiceDefinition>
+					<ServiceDefinition aspect.isAsync="false" category="" description="" isAllowOverride="false" isLocalOnly="false" isOpen="false" isPrivate="false" name="GetStatsForAggregateData">
+						<ResultType aspect.dataShape="PTCSC.Utilization.Statistics" baseType="INFOTABLE" description="" name="result" ordinal="0"/>
+						<ParameterDefinitions>
+							<FieldDefinition aspect.dataShape="PTCSC.Utilization.Aggregate" baseType="INFOTABLE" description="" name="AggregatedByUtilizationStateData" ordinal="1"/>
+						</ParameterDefinitions>
+					</ServiceDefinition>
+					<ServiceDefinition aspect.isAsync="false" category="" description="" isAllowOverride="false" isLocalOnly="false" isOpen="false" isPrivate="false" name="GetUtilizationOverview">
+						<ResultType baseType="JSON" description="" name="result" ordinal="0"/>
+						<ParameterDefinitions>
+							<FieldDefinition aspect.isRequired="true" baseType="DATETIME" description="" name="EndDate" ordinal="2"/>
+							<FieldDefinition baseType="BOOLEAN" description="" name="IncludeEffectiveDates" ordinal="6"/>
+							<FieldDefinition baseType="BOOLEAN" description="" name="IncludeMachineCoverage" ordinal="5"/>
+							<FieldDefinition baseType="BOOLEAN" description="" name="IncludeStateSummary" ordinal="7"/>
+							<FieldDefinition baseType="STRING" description="" name="Machine" ordinal="4"/>
+							<FieldDefinition baseType="INTEGER" description="" name="MaxMachines" ordinal="8"/>
+							<FieldDefinition baseType="STRING" description="" name="ShiftID" ordinal="3"/>
+							<FieldDefinition aspect.isRequired="true" baseType="DATETIME" description="" name="StartDate" ordinal="1"/>
+						</ParameterDefinitions>
+					</ServiceDefinition>
+					<ServiceDefinition aspect.isAsync="false" category="" description="" isAllowOverride="false" isLocalOnly="false" isOpen="false" isPrivate="false" name="GetUtilizationRecords">
+						<ResultType baseType="JSON" description="" name="result" ordinal="0"/>
+						<ParameterDefinitions>
+							<FieldDefinition aspect.isRequired="true" baseType="DATETIME" description="" name="EndDate" ordinal="2"/>
+							<FieldDefinition baseType="INTEGER" description="" name="Limit" ordinal="5"/>
+							<FieldDefinition aspect.isRequired="false" baseType="THINGNAME" description="" name="Machine" ordinal="4"/>
+							<FieldDefinition baseType="INTEGER" description="" name="Offset" ordinal="6"/>
+							<FieldDefinition baseType="STRING" description="" name="ShiftID" ordinal="3"/>
+							<FieldDefinition aspect.isRequired="true" baseType="DATETIME" description="" name="StartDate" ordinal="1"/>
+						</ParameterDefinitions>
+					</ServiceDefinition>
+					<ServiceDefinition aspect.isAsync="false" category="" description="Return utilization records for one machine over an explicit time window. Machine must be the canonical ThingWorx Thing name of the machine, not a display name, short equipment label, alias, or serial number." isAllowOverride="false" isLocalOnly="false" isOpen="false" isPrivate="false" name="GetUtilizationRecordsByMachine">
+						<ResultType aspect.dataShape="PTCSC.Utilization.UtilizationWithDuration" baseType="INFOTABLE" description="" name="result" ordinal="0"/>
+						<ParameterDefinitions>
+							<FieldDefinition aspect.isRequired="true" baseType="DATETIME" description="" name="EndDate" ordinal="2"/>
+							<FieldDefinition aspect.isRequired="true" baseType="THINGNAME" description="" name="Machine" ordinal="3"/>
+							<FieldDefinition baseType="STRING" description="" name="ShiftID" ordinal="4"/>
+							<FieldDefinition aspect.isRequired="true" baseType="DATETIME" description="" name="StartDate" ordinal="1"/>
+						</ParameterDefinitions>
+					</ServiceDefinition>
+					<ServiceDefinition aspect.isAsync="false" category="" description="" isAllowOverride="false" isLocalOnly="false" isOpen="false" isPrivate="false" name="GetUtilizationStateSummary">
+						<ResultType baseType="JSON" description="" name="result" ordinal="0"/>
+						<ParameterDefinitions>
+							<FieldDefinition baseType="DATETIME" description="" name="EndDate" ordinal="2"/>
+							<FieldDefinition baseType="STRING" description="" name="IncludeStats" ordinal="5"/>
+							<FieldDefinition aspect.isRequired="false" baseType="THINGNAME" description="" name="Machine" ordinal="4"/>
+							<FieldDefinition baseType="STRING" description="" name="ShiftID" ordinal="3"/>
+							<FieldDefinition baseType="DATETIME" description="" name="StartDate" ordinal="1"/>
+						</ParameterDefinitions>
+					</ServiceDefinition>
+					<ServiceDefinition aspect.isAsync="false" category="" description="" isAllowOverride="false" isLocalOnly="false" isOpen="false" isPrivate="false" name="ListUtilizationMachines">
+						<ResultType baseType="JSON" description="" name="result" ordinal="0"/>
+						<ParameterDefinitions>
+							<FieldDefinition baseType="DATETIME" description="" name="EndDate" ordinal="2"/>
+							<FieldDefinition baseType="BOOLEAN" description="" name="IncludeEffectiveDates" ordinal="4"/>
+							<FieldDefinition baseType="INTEGER" description="" name="MaxItems" ordinal="5"/>
+							<FieldDefinition baseType="STRING" description="" name="ShiftID" ordinal="3"/>
+							<FieldDefinition baseType="DATETIME" description="" name="StartDate" ordinal="1"/>
+						</ParameterDefinitions>
+					</ServiceDefinition>
+				</ServiceDefinitions>
+				<EventDefinitions/>
+				<ServiceMappings/>
+				<ServiceImplementations>
+					<ServiceImplementation description="" handlerName="Script" name="GetAggregatesByUtilizationState">
+						<ConfigurationTables>
+							<ConfigurationTable dataShapeName="" description="" isMultiRow="false" name="Script" ordinal="0">
+								<DataShape>
+									<FieldDefinitions>
+										<FieldDefinition baseType="STRING" description="code" name="code" ordinal="0"/>
+									</FieldDefinitions>
+								</DataShape>
+								<Rows>
+									<Row>
+										<code><![CDATA[// result: INFOTABLE dataShape: "PTCSC.Utilization.Aggregate"
+let result = Things["PTCSC.UtilizationTWImpl.Manager"].GetAggregatesByUtilizationState({
+	UtilizationRecords: UtilizationRecords /* INFOTABLE {"dataShape":"PTCSC.Utilization.UtilizationWithDuration"} */
+});]]></code>
+									</Row>
+								</Rows>
+							</ConfigurationTable>
+						</ConfigurationTables>
+					</ServiceImplementation>
+					<ServiceImplementation description="" handlerName="Script" name="GetMachineListing">
+						<ConfigurationTables>
+							<ConfigurationTable dataShapeName="" description="" isMultiRow="false" name="Script" ordinal="0">
+								<DataShape>
+									<FieldDefinitions>
+										<FieldDefinition baseType="STRING" description="code" name="code" ordinal="0"/>
+									</FieldDefinitions>
+								</DataShape>
+								<Rows>
+									<Row>
+										<code><![CDATA[// result: INFOTABLE dataShape: "RootEntityList"
+let result = Things["PTCSC.UtilizationUI.Manager"].GetMachineListing({
+	UsesSelection: UsesSelection /* BOOLEAN {"defaultValue":false} */,
+	Machines: Machines /* INFOTABLE {"dataShape":"RootEntityList"} */
+});]]></code>
+									</Row>
+								</Rows>
+							</ConfigurationTable>
+						</ConfigurationTables>
+					</ServiceImplementation>
+					<ServiceImplementation description="" handlerName="Script" name="GetMachineListingWithDates">
+						<ConfigurationTables>
+							<ConfigurationTable dataShapeName="" description="" isMultiRow="false" name="Script" ordinal="0">
+								<DataShape>
+									<FieldDefinitions>
+										<FieldDefinition baseType="STRING" description="code" name="code" ordinal="0"/>
+									</FieldDefinitions>
+								</DataShape>
+								<Rows>
+									<Row>
+										<code><![CDATA[// result: INFOTABLE dataShape: "PTCSC.Utilization.MachineStartEndDates"
+let result = Things["PTCSC.UtilizationUI.Manager"].GetMachineListingWithDates({
+	StartDate: StartDate /* DATETIME */,
+	ShiftID: ShiftID /* STRING */,
+	EndDate: EndDate /* DATETIME */,
+	Machines: Machines /* INFOTABLE {"dataShape":"RootEntityList"} */
+});]]></code>
+									</Row>
+								</Rows>
+							</ConfigurationTable>
+						</ConfigurationTables>
+					</ServiceImplementation>
+					<ServiceImplementation description="" handlerName="Script" name="GetStatsForAggregateData">
+						<ConfigurationTables>
+							<ConfigurationTable dataShapeName="" description="" isMultiRow="false" name="Script" ordinal="0">
+								<DataShape>
+									<FieldDefinitions>
+										<FieldDefinition baseType="STRING" description="code" name="code" ordinal="0"/>
+									</FieldDefinitions>
+								</DataShape>
+								<Rows>
+									<Row>
+										<code><![CDATA[// result: INFOTABLE dataShape: "PTCSC.Utilization.Statistics"
+let result = Things["PTCSC.UtilizationTWImpl.Manager"].GetStatsForAggregateData({
+	AggregatedByUtilizationStateData: AggregatedByUtilizationStateData /* INFOTABLE {"dataShape":"PTCSC.Utilization.Aggregate"} */
+});]]></code>
+									</Row>
+								</Rows>
+							</ConfigurationTable>
+						</ConfigurationTables>
+					</ServiceImplementation>
+					<ServiceImplementation description="" handlerName="Script" name="GetUtilizationOverview">
+						<ConfigurationTables>
+							<ConfigurationTable dataShapeName="" description="" isMultiRow="false" name="Script" ordinal="0">
+								<DataShape>
+									<FieldDefinitions>
+										<FieldDefinition baseType="STRING" description="code" name="code" ordinal="0"/>
+									</FieldDefinitions>
+								</DataShape>
+								<Rows>
+									<Row>
+										<code><![CDATA[var includeCoverage = IncludeMachineCoverage !== false;
+var includeDates = IncludeEffectiveDates === true;
+var includeSummary = IncludeStateSummary !== false;
+var maxMachines = clampInt(MaxMachines, 50, 1, 500);
+var machine = Machine ? ("" + Machine).trim() : "";
+var shiftId = normalizeShiftId(ShiftID);
+var evidenceGaps = [];
+var machineCoverage = { included: false };
+var stateSummary = { included: false };
+var stats = {};
+let result;
+
+try {
+    if (includeCoverage && machine === "") {
+        try {
+            machineCoverage = me.ListUtilizationMachines({
+                StartDate: StartDate,
+                EndDate: EndDate,
+                ShiftID: shiftId,
+                IncludeEffectiveDates: includeDates,
+                MaxItems: maxMachines
+            });
+            machineCoverage.included = true;
+        } catch (coverageError) {
+            evidenceGaps.push("Machine coverage failed: " + coverageError);
+            machineCoverage = { included: false };
+        }
+    }
+
+    if (includeSummary) {
+        try {
+            var summary = me.GetUtilizationStateSummary({
+                StartDate: StartDate,
+                EndDate: EndDate,
+                ShiftID: shiftId,
+                Machine: machine,
+                IncludeStats: true
+            });
+            stateSummary = {
+                included: true,
+                status: summary.status,
+                rows: summary.rows || []
+            };
+            stats = summary.stats || {};
+            if (summary.evidenceGaps && summary.evidenceGaps.length) {
+                for (var i = 0; i < summary.evidenceGaps.length; i++) {
+                    evidenceGaps.push(summary.evidenceGaps[i]);
+                }
+            }
+        } catch (summaryError) {
+            evidenceGaps.push("State summary failed: " + summaryError);
+            stateSummary = { included: false };
+        }
+    }
+
+    result = {
+        status: evidenceGaps.length === 0 ? "success" : "partial",
+        scope: machine !== "" ? "machine" : "all",
+        machine: machine !== "" ? machine : null,
+        startDate: iso(StartDate),
+        endDate: iso(EndDate),
+        machineCoverage: machineCoverage,
+        stateSummary: stateSummary,
+        stats: stats,
+        evidenceGaps: evidenceGaps
+    };
+} catch (e) {
+    result = {
+        status: "error",
+        code: "GET_UTILIZATION_OVERVIEW_FAILED",
+        message: "" + e,
+        evidenceGaps: evidenceGaps
+    };
+}
+
+
+function clampInt(value, fallback, min, max) {
+    var n = parseInt(value, 10);
+    if (isNaN(n)) {
+        n = fallback;
+    }
+    if (n < min) {
+        n = min;
+    }
+    if (n >max) {
+        n = max;
+    }
+    return n;
+}
+
+function iso(value) {
+    if (value === undefined || value === null || value === "") {
+        return null;
+    }
+    try {
+        return value.toISOString();
+    } catch (e) {
+        return "" + value;
+    }
+}
+
+function rowValue(row, names, fallback) {
+    for (var i = 0; i < names.length; i++) {
+        var n = names[i];
+        if (row[n] !== undefined && row[n] !== null) {
+            return row[n];
+        }
+    }
+    return fallback;
+}
+
+function normalizeShiftId(value) {
+    var s = value ? ("" + value).trim() : "";
+    var lower = s.toLowerCase();
+    if (s === "" || lower === "all" || lower === "any" || s === "*") {
+        return "";
+    }
+    return s;
+}]]></code>
+									</Row>
+								</Rows>
+							</ConfigurationTable>
+						</ConfigurationTables>
+					</ServiceImplementation>
+					<ServiceImplementation description="" handlerName="Script" name="GetUtilizationRecords">
+						<ConfigurationTables>
+							<ConfigurationTable dataShapeName="" description="" isMultiRow="false" name="Script" ordinal="0">
+								<DataShape>
+									<FieldDefinitions>
+										<FieldDefinition baseType="STRING" description="code" name="code" ordinal="0"/>
+									</FieldDefinitions>
+								</DataShape>
+								<Rows>
+									<Row>
+										<code><![CDATA[var limit = clampInt(Limit, 50, 1, 200);
+var offset = clampInt(Offset, 0, 0, 1000000);
+var machine = Machine ? ("" + Machine).trim() : "";
+var shiftId = normalizeShiftId(ShiftID);
+var rows = [];
+let result;
+
+try {
+    var records;
+    if (machine !== "") {
+        records = me.GetUtilizationRecordsByMachine({
+            StartDate: StartDate,
+            EndDate: EndDate,
+            ShiftID: shiftId,
+            Machine: machine
+        });
+    } else {
+        records = Things["PTCSC.UtilizationTWImpl.Manager"].GetUtilizationRecords({
+            StartDate: StartDate,
+            EndDate: EndDate,
+            ShiftID: shiftId
+        });
+    }
+
+    var total = records && records.rows ? records.rows.length : 0;
+    var end = Math.min(total, offset + limit);
+    for (var i = offset; i < end; i++) {
+        var r = records.rows[i];
+        rows.push({
+            equipmentId: rowValue(r, ["EquipmentID", "equipmentId", "Machine", "name"], ""),
+            equipmentDescription: rowValue(r, ["EquipmentDesc", "equipmentDescription", "description"], ""),
+            eventStart: iso(rowValue(r, ["EventStart", "eventStart", "timestamp"], null)),
+            utilizationState: rowValue(r, ["UtilizationState", "utilizationState"], ""),
+            reasonGroup: rowValue(r, ["ReasonGroup", "reasonGroup"], ""),
+            reason: rowValue(r, ["Reason", "reason"], ""),
+            shiftId: rowValue(r, ["ShiftID", "shiftId"], ""),
+            durationSeconds: rowValue(r, ["Duration", "duration", "DurationSeconds"], null)
+        });
+    }
+
+    result = {
+        status: "success",
+        scope: machine !== "" ? "machine" : "all",
+        machine: machine !== "" ? machine : null,
+        startDate: iso(StartDate),
+        endDate: iso(EndDate),
+        totalRows: total,
+        returnedRows: rows.length,
+        offset: offset,
+        limit: limit,
+        hasMore: end < total,
+        rows: rows
+    };
+} catch (e) {
+    result = {
+        status: "error",
+        code: "GET_UTILIZATION_RECORDS_FAILED",
+        message: "" + e,
+        rows: []
+    };
+}
+
+
+function clampInt(value, fallback, min, max) {
+    var n = parseInt(value, 10);
+    if (isNaN(n)) {
+        n = fallback;
+    }
+    if (n < min) {
+        n = min;
+    }
+    if (n >max) {
+        n = max;
+    }
+    return n;
+}
+
+function iso(value) {
+    if (value === undefined || value === null || value === "") {
+        return null;
+    }
+    try {
+        return value.toISOString();
+    } catch (e) {
+        return "" + value;
+    }
+}
+
+function rowValue(row, names, fallback) {
+    for (var i = 0; i < names.length; i++) {
+        var n = names[i];
+        if (row[n] !== undefined && row[n] !== null) {
+            return row[n];
+        }
+    }
+    return fallback;
+}
+
+function normalizeShiftId(value) {
+    var s = value ? ("" + value).trim() : "";
+    var lower = s.toLowerCase();
+    if (s === "" || lower === "all" || lower === "any" || s === "*") {
+        return "";
+    }
+    return s;
+}
+]]></code>
+									</Row>
+								</Rows>
+							</ConfigurationTable>
+						</ConfigurationTables>
+					</ServiceImplementation>
+					<ServiceImplementation description="" handlerName="Script" name="GetUtilizationRecordsByMachine">
+						<ConfigurationTables>
+							<ConfigurationTable dataShapeName="" description="" isMultiRow="false" name="Script" ordinal="0">
+								<DataShape>
+									<FieldDefinitions>
+										<FieldDefinition baseType="STRING" description="code" name="code" ordinal="0"/>
+									</FieldDefinitions>
+								</DataShape>
+								<Rows>
+									<Row>
+										<code><![CDATA[// result: INFOTABLE dataShape: "PTCSC.Utilization.UtilizationWithDuration"
+let result = Things["PTCSC.UtilizationTWImpl.Manager"].GetUtilizationRecordsByMachine({
+	StartDate: StartDate /* DATETIME */,
+	ShiftID: ShiftID /* STRING */,
+	EndDate: EndDate /* DATETIME */,
+	Machine: Machine /* STRING */
+});]]></code>
+									</Row>
+								</Rows>
+							</ConfigurationTable>
+						</ConfigurationTables>
+					</ServiceImplementation>
+					<ServiceImplementation description="" handlerName="Script" name="GetUtilizationStateSummary">
+						<ConfigurationTables>
+							<ConfigurationTable dataShapeName="" description="" isMultiRow="false" name="Script" ordinal="0">
+								<DataShape>
+									<FieldDefinitions>
+										<FieldDefinition baseType="STRING" description="code" name="code" ordinal="0"/>
+									</FieldDefinitions>
+								</DataShape>
+								<Rows>
+									<Row>
+										<code><![CDATA[var machine = Machine ? ("" + Machine).trim() : "";
+var shiftId = normalizeShiftId(ShiftID);
+var includeStats = IncludeStats !== false;
+var rows = [];
+var stats = {};
+var evidenceGaps = [];
+let result;
+
+try {
+    var aggregate;
+
+    if (machine !== "") {
+        var records = me.GetUtilizationRecordsByMachine({
+            StartDate: StartDate,
+            EndDate: EndDate,
+            ShiftID: shiftId,
+            Machine: machine
+        });
+        aggregate = me.GetAggregatesByUtilizationState({
+            UtilizationRecords: records
+        });
+    } else {
+        aggregate = Things["PTCSC.UtilizationUI.Manager"].GetAggregatesByUtilizationStateTimeFence({
+            StartDate: StartDate,
+            EndDate: EndDate,
+            ShiftID: shiftId
+        });
+    }
+
+    if (aggregate && aggregate.rows) {
+        for (var i = 0; i < aggregate.rows.length; i++) {
+            var r = aggregate.rows[i];
+            rows.push({
+                utilizationState: rowValue(r, ["UtilizationState", "utilizationState"], ""),
+                percentage: rowValue(r, ["Percentage", "percentage"], null),
+                count: rowValue(r, ["COUNT_Duration", "count", "Count"], null),
+                sumDurationSeconds: rowValue(r, ["SUM_Duration", "sumDurationSeconds"], null),
+                sumDurationMinutes: rowValue(r, ["SUM_Duration_Minutes", "sumDurationMinutes"], null),
+                sumDurationHours: rowValue(r, ["SUM_Duration_Hours", "sumDurationHours"], null),
+                minDurationSeconds: rowValue(r, ["MIN_Duration", "minDurationSeconds"], null),
+                maxDurationSeconds: rowValue(r, ["MAX_Duration", "maxDurationSeconds"], null),
+                averageDurationSeconds: rowValue(r, ["AVERAGE_Duration", "averageDurationSeconds"], null)
+            });
+        }
+    }
+
+    if (includeStats && aggregate && aggregate.rows && aggregate.rows.length >0) {
+        try {
+            var statsTable = Things["SCPA_Utilization_helper"].GetStatsForAggregateData({
+                AggregatedByUtilizationStateData: aggregate
+            });
+            if (statsTable && statsTable.rows && statsTable.rows.length >0) {
+                var s = statsTable.rows[0];
+                stats = {
+                    utilizationPercent: rowValue(s, ["UtilizationPercent"], null),
+                    uptimeSeconds: rowValue(s, ["UptimeSec"], null),
+                    downtimeSeconds: rowValue(s, ["DowntimeSec"], null),
+                    totalTimeSeconds: rowValue(s, ["TotalTimeSec"], null),
+                    eventCount: rowValue(s, ["EventCount"], null)
+                };
+            }
+        } catch (statsError) {
+            evidenceGaps.push("Stats route failed: " + statsError);
+        }
+    }
+
+    result = {
+        status: rows.length >0 ? "success" : "empty",
+        code: rows.length >0 ? null : "NO_UTILIZATION_AGGREGATES",
+        scope: machine !== "" ? "machine" : "all",
+        machine: machine !== "" ? machine : null,
+        startDate: iso(StartDate),
+        endDate: iso(EndDate),
+        rows: rows,
+        stats: stats,
+        evidenceGaps: evidenceGaps
+    };
+} catch (e) {
+    result = {
+        status: "error",
+        code: "GET_UTILIZATION_STATE_SUMMARY_FAILED",
+        message: "" + e,
+        rows: [],
+        stats: {}
+    };
+}
+
+
+function clampInt(value, fallback, min, max) {
+    var n = parseInt(value, 10);
+    if (isNaN(n)) {
+        n = fallback;
+    }
+    if (n < min) {
+        n = min;
+    }
+    if (n >max) {
+        n = max;
+    }
+    return n;
+}
+
+function iso(value) {
+    if (value === undefined || value === null || value === "") {
+        return null;
+    }
+    try {
+        return value.toISOString();
+    } catch (e) {
+        return "" + value;
+    }
+}
+
+function rowValue(row, names, fallback) {
+    for (var i = 0; i < names.length; i++) {
+        var n = names[i];
+        if (row[n] !== undefined && row[n] !== null) {
+            return row[n];
+        }
+    }
+    return fallback;
+}
+
+function normalizeShiftId(value) {
+    var s = value ? ("" + value).trim() : "";
+    var lower = s.toLowerCase();
+    if (s === "" || lower === "all" || lower === "any" || s === "*") {
+        return "";
+    }
+    return s;
+}
+]]></code>
+									</Row>
+								</Rows>
+							</ConfigurationTable>
+						</ConfigurationTables>
+					</ServiceImplementation>
+					<ServiceImplementation description="" handlerName="Script" name="ListUtilizationMachines">
+						<ConfigurationTables>
+							<ConfigurationTable dataShapeName="" description="" isMultiRow="false" name="Script" ordinal="0">
+								<DataShape>
+									<FieldDefinitions>
+										<FieldDefinition baseType="STRING" description="code" name="code" ordinal="0"/>
+									</FieldDefinitions>
+								</DataShape>
+								<Rows>
+									<Row>
+										<code><![CDATA[var maxItems = clampInt(MaxItems, 50, 1, 500);
+var includeDatesRequested = IncludeEffectiveDates === true;
+var hasDateWindow = hasValue(StartDate) && hasValue(EndDate);
+var includeDates = includeDatesRequested && hasDateWindow;
+var rows = [];
+var evidenceGaps = [];
+var machines;
+var shiftId = normalizeShiftId(ShiftID);
+var dateAwareRows = -1;
+var fallbackUsed = false;
+
+let result;
+
+try {
+    if (includeDatesRequested && !hasDateWindow) {
+        evidenceGaps.push({
+            code: "EFFECTIVE_DATES_REQUIRE_START_END",
+            message: "IncludeEffectiveDates was requested without both StartDate and EndDate; returned the base utilization machine listing instead."
+        });
+    }
+
+    if (includeDates) {
+        machines = me.GetMachineListingWithDates({
+            StartDate: StartDate,
+            EndDate: EndDate,
+            ShiftID: shiftId
+        });
+        dateAwareRows = machines && machines.rows ? machines.rows.length : 0;
+
+        if (dateAwareRows === 0) {
+            var baseMachines = me.GetMachineListing({
+                UsesSelection: false
+            });
+            var baseRows = baseMachines && baseMachines.rows ? baseMachines.rows.length : 0;
+            if (baseRows >0) {
+                machines = baseMachines;
+                includeDates = false;
+                fallbackUsed = true;
+                evidenceGaps.push({
+                    code: "DATE_AWARE_LISTING_EMPTY_BASE_LISTING_USED",
+                    message: "The date-aware machine listing returned no rows, but the base utilization machine listing returned machines. Rows are listed without effective date fields."
+                });
+            }
+        }
+    } else {
+        machines = me.GetMachineListing({
+            UsesSelection: false
+        });
+    }
+
+    var total = machines && machines.rows ? machines.rows.length : 0;
+    var returned = Math.min(total, maxItems);
+
+    for (var i = 0; i < returned; i++) {
+        var r = machines.rows[i];
+        rows.push({
+            machineName: rowValue(r, ["name", "Name", "Machine", "ThingName"], ""),
+            displayName: rowValue(r, ["displayName", "DisplayName", "Name", "name", "EquipmentID"], ""),
+            description: rowValue(r, ["description", "Description", "EquipmentDesc"], ""),
+            effectiveStartDate: iso(rowValue(r, ["EffectiveStartDate", "effectiveStartDate", "StartDate"], null)),
+            effectiveEndDate: iso(rowValue(r, ["EffectiveEndDate", "effectiveEndDate", "EndDate"], null))
+        });
+    }
+
+    result = {
+        status: "success",
+        machineCount: total,
+        returnedRows: returned,
+        truncated: total >returned,
+        includeEffectiveDates: includeDates,
+        includeEffectiveDatesRequested: includeDatesRequested,
+        dateAwareReturnedRows: dateAwareRows,
+        fallbackUsed: fallbackUsed,
+        rows: rows,
+        evidenceGaps: evidenceGaps
+    };
+} catch (e) {
+    result = {
+        status: "error",
+        code: "LIST_UTILIZATION_MACHINES_FAILED",
+        message: "" + e,
+        rows: []
+    };
+}
+
+function clampInt(value, fallback, min, max) {
+    var n = parseInt(value, 10);
+    if (isNaN(n)) {
+        n = fallback;
+    }
+    if (n < min) {
+        n = min;
+    }
+    if (n >max) {
+        n = max;
+    }
+    return n;
+}
+
+function hasValue(value) {
+    return value !== undefined && value !== null && value !== "";
+}
+
+function iso(value) {
+    if (value === undefined || value === null || value === "") {
+        return null;
+    }
+    try {
+        return value.toISOString();
+    } catch (e) {
+        return "" + value;
+    }
+}
+
+function normalizeShiftId(value) {
+    var s = value ? ("" + value).trim() : "";
+    var lower = s.toLowerCase();
+    if (s === "" || lower === "all" || lower === "any" || s === "*") {
+        return "";
+    }
+    return s;
+}
+
+function rowValue(row, names, fallback) {
+    for (var i = 0; i < names.length; i++) {
+        var n = names[i];
+        if (row[n] !== undefined && row[n] !== null) {
+            return row[n];
+        }
+    }
+    return fallback;
+}]]></code>
+									</Row>
+								</Rows>
+							</ConfigurationTable>
+						</ConfigurationTables>
+					</ServiceImplementation>
+				</ServiceImplementations>
+				<Subscriptions/>
+			</ThingShape>
+			<PropertyBindings/>
+			<RemotePropertyBindings/>
+			<RemoteServiceBindings/>
+			<RemoteEventBindings/>
+			<AlertConfigurations/>
+			<ImplementedShapes/>
+			<ThingProperties/>
+			<ConfigurationChanges/>
+		</Thing>
+	</Things>
+	<Logs/>
+	<Authenticators/>
+	<QueueProviderPackages/>
+	<ThingPackages/>
+	<NotificationDefinitions/>
+	<ApplicationKeys/>
+	<StateDefinitions/>
+	<ThingTemplates/>
+	<ExtensionPackages/>
+	<Organizations/>
+	<Menus/>
+	<ThingGroups/>
+	<Resources/>
+	<DataTags/>
+	<ThingShapes/>
+	<Subsystems/>
+	<NotificationContents/>
+</Entities>

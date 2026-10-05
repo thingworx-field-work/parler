@@ -1,0 +1,10 @@
+{
+  "description": "group_aggregate sum over numeric column v grouped by g.",
+  "arguments": {
+    "cacheId": "<PUT_CACHED_TABLE_ID>",
+    "mode": "group_aggregate",
+    "groupBy": "g",
+    "aggregateColumn": "v",
+    "fn": "sum"
+  }
+}

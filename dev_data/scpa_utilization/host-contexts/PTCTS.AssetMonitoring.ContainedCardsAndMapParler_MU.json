@@ -1,0 +1,24 @@
+{
+    "schema": "parler-host-context-template",
+    "key": "PTCTS.AssetMonitoring.ContainedCardsAndMapParler_MU",
+    "description": "Context for Asset Monitoring cards and map page query parameters.",
+    "requiredContextFields": ["JSONForQuerySelections"],
+    "maxRenderedChars": 4000,
+    "promptTemplate": [
+      "Host page context for this turn:",
+      "- Page: Asset Monitoring contained cards and map",
+      "- Display mode: each visible asset is shown as a card, and the map shows asset locations when location data is available.",
+      "",
+      "{{format.jsonFence(context.JSONForQuerySelections, \"asset-monitoring-query-parameters\")}}",
+      "",
+      "Tool guidance:",
+      "- In this page, the current visible asset set can be queried via tool `invoke_service` with entityType=Thing, entityName=PTCTS.ConfigurationManagement.Manager, serviceName=GetAssetModelForView, and parameters shaped as `{ \"JSONForQuerySelections\": <the fenced JSON block named asset-monitoring-query-parameters> }`. Do not flatten fields such as selectedNetworkNode or selectedEntityTypes into the top-level service parameters.",
+      "- Card and map display details describe how the current page presents assets; they are not query filters and should not be added to the service parameters.",
+      "- When the user asks about visible assets, cards, locations, or the map, use the same fenced query parameters to retrieve the visible asset set before answering.",
+      "- For built-in entity-listing questions, inspect the fenced JSON block named asset-monitoring-query-parameters. If it contains multiple selectedEntityTypes rows, treat them as a union of selected asset types. For each row, use its exact EntityType and EntityName with `query_entities_by_taxonomy`; do not call `resolve_asset_type` for those host-context-selected entity types.",
+      "- If selectedNetworkNode is also present, that value is a hierarchy node id from the page. For each `query_entities_by_taxonomy` call, pass selectedNetworkNode as `hierarchyNodeId`; do not pass it as `hierarchyNodeName`. Union and deduplicate the per-asset-type results.",
+      "- If selectedEntityTypes is absent or empty, the page scope means all asset types. Prefer the page service route (`invoke_service` with JSONForQuerySelections wrapper) for current-visible-asset questions instead of inventing an asset type.",
+      "- If selectedNetworkNode is absent, treat the page as unscoped by hierarchy unless the user explicitly names a node.",
+      "- Explicit user text wins over host page blocks."
+    ]
+  }

@@ -1,0 +1,98 @@
+<Entities>
+	<!--
+	  Included entity definitions (loaded from Entities/ folder at import):
+	  - AgentThreadDataTable (DataTable Thing, DataShape: AgentThreadData): thread/session metadata
+	  - AgentMessageStream (Stream Thing, DataShape: AgentMessageData): message entries per thread
+	  - AgentConversationSummary (DataShape): conversationId, title — used by GetOrCreateConversationId result
+	  - ParlerConversationHistory (DataShape): Stream history row + timestamp for AI Parler InfoTable binding
+	  - HierarchyNode_DS (DataShape): id (key) + name — hierarchy network node rows for GetFlatten/Resolve/GetRoot/GetChildNodes
+	  - ResolvedDocument (DataShape): documentId (key) + alwaysInclude + appliesToMany — resolved document-set rows for the overridable ResolveDocumentSet service
+	  - LLMAPIProviderShape (ThingShape): marker for LLM API Provider Things; AgentThing.llmApiProviderRef aspect
+	  - OpenAIChatV4Provider / OpenAIChatV5Provider / AzureOpenAIChatV4Provider / AzureOpenAIChatV5Provider / AnthropicMessagesProvider (ThingTemplate + ThingPackage): built-in Provider Things per docs/agent/llm-api-provider.md §4.1
+	  - ParlerGateway (ThingTemplate): thingPackage ParlerGateway (base SDKGateway from Java annotation); SubmitUserPrompt on gateway Thing
+	  - AgentThing.ParlerStreamToRemoteThing: AlwaysOn wire streaming via bound Gateway ReceiveMessage
+	-->
+	<ExtensionPackages>
+		<ExtensionPackage name="parler-agent"
+						  description="Parler Java agent extension for ThingWorx"
+						  vendor="ThingWorx"
+					  packageVersion="0.1.250"
+						  buildNumber="0"
+						  minimumThingWorxVersion="9.5.0"
+						  haCompatible="true">
+			<!-- Shadow JAR FileResource(s) injected on assemble into ExtensionPackage only (ThingWorx: shared JAR must not be duplicated per ThingPackage). -->
+			<JarResources>
+			</JarResources>
+		</ExtensionPackage>
+	</ExtensionPackages>
+	<ThingShapes>
+		<ThingShape name="LLMAPIProviderShape"
+			description="Marker for Things that act as an LLM API Provider; filters AgentThing.llmApiProviderRef"/>
+	</ThingShapes>
+	<ThingPackages>
+		<ThingPackage name="OpenAIChatV4Provider"
+				description="OpenAI Chat Completions API (max_tokens family) Provider"
+				className="com.thingworx.things.agent.llm.providers.openai.OpenAIChatV4Provider"
+				aspect.isCreatable="true">
+			<HandlerDefinitions/>
+		</ThingPackage>
+		<ThingPackage name="OpenAIChatV5Provider"
+				description="OpenAI Chat Completions API (max_completion_tokens / reasoning_effort) Provider"
+				className="com.thingworx.things.agent.llm.providers.openai.OpenAIChatV5Provider"
+				aspect.isCreatable="true">
+			<HandlerDefinitions/>
+		</ThingPackage>
+		<ThingPackage name="AzureOpenAIChatV4Provider"
+				description="Azure OpenAI Chat Completions v4 Provider"
+				className="com.thingworx.things.agent.llm.providers.azureopenai.AzureOpenAIChatV4Provider"
+				aspect.isCreatable="true">
+			<HandlerDefinitions/>
+		</ThingPackage>
+		<ThingPackage name="AzureOpenAIChatV5Provider"
+				description="Azure OpenAI Chat Completions v5 Provider"
+				className="com.thingworx.things.agent.llm.providers.azureopenai.AzureOpenAIChatV5Provider"
+				aspect.isCreatable="true">
+			<HandlerDefinitions/>
+		</ThingPackage>
+		<ThingPackage name="AnthropicMessagesProvider"
+				description="Anthropic Messages API Provider (Claude Sonnet/Opus/Haiku)"
+				className="com.thingworx.things.agent.llm.providers.anthropic.AnthropicMessagesProvider"
+				aspect.isCreatable="true">
+			<HandlerDefinitions/>
+		</ThingPackage>
+		<ThingPackage name="AgentThing" description="AI Agent Thing" className="com.thingworx.things.agent.AgentThing"
+			 aspect.isCreatable="true">
+			<HandlerDefinitions/>
+		</ThingPackage>
+		<ThingPackage name="ParlerGateway" description="Parler AlwaysOn transient gateway (SDKGateway)"
+			 className="com.thingworx.things.agent.ParlerGateway" aspect.isCreatable="true">
+			<HandlerDefinitions/>
+		</ThingPackage>
+		<ThingPackage name="AgentLlmUsageHelper"
+				description="Parler LLM usage report helper (CC-7 M0b)"
+				className="com.thingworx.things.agent.AgentLlmUsageHelperThing"
+				aspect.isCreatable="true">
+			<HandlerDefinitions/>
+		</ThingPackage>
+	</ThingPackages>
+	<ThingTemplates>
+		<ThingTemplate name="OpenAIChatV4Provider" thingPackage="OpenAIChatV4Provider"/>
+		<ThingTemplate name="OpenAIChatV5Provider" thingPackage="OpenAIChatV5Provider"/>
+		<ThingTemplate name="AzureOpenAIChatV4Provider" thingPackage="AzureOpenAIChatV4Provider"/>
+		<ThingTemplate name="AzureOpenAIChatV5Provider" thingPackage="AzureOpenAIChatV5Provider"/>
+		<ThingTemplate name="AnthropicMessagesProvider" thingPackage="AnthropicMessagesProvider"/>
+		<ThingTemplate name="AIAgent" description="AI Agent" thingPackage="AgentThing" />
+		<!-- thingPackage required; do not set baseThingTemplate here — ThingTemplate.fromXML skips thingPackage when base is set,
+		     which would leave thingPackageName empty and make getThingPackage() fall back to SDKGateway (no SubmitUserPrompt).
+		     Base SDKGateway is applied from @ThingworxBaseTemplateDefinition on ParlerGateway via scanAndSetBaseThingTemplate(). -->
+		<ThingTemplate name="ParlerGateway" description="Parler AlwaysOn gateway (SubmitUserPrompt; Thing name = conversationId)"
+			 thingPackage="ParlerGateway" />
+		<ThingTemplate name="AgentLlmUsageHelper" description="Parler LLM usage report helper"
+			 thingPackage="AgentLlmUsageHelper" />
+	</ThingTemplates>
+	<!--
+	  Configured entities (XML in Entities/DataShapes/):
+	  - AgentThreadDataTable (DataTable), AgentMessageStream (Stream).
+	  See docs/agent/AGENT-CONTEXT.md § Conversation persistence.
+	-->
+</Entities>

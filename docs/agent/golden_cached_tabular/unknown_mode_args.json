@@ -1,0 +1,12 @@
+{
+  "description": "Negative N-05: mode not in allowed set.",
+  "arguments": {
+    "cacheId": "<PUT_CACHED_TABLE_ID>",
+    "mode": "pivot",
+    "sortBy": "x"
+  },
+  "expect": {
+    "status": "error",
+    "code": "UNKNOWN_MODE"
+  }
+}

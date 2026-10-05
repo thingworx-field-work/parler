@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "suite": "user-context-baseline-ten-turns-v1",
+  "description": "Manual-review manifest for the User's restored dataset, not a numeric golden. No reference fields are supplied until independent evidence is available. Existing judge returns insufficient_evidence/no_reference_evidence for these turns; saved wire evidence is reviewed separately using reviewCriteria and suite judgmentFocus.",
+  "automaticJudgmentPolicy": "Record evidence; never count transport done as task pass. Do not replace missing references with empty reference objects, which the current judge could vacuously pass.",
+  "turns": {
+    "1": { "terminal": "done", "reviewCriteria": ["One delivered pie chart for ORD-Contacting-01", "Local 2025-09-10 boundaries", "Status values, denominator and coverage verified against source"] },
+    "2": { "terminal": "done", "reviewCriteria": ["Two separate pies, one per ORD asset", "Local 2025-09-14 boundaries", "No cross-asset or prior-date data reuse"] },
+    "3": { "terminal": "done", "reviewCriteria": ["Record run date, resolved year and any clarification", "Historical alert query for ORD-Contacting-01", "22:00 to next-day 02:00 in user timezone"] },
+    "4": { "terminal": "done", "reviewCriteria": ["ORD-Contacting-02 identity", "Same alert task and actual turn-3 window"] },
+    "5": { "terminal": "done", "reviewCriteria": ["Resolved MUC BenchScale 02 Thing identity", "Same alert task and actual turn-3 window"] },
+    "6": { "terminal": "done", "reviewCriteria": ["All three assets included", "2026-09-15T02:00:00Z through 2026-09-15T06:00:00Z", "Corrected evidence, not a year-only label change"] },
+    "7": { "terminal": "done", "reviewCriteria": ["Both ORD contactForce trends delivered", "Corrected 2026 window", "Units and source coverage checked"] },
+    "8": { "terminal": "done", "reviewCriteria": ["MUC BenchScale 02 and ORD-Contacting-02 operationalVoltage", "Corrected 2026 window", "Both trends delivered or missing data/property evidenced"] },
+    "9": { "terminal": "done", "reviewCriteria": ["ORD-Contacting-02 Pearson coefficient independently reproducible if computable", "Alignment method, missing-value policy and paired observation count stated", "No coefficient invented for missing/constant/insufficient data"] },
+    "10": { "terminal": "done", "reviewCriteria": ["Same method on ORD-Contacting-01", "Both assets compared over corrected window", "Differences supported by coefficients and paired counts; no causal claim"] }
+  }
+}

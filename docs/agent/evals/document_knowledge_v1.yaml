@@ -1,0 +1,118 @@
+# Document knowledge tools eval (live ThingWorx).
+# Phase D: health-status + manual recommendation flow per docs/agent/document-chunk-tools.md §14.
+#
+# Prerequisites on the target AgentThing:
+#   - documentKnowledgeBuiltinsEnabled = true
+#   - documentKnowledgeRepository + root path populated (e.g. AIDocRepository /document-knowledge)
+#   - fernwick-carbaq-ops-v2 package indexed (see dev_data/future_repo/document-knowledge/fernwick-carbaq-ops-v2/)
+#
+# Run from repo root (default yaml agent matrix — no env thingName override needed):
+#   export AGENT_EVAL_HAS_DOCUMENT_KNOWLEDGE=1
+#   uv run agent-eval --suite docs/agent/evals/document_knowledge_v1.yaml --agent-filter gpt_5_5
+#
+# Env matrix (when local Thing names differ): set AGENT_EVAL_AGENT_GPT_5_5 to the configured AgentThing.
+#   export AGENT_EVAL_HAS_DOCUMENT_KNOWLEDGE=1
+#   export AGENT_EVAL_AGENT_GPT_5_5=YourDocumentKnowledgeAgent
+#   uv run agent-eval --suite docs/agent/evals/document_knowledge_v1.yaml --agent-matrix env --agent-filter gpt_5_5
+#
+# Live-status case additionally requires AGENT_EVAL_DOCUMENT_KNOWLEDGE_LIVE_STATUS=1 when a dev CarbaQ asset
+# with alert/property data is available for query_alert_summary / get_property_values / etc.
+
+version: 1
+suite: document-knowledge-v1
+
+agentMatrix:
+  gpt_5_5:
+    thingName: SCPA_Demo_Agent
+    defaultEnabled: true
+
+cases:
+  - id: chiller_alarm_bpr_manual_guidance
+    tags: [document-knowledge, search-get, happy-path, manual-lookup]
+    skipUnlessEnv: AGENT_EVAL_HAS_DOCUMENT_KNOWLEDGE
+    skipReason: document_knowledge_not_configured_on_dev_agent
+    turns:
+      - user: >
+          A CarbaQ unit is in alarm "Chiller High Pressure Shutdown" with elevated receiver pressure.
+          What does the operations manual recommend for back pressure regulator (BPR) adjustment?
+          Use document search tools before answering and cite the manual section you relied on.
+        acceptableOutcomes:
+          - name: search_then_get_with_bpr_guidance
+            score: 1.0
+            assertions:
+              - toolCalled: search_document_chunks
+              - toolCalled: get_document_chunk
+              - toolResultRegex: "troubleshooting-chiller-high-pressure"
+              - toolResultRegex: "(?i)(sourceLinks|sourceHref|pageStart)"
+              - finalRegex: "(?i)(back pressure|BPR|pressure regulator|140\\s*psi|1/8)"
+              - finalRegex: "(?i)(manual|troubleshooting|page\\s*25|section)"
+              - finalRegex: "\\[[^\\]]+\\]\\(/Thingworx/FileRepositories/[^)\\s]+#page=\\d+\\)"
+          - name: search_with_partial_guidance
+            score: 0.75
+            assertions:
+              - toolCalled: search_document_chunks
+              - toolCalled: get_document_chunk
+              - finalRegex: "(?i)(chiller|high pressure|shutdown|receiver)"
+        rejectIf:
+          - toolNotCalled: search_document_chunks
+          - finalRegex: "(?i)(I (?:don't|do not) have access|no manual|cannot search documents)"
+
+  - id: document_search_unrelated_no_match
+    tags: [document-knowledge, empty-search, degraded]
+    skipUnlessEnv: AGENT_EVAL_HAS_DOCUMENT_KNOWLEDGE
+    skipReason: document_knowledge_not_configured_on_dev_agent
+    turns:
+      - user: >
+          Search the CarbaQ operations manual for "quantum flux capacitor calibration procedure"
+          and report what you find. Use search_document_chunks.
+        acceptableOutcomes:
+          - name: no_match_acknowledged
+            score: 1.0
+            assertions:
+              - toolCalled: search_document_chunks
+              - finalRegex: "(?i)(no matching|not found|no relevant|could not find|empty|degraded|no results|nothing)"
+          - name: search_ran_low_confidence
+            score: 0.7
+            assertions:
+              - toolCalled: search_document_chunks
+              - toolResultRegex: "(?i)(\"matches\"\\s*:\\s*\\[\\]|\"degraded\"\\s*:\\s*true|EMPTY|NO_MATCH)"
+        rejectIf:
+          - toolNotCalled: search_document_chunks
+          - finalRegex: "(?i)(calibrat(?:e|ion) procedure for (?:the )?quantum flux capacitor)"
+
+  - id: chiller_alarm_health_then_manual
+    tags: [document-knowledge, multi-step, health-status, live-status-first]
+    skipUnlessEnv:
+      - AGENT_EVAL_HAS_DOCUMENT_KNOWLEDGE
+      - AGENT_EVAL_DOCUMENT_KNOWLEDGE_LIVE_STATUS
+    skipReason: document_knowledge_live_status_fixture_unavailable
+    turns:
+      - user: >
+          We have alarm "Chiller High Pressure Shutdown" on a CarbaQ CO2 capture unit.
+          Summarize live status if you can, then find manual troubleshooting for moisture in the chiller/carbon bed.
+        acceptableOutcomes:
+          - name: live_status_then_manual_search
+            score: 1.0
+            assertions:
+              - anyOf:
+                  - toolsCalledSubsequence:
+                      - query_alert_summary
+                      - search_document_chunks
+                  - toolsCalledSubsequence:
+                      - query_alert_history
+                      - search_document_chunks
+                  - toolsCalledSubsequence:
+                      - get_property_values
+                      - search_document_chunks
+                  - toolsCalledSubsequence:
+                      - query_property_history
+                      - search_document_chunks
+              - toolResultRegex: "troubleshooting-chiller-high-pressure-moisture"
+              - finalRegex: "(?i)(moisture|depressuriz|carbon bed|chiller)"
+        rejectIf:
+          - allOf:
+              - toolCalled: search_document_chunks
+              - toolNotCalled: query_alert_summary
+              - toolNotCalled: query_alert_history
+              - toolNotCalled: get_property_values
+              - toolNotCalled: query_property_history

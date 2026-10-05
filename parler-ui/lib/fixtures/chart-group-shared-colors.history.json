@@ -1,0 +1,87 @@
+{
+  "format" : "ai-parler-history-v1",
+  "rows" : [ {
+    "kind" : "user",
+    "text" : "Compare today's utilization of Oven-01 and Oven-02"
+  }, {
+    "kind" : "assistant",
+    "requestId" : "am-sc11",
+    "assistantMessageId" : "am-sc11",
+    "markdown" : "Both ovens ran most of the day; Oven-01 also had setup time.",
+    "charts" : [ {
+      "chartId" : "c1",
+      "kind" : "pie",
+      "series" : [ {
+        "name" : "state",
+        "x" : [ "Running", "Down", "Setup" ],
+        "y" : [ 360, 90, 30 ]
+      } ],
+      "source" : {
+        "sourceResolved" : "cache_id",
+        "pointCount" : 3,
+        "sourceCacheId" : "dce5550b-faf0-48d3-b3c1-e3cd44e41cf5",
+        "rowCount" : 3,
+        "transformSummary" : "pie(top_with_other)",
+        "sourceColumns" : [ "state", "minutes" ],
+        "truncationApplied" : false
+      },
+      "title" : "oven1"
+    }, {
+      "chartId" : "c2",
+      "kind" : "pie",
+      "series" : [ {
+        "name" : "state",
+        "x" : [ "Running", "Down" ],
+        "y" : [ 400, 80 ]
+      } ],
+      "source" : {
+        "sourceResolved" : "cache_id",
+        "pointCount" : 2,
+        "sourceCacheId" : "9c51a62c-66a5-4f98-a2b9-e2f6a46dfcdc",
+        "rowCount" : 2,
+        "transformSummary" : "pie(top_with_other)",
+        "sourceColumns" : [ "state", "minutes" ],
+        "truncationApplied" : false
+      },
+      "title" : "oven2"
+    } ],
+    "tables" : [ ],
+    "groups" : [ {
+      "layout" : "auto",
+      "sharedCategories" : {
+        "keys" : [ "Running", "Down", "Setup" ],
+        "dimension" : "utilization state"
+      },
+      "summary" : {
+        "ready" : 2,
+        "expected" : 2,
+        "final" : true,
+        "cancelled" : 0,
+        "noData" : 0,
+        "error" : 0
+      },
+      "groupId" : "g1",
+      "members" : [ {
+        "colorShared" : true,
+        "chartId" : "c1",
+        "expectedType" : "chart",
+        "name" : "Oven-01",
+        "state" : "ready",
+        "key" : "oven1",
+        "order" : 0
+      }, {
+        "colorShared" : true,
+        "chartId" : "c2",
+        "expectedType" : "chart",
+        "name" : "Oven-02",
+        "state" : "ready",
+        "key" : "oven2",
+        "order" : 1
+      } ],
+      "final" : true,
+      "title" : "Utilization by device",
+      "revision" : 6
+    } ],
+    "activity" : null
+  } ]
+}

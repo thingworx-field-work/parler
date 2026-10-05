@@ -1,0 +1,309 @@
+{
+  "Stacking Robot": {
+    "aliases": [
+      "stacking robots",
+      "stacker robot",
+      "palletizing stacker",
+      "cell stacker"
+    ],
+    "entityType": "ThingShape",
+    "entityName": "PTCTDD.CellfabDataset.StackingRobot_TS",
+    "criticalProperties": [
+      "PTCDisplayName",
+      "PTCMake",
+      "PTCModel",
+      "PTCSerialNumber"
+    ]
+  },
+  "Sealing": {
+    "aliases": [
+      "sealer",
+      "seal machine",
+      "cell sealing",
+      "sealing station"
+    ],
+    "entityType": "ThingShape",
+    "entityName": "PTCTDD.CellfabDataset.Sealing_TS",
+    "criticalProperties": [
+      "PTCDisplayName",
+      "PTCMake",
+      "PTCModel",
+      "PTCSerialNumber"
+    ]
+  },
+  "Contacting": {
+    "aliases": [
+      "contact press",
+      "contacting station",
+      "roll contactor"
+    ],
+    "entityType": "ThingShape",
+    "entityName": "PTCTDD.CellfabDataset.Contacting_TS",
+    "criticalProperties": [
+      "PTCDisplayName",
+      "PTCMake",
+      "PTCModel",
+      "PTCSerialNumber"
+    ]
+  },
+  "Cutting": {
+    "aliases": [
+      "cutter",
+      "cut station",
+      "slitting",
+      "knife cutting"
+    ],
+    "entityType": "ThingShape",
+    "entityName": "PTCTDD.CellfabDataset.Cutting_TS",
+    "criticalProperties": [
+      "PTCDisplayName",
+      "PTCMake",
+      "PTCModel",
+      "PTCSerialNumber"
+    ]
+  },
+  "Slurry Pump": {
+    "aliases": [
+      "slurry pumps",
+      "slurry mixer pump",
+      "mixing pump"
+    ],
+    "entityType": "ThingShape",
+    "entityName": "PTCTDD.CellfabDataset.SlurryPump_TS",
+    "criticalProperties": [
+      "PTCDisplayName",
+      "PTCMake",
+      "PTCModel",
+      "PTCSerialNumber"
+    ]
+  },
+  "Calendering": {
+    "aliases": [
+      "calender",
+      "calendar line",
+      "roll calendering"
+    ],
+    "entityType": "ThingShape",
+    "entityName": "PTCTDD.CellfabDataset.Calendering_TS",
+    "criticalProperties": [
+      "PTCDisplayName",
+      "PTCMake",
+      "PTCModel",
+      "PTCSerialNumber"
+    ]
+  },
+  "Bench Scale": {
+    "aliases": [
+      "bench-scale",
+      "lab scale",
+      "pilot coater",
+      "bench coater"
+    ],
+    "entityType": "ThingShape",
+    "entityName": "PTCTDD.CellfabDataset.BenchScale_TS",
+    "criticalProperties": [
+      "PTCDisplayName",
+      "PTCMake",
+      "PTCModel",
+      "PTCSerialNumber"
+    ]
+  },
+  "Coil Rewinder": {
+    "aliases": [
+      "rewinder",
+      "coil rewind",
+      "jumbo unwind rewind"
+    ],
+    "entityType": "ThingShape",
+    "entityName": "PTCTDD.CellfabDataset.CoilRewinder_TS",
+    "criticalProperties": [
+      "PTCDisplayName",
+      "PTCMake",
+      "PTCModel",
+      "PTCSerialNumber"
+    ]
+  },
+  "Degasing": {
+    "aliases": [
+      "degassing",
+      "degas station",
+      "electrolyte degas"
+    ],
+    "entityType": "ThingShape",
+    "entityName": "PTCTDD.CellfabDataset.Degasing_TS",
+    "criticalProperties": [
+      "PTCDisplayName",
+      "PTCMake",
+      "PTCModel",
+      "PTCSerialNumber"
+    ]
+  },
+  "E-Filling": {
+    "aliases": [
+      "e filling",
+      "electrolyte fill",
+      "electrolyte filling",
+      "efill"
+    ],
+    "entityType": "ThingShape",
+    "entityName": "PTCTDD.CellfabDataset.ElectrolyteFilling_TS",
+    "criticalProperties": [
+      "PTCDisplayName",
+      "PTCMake",
+      "PTCModel",
+      "PTCSerialNumber"
+    ]
+  },
+  "Vacuum Dryer": {
+    "aliases": [
+      "vacuum drying",
+      "vac dry",
+      "dry oven"
+    ],
+    "entityType": "ThingShape",
+    "entityName": "PTCTDD.CellfabDataset.VacuumDrying_TS",
+    "criticalProperties": [
+      "PTCDisplayName",
+      "PTCMake",
+      "PTCModel",
+      "PTCSerialNumber"
+    ]
+  },
+  "Z-Fold Stacker": {
+    "aliases": [
+      "z fold",
+      "zfold",
+      "zigzag stacker",
+      "z fold stacker"
+    ],
+    "entityType": "ThingShape",
+    "entityName": "PTCTDD.CellfabDataset.ZFoldStacker_TS",
+    "criticalProperties": [
+      "PTCDisplayName",
+      "PTCMake",
+      "PTCModel",
+      "PTCSerialNumber"
+    ]
+  },
+  "Quality Camera": {
+    "aliases": [
+      "vision camera",
+      "qc camera",
+      "inline inspection camera"
+    ],
+    "entityType": "ThingShape",
+    "entityName": "PTCTDD.CellfabDataset.QualityCamera_TS",
+    "criticalProperties": [
+      "PTCDisplayName",
+      "PTCMake",
+      "PTCModel",
+      "PTCSerialNumber"
+    ]
+  },
+  "Forming": {
+    "aliases": [
+      "punching forming",
+      "cell forming",
+      "punch and form"
+    ],
+    "entityType": "ThingShape",
+    "entityName": "PTCTDD.CellfabDataset.PunchingForming_TS",
+    "criticalProperties": [
+      "PTCDisplayName",
+      "PTCMake",
+      "PTCModel",
+      "PTCSerialNumber"
+    ]
+  },
+  "Jet Dryer": {
+    "aliases": [
+      "jet dryers",
+      "jet dry",
+      "drying tunnel",
+      "convection jet dryer"
+    ],
+    "entityType": "ThingShape",
+    "entityName": "PTCTDD.CellfabDataset.JetDryer_TS",
+    "criticalProperties": [
+      "PTCDisplayName",
+      "PTCMake",
+      "PTCModel",
+      "PTCSerialNumber"
+    ]
+  },
+  "Folding": {
+    "aliases": [
+      "folder",
+      "cell folding",
+      "zigzag folding"
+    ],
+    "entityType": "ThingShape",
+    "entityName": "PTCTDD.CellfabDataset.Folding_TS",
+    "criticalProperties": [
+      "PTCDisplayName",
+      "PTCMake",
+      "PTCModel",
+      "PTCSerialNumber"
+    ]
+  },
+  "Int. Mixer": {
+    "aliases": [
+      "intensive mixer",
+      "int mixer",
+      "kneader mixer"
+    ],
+    "entityType": "ThingShape",
+    "entityName": "PTCTDD.CellfabDataset.IntensiveMixer_TS",
+    "criticalProperties": [
+      "PTCDisplayName",
+      "PTCMake",
+      "PTCModel",
+      "PTCSerialNumber"
+    ]
+  },
+  "Cont. Processor": {
+    "aliases": [
+      "continuous processor",
+      "continuous mixer",
+      "twin screw processor"
+    ],
+    "entityType": "ThingShape",
+    "entityName": "PTCTDD.CellfabDataset.ContinuousProcessor_TS",
+    "criticalProperties": [
+      "PTCDisplayName",
+      "PTCMake",
+      "PTCModel",
+      "PTCSerialNumber"
+    ]
+  },
+  "Cell Aging": {
+    "aliases": [
+      "cell aging oven",
+      "formation aging",
+      "aging cabinet"
+    ],
+    "entityType": "ThingShape",
+    "entityName": "PTCTDD.CellfabDataset.CellAging_TS",
+    "criticalProperties": [
+      "PTCDisplayName",
+      "PTCMake",
+      "PTCModel",
+      "PTCSerialNumber"
+    ]
+  },
+  "Testing": {
+    "aliases": [
+      "test station",
+      "cell tester",
+      "eol testing"
+    ],
+    "entityType": "ThingShape",
+    "entityName": "PTCTDD.CellfabDataset.Testing_TS",
+    "criticalProperties": [
+      "PTCDisplayName",
+      "PTCMake",
+      "PTCModel",
+      "PTCSerialNumber"
+    ]
+  }
+}

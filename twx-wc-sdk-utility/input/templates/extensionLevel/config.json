@@ -1,0 +1,4 @@
+{
+  "extensionName": "{{{extensionName}}}",
+  "zipName": "{{{extensionName}}}-{{{version}}}.zip"
+}

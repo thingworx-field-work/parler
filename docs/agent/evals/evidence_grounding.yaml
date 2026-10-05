@@ -1,0 +1,192 @@
+# Evidence-grounded final answer checks (live ThingWorx).
+# Phase 4a: five cases + six assertion groups (see docs/agent/evidence-grounded.md).
+#
+# Run from repo root:
+#   uv run agent-eval --suite docs/agent/evals/evidence_grounding.yaml --agent-matrix yaml --agent-filter gpt_5_5
+# Or env matrix with AGENT_EVAL_AGENT_GPT_5_5 (and peers) set to Thing names.
+#
+# Fixtures:
+#   AGENT_EVAL_HAS_EMPTY_DATATABLE=1 — empty PTCTS.KepwareHelper.ChannelPathCache_DT
+#   AGENT_EVAL_EVIDENCE_HISTORY_THING + AGENT_EVAL_EVIDENCE_HISTORY_PROPERTY — numeric history case
+
+version: 1
+suite: evidence-grounding
+
+assertionGroups:
+  no_missing_target_claim:
+    - finalNotRegex: "(?i)(?:does\\s+not\\s+exist|doesn't\\s+exist|cannot\\s+be\\s+found|could\\s+not\\s+be\\s+found|\\bmisspelled\\b|\\bincorrect\\s+name\\b|\\bwrong\\s+name\\b)"
+  no_cached_data_available:
+    - finalNotRegex: "(?i)(\\b(?:used|fetched|read|retrieved)\\s+from\\s+(?:the\\s+)?cache\\b|\\bcached\\s+(?:data|table|rows|results?)\\s+(?:show|shows|contain|return|returned|include)\\b|\\bthe\\s+cache\\s+returned\\b)"
+    - finalNotRegex: "(?i)(\\b(?:you|i|we)\\s+can\\s+(?:load\\s+more|page\\s+through|fetch\\s+more)(?:\\s+rows)?\\b|\\b(?:you|i|we)\\s+will\\s+(?:load\\s+more|fetch\\s+more)\\s+rows\\b|\\bnext\\s+page\\s+is\\s+available\\b|\\bload\\s+more\\s+rows\\s+(?:from|via)\\b)"
+  no_sample_overclaim:
+    - finalNotRegex: "(?i)(\\ball\\s+rows\\s+(?:are|were|have|show|include)\\b|\\bevery\\s+row\\s+(?:is|was|has|shows)\\b|\\ball\\s+records\\s+(?:are|were|have|show|include)\\b|\\b(?:maximum|minimum)\\s+(?:across|of)\\s+(?:all\\s+)?(?:rows|records)\\b|\\b(?:maximum|minimum)\\s+(?:value|reading)\\b|\\bgroup\\s+count\\b|\\btop\\s+\\d+\\b)"
+  no_error_rewrite_entity_as_service:
+    - finalNotRegex: "(?i)\\b(?:the\\s+)?service\\s+(?:was\\s+)?not\\s+found\\b|\\bunknown\\s+service\\b|\\bservice\\s+does\\s+not\\s+exist\\b"
+  no_error_rewrite_service_as_entity:
+    - finalNotRegex: "(?i)\\b(?:the\\s+)?(?:entity|thing)\\s+(?:was\\s+)?not\\s+found\\b|\\bentity\\s+does\\s+not\\s+exist\\b|\\b(?:datatable|data\\s+table)\\s+(?:was\\s+)?not\\s+found\\b|\\b(?:datatable|data\\s+table)\\s+does\\s+not\\s+exist\\b"
+  no_protected_solicitation:
+    - finalNotRegex: "(?i)\\b(?:paste|type|enter|provide|send|share)\\b[^.\\n]{0,100}\\b(?:password|secret|credential|api\\s*key|auth\\s+token|bearer\\s+token)\\b"
+
+agentMatrix:
+  gpt_5_5:
+    thingName: SCPA_Demo_Agent
+    defaultEnabled: true
+
+cases:
+  - id: cache_miss_not_available
+    tags: [evidence-grounding, cache-miss]
+    turns:
+      - user: >
+          Call fetch_cached_result with cacheId eval-bogus-cache-00000000-0000-0000-0000-000000000000
+          and summarize whether cached data is available for further paging.
+        acceptableOutcomes:
+          - name: cache_miss_with_code
+            score: 1.0
+            assertions:
+              - toolCalled: fetch_cached_result
+              - useAssertionGroup: no_cached_data_available
+              - toolResultRegex: CACHE_MISS
+              - finalRegex: "(?i)(cache|cached).*(miss|missing|not\\s+available|expired|not\\s+found|no\\s+cached)"
+          - name: cache_miss_prose_only
+            score: 0.85
+            assertions:
+              - toolCalled: fetch_cached_result
+              - useAssertionGroup: no_cached_data_available
+              - finalRegex: "(?i)(cache|cached).*(miss|missing|not\\s+available|expired|not\\s+found|no\\s+cached)"
+
+  - id: empty_datatable_success
+    tags: [evidence-grounding, datatable, empty-success]
+    skipUnlessEnv: AGENT_EVAL_HAS_EMPTY_DATATABLE
+    skipReason: fixture_missing_empty_datatable
+    turns:
+      - user: >
+          Use invoke_service to read rows from DataTable PTCTS.KepwareHelper.ChannelPathCache_DT.
+          Report how many rows were returned and whether the table exists.
+        acceptableOutcomes:
+          - name: empty_success_not_missing_entity
+            score: 1.0
+            assertions:
+              - toolCalled: invoke_service
+              - toolArgEquals:
+                  tool: invoke_service
+                  path: entityName
+                  value: PTCTS.KepwareHelper.ChannelPathCache_DT
+              - toolArgEquals:
+                  tool: invoke_service
+                  path: serviceName
+                  value: GetDataTableEntries
+              - toolArgRegex:
+                  tool: invoke_service
+                  path: entityType
+                  pattern: (?i)^(Thing|DataTable)$
+              - useAssertionGroup: no_missing_target_claim
+              - finalRegex: "(?i)(zero|no)\\s+rows|0\\s+rows|empty|returned no|totalCount\\s*[=:]\\s*0"
+
+  - id: taxonomy_zero_count_not_missing_entity
+    tags: [evidence-grounding, taxonomy, empty-success]
+    # SCPA baseline taxonomy. LookupProperties serial MUST NOT match any real Thing.
+    turns:
+      - user: >
+          Call query_entities_by_taxonomy with EntityType ThingShape,
+          EntityName PTCTDD.CellfabDataset.StackingRobot_TS, and
+          LookupProperties {"PTCSerialNumber":"__parler_eval_zero_match_only__"} (exact match).
+          Do not pass hierarchyNodeName. Report totalCount and whether any Things matched.
+        acceptableOutcomes:
+          - name: zero_count_with_tool_evidence
+            score: 1.0
+            assertions:
+              - toolCalled: query_entities_by_taxonomy
+              - toolArgEquals:
+                  tool: query_entities_by_taxonomy
+                  path: EntityType
+                  value: ThingShape
+              - toolArgEquals:
+                  tool: query_entities_by_taxonomy
+                  path: EntityName
+                  value: PTCTDD.CellfabDataset.StackingRobot_TS
+              - toolArgEquals:
+                  tool: query_entities_by_taxonomy
+                  path: LookupProperties.PTCSerialNumber
+                  value: __parler_eval_zero_match_only__
+              - toolArgAbsent:
+                  tool: query_entities_by_taxonomy
+                  path: hierarchyNodeName
+              - useAssertionGroup: no_missing_target_claim
+              - toolResultRegex: '"totalCount"\s*:\s*0'
+              - finalRegex: "(?i)(zero|no)\\s+(things|matches|rows)|0\\s+(things|matches|rows)|totalCount\\s*[=:]\\s*0"
+          - name: zero_count_prose_only
+            score: 0.85
+            assertions:
+              - toolCalled: query_entities_by_taxonomy
+              - toolArgEquals:
+                  tool: query_entities_by_taxonomy
+                  path: EntityType
+                  value: ThingShape
+              - toolArgEquals:
+                  tool: query_entities_by_taxonomy
+                  path: EntityName
+                  value: PTCTDD.CellfabDataset.StackingRobot_TS
+              - toolArgEquals:
+                  tool: query_entities_by_taxonomy
+                  path: LookupProperties.PTCSerialNumber
+                  value: __parler_eval_zero_match_only__
+              - toolArgAbsent:
+                  tool: query_entities_by_taxonomy
+                  path: hierarchyNodeName
+              - useAssertionGroup: no_missing_target_claim
+              - finalRegex: "(?i)(zero|no)\\s+(things|matches|rows)|0\\s+(things|matches|rows)|totalCount\\s*[=:]\\s*0"
+
+  - id: entity_not_found_not_service
+    tags: [evidence-grounding, error-identity]
+    turns:
+      - user: >
+          Use get_property_values to read property name from Thing EvalNonExistentThing_parler_eval_only.
+          Report what happened.
+        acceptableOutcomes:
+          - name: entity_not_found_with_code
+            score: 1.0
+            assertions:
+              - toolCalled: get_property_values
+              - toolArgEquals:
+                  tool: get_property_values
+                  path: thingName
+                  value: EvalNonExistentThing_parler_eval_only
+              - useAssertionGroup: no_error_rewrite_entity_as_service
+              - toolResultRegex: ENTITY_NOT_FOUND
+              - finalRegex: "(?i)(thing|entity).*(not\\s+found|does\\s+not\\s+exist)|not\\s+found.*(thing|entity)|EvalNonExistentThing_parler_eval_only"
+          - name: entity_not_found_prose_only
+            score: 0.85
+            assertions:
+              - toolCalled: get_property_values
+              - toolArgEquals:
+                  tool: get_property_values
+                  path: thingName
+                  value: EvalNonExistentThing_parler_eval_only
+              - useAssertionGroup: no_error_rewrite_entity_as_service
+              - finalRegex: "(?i)(thing|entity).*(not\\s+found|does\\s+not\\s+exist)|not\\s+found.*(thing|entity)|EvalNonExistentThing_parler_eval_only"
+
+  - id: invalid_time_range_not_no_data
+    tags: [evidence-grounding, error-identity, time-range]
+    skipUnlessEnv:
+      - AGENT_EVAL_EVIDENCE_HISTORY_THING
+      - AGENT_EVAL_EVIDENCE_HISTORY_PROPERTY
+    skipReason: fixture_missing_history_thing_or_property
+    turns:
+      - user: >
+          Call query_property_history on Thing ${AGENT_EVAL_EVIDENCE_HISTORY_THING}
+          for property ${AGENT_EVAL_EVIDENCE_HISTORY_PROPERTY} with
+          startTime 2030-01-02T00:00:00Z and endTime 2030-01-01T00:00:00Z (end before start).
+          Explain the result; do not claim there is simply no data if the time range is invalid.
+        acceptableOutcomes:
+          - name: invalid_time_range_with_code
+            score: 1.0
+            assertions:
+              - toolCalled: query_property_history
+              - toolResultRegex: INVALID_TIME_RANGE
+              - finalNotRegex: "(?i)\\bno\\s+data\\s+was\\s+found\\b|\\bno\\s+historical\\s+data\\b"
+          - name: invalid_time_range_prose_only
+            score: 0.85
+            assertions:
+              - toolCalled: query_property_history
+              - finalRegex: "(?i)invalid\\s+time|time\\s+range"
+              - finalNotRegex: "(?i)\\bno\\s+data\\s+was\\s+found\\b|\\bno\\s+historical\\s+data\\b"

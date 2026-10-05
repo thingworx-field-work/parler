@@ -1,0 +1,10 @@
+{
+  "description": "sort_topn ascending on column score (explicit direction).",
+  "arguments": {
+    "cacheId": "<PUT_CACHED_TABLE_ID>",
+    "mode": "sort_topn",
+    "sortBy": "score",
+    "direction": "asc",
+    "limit": 10
+  }
+}

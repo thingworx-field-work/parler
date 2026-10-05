@@ -1,0 +1,75 @@
+# Parler agent-eval smoke suite (live ThingWorx).
+# Run: uv run agent-eval --suite docs/agent/evals/smoke.yaml --agent-matrix yaml
+# Or:  uv run agent-eval --suite docs/agent/evals/smoke.yaml --agent-matrix env
+#       with AGENT_EVAL_AGENT_GPT_5_5 set to the AgentThing name.
+
+version: 1
+suite: agent-eval-smoke
+
+agentMatrix:
+  gpt_5_5:
+    thingName: SCPA_Demo_Agent
+    defaultEnabled: true
+
+cases:
+  - id: asset_pair_jetdryer_display_names
+    skill: asset_pair_health
+    tags: [asset-resolution, multi-tool, chart-candidate]
+    turns:
+      - user: >
+          /asset_pair_health Compare the health status of Jet Dryer assets
+          ORD JetDryer 02 and AC JetDryer 01 over the past 24 hours
+        acceptableOutcomes:
+          - name: resolved_pair
+            score: 1.0
+            assertions:
+              - finalContains: "SE.CellFab.Model.Workunit.ORD-JetDryer-02"
+              - finalContains: "SE.CellFab.Model.Workunit.AC-JetDryer-01"
+              - toolCalled: query_entities_by_taxonomy
+              - toolCalled: query_alert_summary
+              - toolCalled: get_property_values
+        rejectIf:
+          - allOf:
+              - finalContains: "HIERARCHY_RESOLVE_NOT_FOUND"
+              - finalNotContains: "SE.CellFab.Model.Workunit.ORD-JetDryer-02"
+              - finalNotContains: "SE.CellFab.Model.Workunit.AC-JetDryer-01"
+          - toolArgEquals:
+              tool: query_entities_by_taxonomy
+              path: hierarchyNodeName
+              value: "ORD JetDryer 02"
+          - toolArgEquals:
+              tool: query_entities_by_taxonomy
+              path: hierarchyNodeName
+              value: "AC JetDryer 01"
+
+  - id: asset_pair_missing_type_then_clarify
+    tags: [clarification, multi-turn]
+    scoreMode: sum
+    passThreshold: 1.0
+    turns:
+      - user: "Compare ORD 02 and AC 01 health over the past 24 hours"
+        acceptableOutcomes:
+          - name: inferred_asset_type
+            score: 1.0
+            assertions:
+              - finalRegex: "(?i)Jet\\s*Dryer"
+              - finalContains: "SE.CellFab.Model.Workunit."
+          - name: targeted_clarification
+            score: 0.6
+            assertions:
+              - finalRegex: "(?i)asset\\s*type|what\\s+type|which\\s+asset"
+              - finalRegex: "(?i)ORD\\s*02|AC\\s*01"
+        rejectIf:
+          - finalRegex: "(?i)send more information|provide more details"
+          - allOf:
+              - finalContains: "HIERARCHY_RESOLVE_NOT_FOUND"
+              - finalNotContains: "SE.CellFab.Model.Workunit."
+      - user: "They are Jet Dryer assets."
+        whenPreviousOutcome: targeted_clarification
+        acceptableOutcomes:
+          - name: resolved_after_clarification
+            score: 1.0
+            assertions:
+              - finalContains: "SE.CellFab.Model.Workunit.ORD-JetDryer"
+              - finalContains: "SE.CellFab.Model.Workunit.AC-JetDryer"
+              - toolCalled: query_entities_by_taxonomy

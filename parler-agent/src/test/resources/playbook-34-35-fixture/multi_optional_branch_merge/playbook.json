@@ -1,0 +1,264 @@
+{
+  "schema": "parler-playbook-v1",
+  "title": "Multi optional branch merge (workshop gaps fixture)",
+  "budgets": {
+    "timeoutSeconds": 900,
+    "maxNodes": 48,
+    "maxToolCalls": 80,
+    "maxEvidenceBytes": 12000
+  },
+  "vars": {},
+  "nodes": [
+    {
+      "id": "equipment_uids",
+      "kind": "derive",
+      "dependsOn": [],
+      "op": "project",
+      "args": {
+        "rows": [{ "UID": 4 }],
+        "fields": [{ "from": "UID", "as": "UID" }]
+      },
+      "evidence": { "label": "Equipment UID rows (fixture stub)" }
+    },
+    {
+      "id": "product_gate",
+      "kind": "condition",
+      "dependsOn": [],
+      "if": { "op": "is_present", "left": { "$input": "productFilter" } },
+      "then": "product_lookup",
+      "else": "product_skip"
+    },
+    {
+      "id": "product_skip",
+      "kind": "derive",
+      "dependsOn": ["product_gate"],
+      "op": "project",
+      "args": {
+        "rows": [],
+        "fields": [{ "from": "FilterCriteria", "as": "FilterCriteria" }]
+      },
+      "evidence": { "label": "Optional product branch not taken" }
+    },
+    {
+      "id": "product_lookup",
+      "kind": "derive",
+      "dependsOn": ["product_gate"],
+      "op": "project",
+      "args": {
+        "rows": [{ "FilterCriteria": "PRODUCT", "UIDValue": 8 }],
+        "fields": [
+          { "from": "FilterCriteria", "as": "FilterCriteria" },
+          { "from": "UIDValue", "as": "UIDValue" }
+        ]
+      },
+      "evidence": { "label": "Product filter criteria when productFilter present" }
+    },
+    {
+      "id": "product_rows",
+      "kind": "derive",
+      "dependsOn": ["product_gate"],
+      "op": "empty_rows_if_skipped",
+      "args": { "sourceNodeId": "product_lookup", "label": "product" },
+      "evidence": { "label": "Product optional rows" }
+    },
+    {
+      "id": "job_gate",
+      "kind": "condition",
+      "dependsOn": [],
+      "if": { "op": "is_present", "left": { "$input": "jobFilter" } },
+      "then": "job_lookup",
+      "else": "job_skip"
+    },
+    {
+      "id": "job_skip",
+      "kind": "derive",
+      "dependsOn": ["job_gate"],
+      "op": "project",
+      "args": {
+        "rows": [],
+        "fields": [{ "from": "FilterCriteria", "as": "FilterCriteria" }]
+      },
+      "evidence": { "label": "Optional job branch not taken" }
+    },
+    {
+      "id": "job_lookup",
+      "kind": "derive",
+      "dependsOn": ["job_gate"],
+      "op": "project",
+      "args": {
+        "rows": [{ "FilterCriteria": "JOB", "UIDValue": 9 }],
+        "fields": [
+          { "from": "FilterCriteria", "as": "FilterCriteria" },
+          { "from": "UIDValue", "as": "UIDValue" }
+        ]
+      },
+      "evidence": { "label": "Job filter criteria when jobFilter present" }
+    },
+    {
+      "id": "job_rows",
+      "kind": "derive",
+      "dependsOn": ["job_gate"],
+      "op": "empty_rows_if_skipped",
+      "args": { "sourceNodeId": "job_lookup", "label": "job" },
+      "evidence": { "label": "Job optional rows" }
+    },
+    {
+      "id": "shift_gate",
+      "kind": "condition",
+      "dependsOn": [],
+      "if": { "op": "is_present", "left": { "$input": "shiftFilter" } },
+      "then": "shift_lookup",
+      "else": "shift_skip"
+    },
+    {
+      "id": "shift_skip",
+      "kind": "derive",
+      "dependsOn": ["shift_gate"],
+      "op": "project",
+      "args": {
+        "rows": [],
+        "fields": [{ "from": "FilterCriteria", "as": "FilterCriteria" }]
+      },
+      "evidence": { "label": "Optional shift branch not taken" }
+    },
+    {
+      "id": "shift_lookup",
+      "kind": "derive",
+      "dependsOn": ["shift_gate"],
+      "op": "project",
+      "args": {
+        "rows": [{ "FilterCriteria": "SHIFT", "UIDValue": 10 }],
+        "fields": [
+          { "from": "FilterCriteria", "as": "FilterCriteria" },
+          { "from": "UIDValue", "as": "UIDValue" }
+        ]
+      },
+      "evidence": { "label": "Shift filter criteria when shiftFilter present" }
+    },
+    {
+      "id": "shift_rows",
+      "kind": "derive",
+      "dependsOn": ["shift_gate"],
+      "op": "empty_rows_if_skipped",
+      "args": { "sourceNodeId": "shift_lookup", "label": "shift" },
+      "evidence": { "label": "Shift optional rows" }
+    },
+    {
+      "id": "merged_criteria",
+      "kind": "derive",
+      "dependsOn": ["product_rows", "job_rows", "shift_rows"],
+      "op": "merge_row_sets",
+      "args": {
+        "sources": [
+          { "$ref": "product_rows.output.rows" },
+          { "$ref": "job_rows.output.rows" },
+          { "$ref": "shift_rows.output.rows" }
+        ],
+        "maxSources": 8,
+        "maxRows": 100
+      },
+      "evidence": { "label": "Merge optional branch filter criteria rows" }
+    },
+    {
+      "id": "quick_intervals",
+      "kind": "derive",
+      "dependsOn": [],
+      "op": "project",
+      "args": {
+        "rows": [{ "name": "Today", "QuickTimeIntervalUID": 3 }],
+        "fields": [
+          { "from": "name", "as": "name" },
+          { "from": "QuickTimeIntervalUID", "as": "QuickTimeIntervalUID" }
+        ]
+      },
+      "evidence": { "label": "Quick interval listing (fixture stub)" }
+    },
+    {
+      "id": "time_window",
+      "kind": "derive",
+      "dependsOn": ["quick_intervals"],
+      "op": "resolve_time_window_for_playbook",
+      "args": {
+        "phrase": { "$input": "timeWindow" },
+        "quickIntervalRows": { "$ref": "quick_intervals.output.rows" },
+        "defaultQuickIntervalName": "Today",
+        "timezone": "UTC"
+      },
+      "evidence": { "label": "Resolve time window" }
+    },
+    {
+      "id": "filters_payload",
+      "kind": "derive",
+      "dependsOn": ["equipment_uids", "merged_criteria", "time_window"],
+      "op": "build_nested_object",
+      "args": {
+        "sources": {
+          "equipment": { "$ref": "equipment_uids.output.rows" },
+          "criteria": { "$ref": "merged_criteria.output.rows" }
+        },
+        "template": {
+          "Filters": {
+            "$map": {
+              "over": "equipment",
+              "each": {
+                "EquipmentUID": { "$path": "UID" },
+                "FilterCriterias": { "$src": "criteria" }
+              }
+            }
+          },
+          "QuickTimeIntervalUID": { "$nodeRef": "time_window.output.QuickTimeIntervalUID" },
+          "StartTime": { "$nodeRef": "time_window.output.StartTime" },
+          "EndTime": { "$nodeRef": "time_window.output.EndTime" }
+        },
+        "maxParents": 25,
+        "maxChildren": 100,
+        "minParents": 1,
+        "omitNull": true
+      },
+      "evidence": { "label": "Assemble Filters payload from merged criteria" }
+    },
+    {
+      "id": "filters_string",
+      "kind": "derive",
+      "dependsOn": ["filters_payload"],
+      "op": "json_stringify",
+      "args": {
+        "value": { "$ref": "filters_payload.output.object" },
+        "maxBytes": 12000
+      },
+      "evidence": { "label": "Serialize Filters JSON" }
+    },
+    {
+      "id": "kpi_call",
+      "kind": "tool_call",
+      "dependsOn": ["filters_string"],
+      "tool": "CallGetKPIs",
+      "args": {
+        "Filters": { "$ref": "filters_string.output.value" }
+      },
+      "evidence": {
+        "label": "Stub KPI service call with nested result evidence",
+        "includeToolOutputPaths": [
+          "result.stats.rowCount"
+        ],
+        "table": {
+          "path": "result.rows",
+          "columns": [
+            "FilterCriteria",
+            "value"
+          ],
+          "maxRows": 8
+        }
+      }
+    },
+    {
+      "id": "end",
+      "kind": "llm_summary",
+      "dependsOn": ["kpi_call"],
+      "evidenceRefs": ["kpi_call", "merged_criteria", "filters_string"],
+      "prompt": "Summarize merged optional-branch filter payload."
+    }
+  ],
+  "finalNode": "end",
+  "description": "Workshop gaps C7 proof: three optional branches → merge_row_sets → build_nested_object → json_stringify → CallGetKPIs."
+}

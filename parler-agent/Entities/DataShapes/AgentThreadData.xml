@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Entities>
+    <DataShapes>
+        <DataShape name="AgentThreadData"
+                   description="Data shape for agent thread/session metadata (DataTable storage)">
+            <FieldDefinitions>
+                <!-- aspect.isPrimaryKey="true" is required for DataTable; do not remove -->
+                <FieldDefinition name="conversationId" baseType="STRING" aspect.isPrimaryKey="true"
+                                 description="Thread/session identifier (business key)" ordinal="0"/>
+                <FieldDefinition name="username" baseType="STRING"
+                                 description="Owner (user) of the thread" ordinal="1"/>
+                <FieldDefinition name="agentName" baseType="STRING"
+                                 description="Agent Thing name" ordinal="2"/>
+                <FieldDefinition name="title" baseType="STRING"
+                                 description="Optional thread title" ordinal="3"/>
+                <FieldDefinition name="createdAt" baseType="DATETIME"
+                                 description="Thread creation time" ordinal="4"/>
+                <FieldDefinition name="updatedAt" baseType="DATETIME"
+                                 description="Last update time" ordinal="5"/>
+                <FieldDefinition name="historyClearedAt" baseType="DATETIME"
+                                 description="When set, UI and LLM effective history excludes rows at or before this instant"
+                                 ordinal="6"/>
+            </FieldDefinitions>
+        </DataShape>
+    </DataShapes>
+</Entities>

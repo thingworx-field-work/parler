@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Entities>
+    <DataShapes>
+        <DataShape name="AgentLlmCallData"
+                   description="Data shape for AgentLlmCallStream entry value rows (CC-7)">
+            <FieldDefinitions>
+                <FieldDefinition name="eventId" baseType="STRING"
+                                 description="Unique event identity; also used as Stream source metadata" ordinal="0"/>
+                <FieldDefinition name="callId" baseType="STRING"
+                                 description="Attempt UUID for one provider call" ordinal="1"/>
+                <FieldDefinition name="logicalCallId" baseType="STRING"
+                                 description="Logical model request UUID" ordinal="2"/>
+                <FieldDefinition name="turnRequestId" baseType="STRING"
+                                 description="Turn request id snapshot" ordinal="3"/>
+                <FieldDefinition name="conversationId" baseType="STRING"
+                                 description="Conversation id snapshot" ordinal="4"/>
+                <FieldDefinition name="agentThing" baseType="STRING"
+                                 description="Owning AgentThing name snapshot" ordinal="5"/>
+                <FieldDefinition name="providerThingName" baseType="STRING"
+                                 description="Provider Thing name snapshot" ordinal="6"/>
+                <FieldDefinition name="providerFamily" baseType="STRING"
+                                 description="Provider family: openai or anthropic" ordinal="7"/>
+                <FieldDefinition name="apiShapeId" baseType="STRING"
+                                 description="API shape id snapshot" ordinal="8"/>
+                <FieldDefinition name="requestedModel" baseType="STRING"
+                                 description="Requested model or deployment snapshot" ordinal="9"/>
+                <FieldDefinition name="callKind" baseType="STRING"
+                                 description="agent_round, checkpoint, playbook, probe" ordinal="10"/>
+                <FieldDefinition name="eventType" baseType="STRING"
+                                 description="Lifecycle event type" ordinal="11"/>
+                <FieldDefinition name="sequence" baseType="INTEGER"
+                                 description="Monotonic sequence within callId" ordinal="12"/>
+                <FieldDefinition name="callStartedAt" baseType="DATETIME"
+                                 description="Attempt start time (UTC)" ordinal="13"/>
+                <FieldDefinition name="occurredAt" baseType="DATETIME"
+                                 description="Event occurrence time (UTC)" ordinal="14"/>
+                <FieldDefinition name="schemaVersion" baseType="INTEGER"
+                                 description="eventJson schema version" ordinal="15"/>
+                <FieldDefinition name="eventJson" baseType="TEXT"
+                                 description="Full JSON envelope for the event" ordinal="16"/>
+            </FieldDefinitions>
+        </DataShape>
+    </DataShapes>
+</Entities>

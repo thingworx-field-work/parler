@@ -1,0 +1,151 @@
+{
+  "schema": "parler-playbook-v1",
+  "title": "Alarm events by equipment",
+  "budgets": {
+    "timeoutSeconds": 900,
+    "maxNodes": 40,
+    "maxToolCalls": 80,
+    "maxEvidenceBytes": 12000
+  },
+  "vars": {},
+  "nodes": [
+    {
+      "id": "resolve_equipment",
+      "kind": "fan_out",
+      "dependsOn": [],
+      "items": {
+        "$input": "equipmentIdentifiers"
+      },
+      "itemVar": "equipment",
+      "maxItems": 10,
+      "maxConcurrency": 1,
+      "node": {
+        "kind": "tool_call",
+        "tool": "resolve_thing",
+        "args": {
+          "text": {
+            "$item": "input"
+          }
+        },
+        "evidence": {
+          "label": "Resolve each equipment identifier to a canonical Thing name"
+        }
+      }
+    },
+    {
+      "id": "normalize_equipment",
+      "kind": "derive",
+      "dependsOn": [
+        "resolve_equipment"
+      ],
+      "op": "normalize_resolved_things",
+      "args": {
+        "fanOutNodeId": "resolve_equipment",
+        "maxRows": 25
+      },
+      "evidence": {
+        "label": "Normalize resolver fan-out into canonical equipment rows"
+      }
+    },
+    {
+      "id": "read_uids",
+      "kind": "fan_out",
+      "dependsOn": [
+        "normalize_equipment"
+      ],
+      "items": {
+        "$ref": "normalize_equipment.output.rows"
+      },
+      "itemVar": "equipmentRow",
+      "maxItems": 25,
+      "maxConcurrency": 1,
+      "node": {
+        "kind": "tool_call",
+        "tool": "get_property_values",
+        "args": {
+          "thingName": {
+            "$item": "name"
+          },
+          "propertyNames": [
+            "UID"
+          ]
+        },
+        "evidence": {
+          "label": "Read UID property for each resolved equipment Thing"
+        }
+      }
+    },
+    {
+      "id": "extract_uids",
+      "kind": "derive",
+      "dependsOn": [
+        "read_uids"
+      ],
+      "op": "extract_from_tool_output",
+      "args": {
+        "sourceNodeId": "read_uids",
+        "mode": "fan_out_children",
+        "arrayPath": "properties",
+        "maxRows": 25,
+        "where": {
+          "field": "name",
+          "op": "eq",
+          "right": "UID"
+        },
+        "fields": [
+          {
+            "from": "value",
+            "as": "UID",
+            "type": "number"
+          },
+          {
+            "from": "$parent.item.input",
+            "as": "input"
+          },
+          {
+            "from": "$parent.item.name",
+            "as": "thingName"
+          }
+        ]
+      },
+      "evidence": {
+        "label": "Extract UID scalar rows from property reads"
+      }
+    },
+    {
+      "id": "alarm_events",
+      "kind": "tool_call",
+      "dependsOn": [
+        "extract_uids"
+      ],
+      "tool": "GetAlarmEvents_AI",
+      "args": {
+        "EquipmentUIDs": {
+          "$infotable": {
+            "rows": {
+              "$ref": "extract_uids.output.rows"
+            },
+            "dataShapeName": "PTC.SCA.SCO.Utilities.UID"
+          }
+        }
+      },
+      "evidence": {
+        "label": "Query alarm events for extracted equipment UIDs"
+      }
+    },
+    {
+      "id": "end",
+      "kind": "llm_summary",
+      "dependsOn": [
+        "alarm_events"
+      ],
+      "evidenceRefs": [
+        "alarm_events",
+        "extract_uids"
+      ],
+      "prompt": "Summarize alarm events for the requested equipment."
+    }
+  ],
+  "finalNode": "end",
+  "description": "Workshop #34 alarm-events path: resolve equipment names, read UID properties, bind UID rows to GetAlarmEvents_AI via $infotable."
+}

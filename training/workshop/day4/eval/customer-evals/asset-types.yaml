@@ -1,0 +1,20 @@
+version: 1
+suite: customer-asset-types
+
+agentMatrix:
+  gpt_5_4:
+    thingName: Customer_Agent_GPT54
+    defaultEnabled: true
+
+cases:
+  - id: asset_type_phrase_maps_to_catalog
+    tags: [asset-type, taxonomy]
+    turns:
+      - user: "Show me the Jet Dryer assets."
+        acceptableOutcomes:
+          - name: resolved_asset_type_and_listed_assets
+            score: 1.0
+            assertions:
+              - toolCalled: resolve_asset_type
+              - toolCalled: query_entities_by_taxonomy
+              - finalRegex: "(?i)jet\\s*dryer|asset"

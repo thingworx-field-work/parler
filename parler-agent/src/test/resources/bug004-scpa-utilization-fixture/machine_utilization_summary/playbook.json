@@ -1,0 +1,211 @@
+{
+  "schema": "parler-playbook-v1",
+  "id": "machine_utilization_summary",
+  "title": "Machine utilization summary",
+  "description": "Summarize utilization for one named machine over a date range and optional shift using the LLM-friendly state-summary tool.",
+  "whenToUse": "Use when the user asks for utilization for a specific machine, work unit, or asset by name (canonical Thing name or human label).",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "startDate": {
+        "type": "string"
+      },
+      "endDate": {
+        "type": "string"
+      },
+      "shiftId": {
+        "type": "string"
+      },
+      "machine": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "startDate",
+      "endDate",
+      "machine"
+    ]
+  },
+  "execution": {
+    "timeoutSeconds": 900,
+    "maxNodes": 30,
+    "maxToolCalls": 12,
+    "maxEvidenceBytes": 12000
+  },
+  "budgets": {
+    "timeoutSeconds": 900,
+    "maxNodes": 30,
+    "maxToolCalls": 12,
+    "maxEvidenceBytes": 12000
+  },
+  "vars": {},
+  "nodes": [
+    {
+      "id": "resolve_machine",
+      "kind": "tool_call",
+      "dependsOn": [],
+      "tool": "resolve_thing",
+      "args": {
+        "text": {
+          "$input": "machine"
+        }
+      },
+      "evidence": {
+        "label": "Resolve machine label to canonical Thing name when possible"
+      }
+    },
+    {
+      "id": "gate_resolve",
+      "kind": "condition",
+      "dependsOn": [
+        "resolve_machine"
+      ],
+      "if": {
+        "and": [
+          {
+            "op": "eq",
+            "left": {
+              "$ref": "resolve_machine.toolOutput.status"
+            },
+            "right": "success"
+          },
+          {
+            "op": "eq",
+            "left": {
+              "$ref": "resolve_machine.toolOutput.resultKind"
+            },
+            "right": "THING_RESOLVED_INLINE"
+          }
+        ]
+      },
+      "then": "normalize_machine",
+      "else": "machine_listing"
+    },
+    {
+      "id": "normalize_machine",
+      "kind": "derive",
+      "dependsOn": [
+        "gate_resolve",
+        "resolve_machine"
+      ],
+      "op": "normalize_resolved_thing",
+      "args": {
+        "sourceNodeId": "resolve_machine",
+        "label": "machine"
+      },
+      "evidence": {
+        "label": "Normalize unique inline resolve_thing result"
+      }
+    },
+    {
+      "id": "machine_listing",
+      "kind": "tool_call",
+      "dependsOn": [
+        "gate_resolve"
+      ],
+      "tool": "list_utilization_machines",
+      "args": {},
+      "evidence": {
+        "label": "List utilization-capable machines for identifier fallback"
+      }
+    },
+    {
+      "id": "match_listing",
+      "kind": "derive",
+      "dependsOn": [
+        "machine_listing"
+      ],
+      "op": "match_identifier_in_rows",
+      "args": {
+        "rows": {
+          "$ref": "machine_listing.toolOutput.result.rows"
+        },
+        "identifier": {
+          "$input": "machine"
+        },
+        "label": "machine",
+        "fields": [
+          "machineName",
+          "displayName",
+          "description"
+        ]
+      },
+      "evidence": {
+        "label": "Match user machine text to a listing row"
+      }
+    },
+    {
+      "id": "resolved_machine",
+      "kind": "derive",
+      "dependsOn": [
+        "gate_resolve",
+        "normalize_machine",
+        "match_listing"
+      ],
+      "op": "pick_branch_output",
+      "args": {
+        "conditionNodeId": "gate_resolve",
+        "thenNodeId": "normalize_machine",
+        "elseNodeId": "match_listing"
+      },
+      "evidence": {
+        "label": "Coalesce resolver-first or listing-match canonical machine"
+      }
+    },
+    {
+      "id": "state_summary",
+      "kind": "tool_call",
+      "dependsOn": [
+        "resolved_machine"
+      ],
+      "tool": "get_utilization_state_summary",
+      "args": {
+        "StartDate": {
+          "$input": "startDate"
+        },
+        "EndDate": {
+          "$input": "endDate"
+        },
+        "ShiftID": {
+          "$input": "shiftId"
+        },
+        "Machine": {
+          "$ref": "resolved_machine.output.name"
+        }
+      },
+      "evidence": {
+        "label": "Read utilization state summary for one machine",
+        "includeToolOutputPaths": [
+          "result.stats.utilizationPercent",
+          "result.stats.eventCount",
+          "result.machine"
+        ],
+        "table": {
+          "path": "result.rows",
+          "columns": [
+            "utilizationState",
+            "percentage",
+            "count",
+            "sumDurationHours"
+          ],
+          "maxRows": 8
+        }
+      }
+    },
+    {
+      "id": "final_summary",
+      "kind": "llm_summary",
+      "dependsOn": [
+        "state_summary"
+      ],
+      "prompt": "Write a concise utilization summary for the requested machine over the requested time range. State the canonical machine Thing name that was queried when it appears in the evidence. Explain utilization states, utilization percent, uptime/downtime when present, notable state concentration, and evidence gaps. Use only the provided playbook evidence.",
+      "evidenceRefs": [
+        "resolve_machine",
+        "resolved_machine",
+        "state_summary"
+      ],
+      "maxEvidenceBytes": 8000
+    }
+  ],
+  "finalNode": "final_summary"
+}

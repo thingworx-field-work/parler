@@ -1,0 +1,8 @@
+{
+    "includePrompt": true,
+    "includeSkills": true,
+    "includeTools": true,
+    "includePolicies": true,
+    "includeTaxonomy": true,
+    "refresh": true
+  }

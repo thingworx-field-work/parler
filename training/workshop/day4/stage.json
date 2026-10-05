@@ -1,0 +1,61 @@
+{
+  "schema": "parler-training-stage-v1",
+  "stage": "day4",
+  "phase": "post-llm-friendly",
+  "sourceOfTruth": {
+    "finalBundle": "parler/dev_data/scpa_utilization"
+  },
+  "uploads": [
+    { "repoPath": "workshop/day4/tools/extended_tools.json", "target": "/tools/extended_tools.json" },
+    { "repoPath": "workshop/day4/skills/asset_pair_health/SKILL.md", "target": "/skills/asset_pair_health/SKILL.md" },
+    { "repoPath": "workshop/day4/skills/utilization_summary/SKILL.md", "target": "/skills/utilization_summary/SKILL.md" },
+    { "repoPath": "workshop/day4/skills/utilization_overview/SKILL.md", "target": "/skills/utilization_overview/SKILL.md" },
+    { "repoPath": "workshop/day4/skills/machine_utilization_summary/SKILL.md", "target": "/skills/machine_utilization_summary/SKILL.md" },
+    { "repoPath": "workshop/day4/playbooks/utilization_summary/playbook.json", "target": "/playbooks/utilization_summary/playbook.json" },
+    { "repoPath": "workshop/day4/playbooks/utilization_overview/playbook.json", "target": "/playbooks/utilization_overview/playbook.json" },
+    { "repoPath": "workshop/day4/playbooks/machine_utilization_summary/playbook.json", "target": "/playbooks/machine_utilization_summary/playbook.json" }
+  ],
+  "expectedRuntime": {
+    "extendedTools": [
+      "list_utilization_machines",
+      "get_utilization_records",
+      "get_utilization_state_summary",
+      "get_utilization_overview"
+    ],
+    "skills": [
+      "asset_pair_health",
+      "utilization_summary",
+      "utilization_overview",
+      "machine_utilization_summary"
+    ],
+    "playbooks": [
+      "utilization_summary",
+      "utilization_overview",
+      "machine_utilization_summary"
+    ],
+    "shadowedSkills": [
+      "utilization_summary",
+      "utilization_overview",
+      "machine_utilization_summary"
+    ],
+    "policyRules": []
+  },
+  "tests": {
+    "static": [
+      "parse-payloads",
+      "byte-parity-final-utilization",
+      "stage-manifest"
+    ],
+    "thingworxRuntime": [
+      "list-machines",
+      "state-summary-all-shift-normalization",
+      "records-all-machines"
+    ],
+    "agent": [
+      "which-machines",
+      "raw-records-all-machines",
+      "state-summary-all-machines",
+      "overview"
+    ]
+  }
+}

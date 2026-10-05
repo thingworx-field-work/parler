@@ -1,0 +1,44 @@
+{
+  "contractVersion": "0.1",
+  "docId": "fernwick-carbaq-ops-v2",
+  "title": "Fernwick Labs CarbaQ CO2 Capture Solution Operations Manual",
+  "sourcePath": "source/original.pdf",
+  "markdownPath": "markdown/manual.md",
+  "chunksPath": "chunks/chunks.jsonl",
+  "pageCount": 28,
+  "sourceSha256": "8b06649611a0312e712117bd046b91ae9106a092b3b0460f4a090d60346046e3",
+  "convertedAt": "2026-06-15T00:00:00Z",
+  "sourceFileName": "Fernwick Labs - CarbaQ - V.2.0.pdf",
+  "documentVersion": "2.0",
+  "documentType": "operations_manual",
+  "assetModels": [
+    "CarbaQ CO2 Capture Solution"
+  ],
+  "languages": [
+    "en"
+  ],
+  "artifacts": {
+    "renderedPagesPattern": "pages/page-{page:04d}.png",
+    "figuresPath": "figures/"
+  },
+  "conversionQuality": {
+    "textLayer": "present",
+    "ocrUsed": false,
+    "tablesDetected": 2,
+    "tablesStructured": 2,
+    "pageAnchorsGenerated": 28,
+    "manualReview": "completed",
+    "warnings": [
+      "Synthetic sample built by test_scripts/pdf-conversion/synthetic/build_samples.py; section, maintenance and troubleshooting-row chunks are hand-curated."
+    ]
+  },
+  "chunkCount": 45,
+  "chunkStrategies": [
+    "page",
+    "semantic-section",
+    "troubleshooting-row"
+  ],
+  "sourceRepository": "AIDocRepository",
+  "sourceRepositoryPath": "/document-knowledge/fernwick-carbaq-ops-v2/source/original.pdf",
+  "sourceHref": "/Thingworx/FileRepositories/AIDocRepository/document-knowledge/fernwick-carbaq-ops-v2/source/original.pdf"
+}

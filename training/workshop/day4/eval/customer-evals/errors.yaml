@@ -1,0 +1,45 @@
+version: 1
+suite: customer-errors
+
+agentMatrix:
+  gpt_5_4:
+    thingName: Customer_Agent_GPT54
+    defaultEnabled: true
+
+assertionGroups:
+  no_missing_target_claim:
+    - finalNotRegex: "(?i)(does\\s+not\\s+exist|cannot\\s+be\\s+found|misspelled|wrong\\s+name)"
+
+cases:
+  - id: empty_datatable_is_not_missing
+    tags: [empty-success, evidence]
+    skipUnlessEnv: CUSTOMER_HAS_EMPTY_DATATABLE
+    skipReason: fixture_missing_empty_datatable
+    turns:
+      - user: >
+          Use invoke_service to read rows from the known empty DataTable for this App.
+          Report how many rows were returned and whether the table exists.
+        acceptableOutcomes:
+          - name: empty_success
+            score: 1.0
+            assertions:
+              - toolCalled: invoke_service
+              - useAssertionGroup: no_missing_target_claim
+              - finalRegex: "(?i)(zero|no)\\s+rows|0\\s+rows|empty|returned no"
+
+  - id: invalid_history_time_range
+    tags: [invalid-time, evidence]
+    skipUnlessEnv: CUSTOMER_HAS_HISTORY
+    skipReason: fixture_missing_history
+    turns:
+      - user: >
+          Call query_property_history on the customer's known history Thing and property with
+          startTime 2030-01-02T00:00:00Z and endTime 2030-01-01T00:00:00Z.
+          Explain the result.
+        acceptableOutcomes:
+          - name: invalid_time_range
+            score: 1.0
+            assertions:
+              - toolCalled: query_property_history
+              - finalRegex: "(?i)invalid\\s+time|time\\s+range"
+              - finalNotRegex: "(?i)\\bno\\s+data\\s+was\\s+found\\b|\\bno\\s+historical\\s+data\\b"

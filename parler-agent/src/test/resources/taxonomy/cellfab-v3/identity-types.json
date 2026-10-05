@@ -1,0 +1,20 @@
+[
+  {
+    "identityProperties": [
+      {
+        "name": "name",
+        "match": "suffix"
+      },
+      {
+        "name": "PTCDisplayName",
+        "match": "equals"
+      },
+      {
+        "name": "PTCSerialNumber",
+        "match": "equals"
+      }
+    ],
+    "baseThingTemplate": "PTC.MfgModel.DefaultWorkunit_TT",
+    "criticalProperties": []
+  }
+]

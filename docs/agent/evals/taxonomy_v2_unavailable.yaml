@@ -1,0 +1,52 @@
+# TAXONOMY_UNAVAILABLE + stale omission (separate agent; env matrix only).
+#
+# The AgentThing must have NO readable /taxonomies/identity-types.json — for example:
+#   - configurationRepository empty / unset, or
+#   - repository exists but /taxonomies/identity-types.json is absent or empty.
+# Do NOT use an agent that has the file on disk but "was not refreshed"; the first LLM
+# submit lazy-builds the cache from the repository (see docs/agent/taxonomy.md).
+#
+# The SCPA sample ships one AgentThing (SCPA_Demo_Agent), which has a taxonomy; create a second
+# AgentThing without a configuration repository for this suite, then:
+#   export AGENT_EVAL_AGENT_GPT_5_5=<AgentThing without taxonomy>
+#   uv run agent-eval --suite docs/agent/evals/taxonomy_v2_unavailable.yaml --agent-matrix env --agent-filter gpt_5_5
+#
+# If you omit --agent-matrix env, this case is skipped (skipUnlessEnv) instead of hitting
+# the yaml-matrix default agent.
+
+version: 1
+suite: taxonomy-v2-unavailable
+
+assertionGroups:
+  no_stale_field_when_unavailable:
+    - toolResultNotContains: '"stale"'
+  no_invented_taxonomy:
+    - finalNotRegex: "(?i)\\b(?:invented|made[- ]up|fictional)\\s+(?:asset\\s+)?type"
+
+agentMatrix:
+  gpt_5_5:
+    thingName: __SET_AGENT_EVAL_AGENT_GPT_5_5__
+    defaultEnabled: true
+
+cases:
+  - id: taxonomy_unavailable_no_stale
+    tags: [taxonomy, unavailable, stale-tri-state]
+    skipUnlessEnv: AGENT_EVAL_AGENT_GPT_5_5
+    skipReason: set AGENT_EVAL_AGENT_GPT_5_5 and run with --agent-matrix env (not yaml)
+    turns:
+      - user: >
+          You must call the list_asset_types tool first before writing your answer.
+          Use only the tool JSON for whether taxonomy is available. If the tool returns
+          TAXONOMY_UNAVAILABLE, state that taxonomy is unavailable and do not invent asset types.
+        acceptableOutcomes:
+          - name: unavailable_omits_stale
+            score: 1.0
+            assertions:
+              - toolCalled: list_asset_types
+              - toolResultRegex: '"code"\s*:\s*"TAXONOMY_UNAVAILABLE"'
+              - useAssertionGroup: no_stale_field_when_unavailable
+          - name: unavailable_prose_only
+            score: 0.85
+            assertions:
+              - useAssertionGroup: no_invented_taxonomy
+              - finalRegex: "(?i)(unavailable|not\\s+configured|no\\s+taxonomy)"

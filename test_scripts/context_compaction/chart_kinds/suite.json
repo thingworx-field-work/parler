@@ -1,0 +1,84 @@
+{
+  "version": 1,
+  "suite": "chart-kinds-ten-turns-v2",
+  "description": "Ten prompts covering the chart kinds and group behaviours added by chart-enhancement L1 through C3b-2a: histogram (equal width, explicit edges, density), boxplot (multi-device and single-table), heatmap with missing cells, stacked and percent bars, a chart group with a failing member and shared colours, the EMPTY-result guard, and a two-category bar. Uses the existing ten-turn driver unchanged.",
+  "variables": {
+    "userTimezone": "America/New_York",
+    "hostContext": ""
+  },
+  "helperCapture": {
+    "intervalSeconds": 30,
+    "reads": 2
+  },
+  "clientWaitSeconds": 600,
+  "turnGapSeconds": 0,
+  "goldenRef": "reference-manifest.json",
+  "datasetManifest": {
+    "baseline": "User-restored ThingWorx Stream/ValueStream history; record the restored snapshot with live results",
+    "knownCoverage": {
+      "utilization": "ORD-Contacting-01/02, AC-Contacting-01, BOS-Contacting-02, 2025-09-03 to 2025-09-14",
+      "timeseries": "contactForce and operationalVoltage for ORD-Contacting-01/02, 2026-09-14 22:00 to 2026-09-15 02:00 America/New_York, about one sample per six minutes (37 per series). MUC BenchScale 02 has operationalVoltage but no contactForce property.",
+      "alerts": "same three assets and window"
+    },
+    "referenceDataStatus": "not_independently_verified",
+    "userTimezone": "America/New_York",
+    "promptPolicy": "Prompts state explicit dates and do not name a timezone; the submitted user timezone is America/New_York.",
+    "knownLimits": [
+      "Since Agent 0.1.245 a complete JSON result above 20 rows (hasMore false, or equal totalRows/returnedRows) is promoted to a cached table; get_utilization_records returns 25 rows for 2025-09-03..2025-09-14 and the event-record turns use that full window.",
+      "tabulate_cached_result mode union_rows appends per-day or per-device tables with a label column; turns 3 and 10 depend on it. Nothing pages or re-queries automatically.",
+      "Grouped and stacked bars accept at most 6 series; the records window holds 8 distinct reasons, so the stacked turns use utilizationState as the series."
+    ]
+  },
+  "turns": [
+    {
+      "id": 1,
+      "prompt": "Show the distribution of contactForce for ORD-Contacting-01 from September 14, 2026 22:00 to September 15, 2026 02:00 as a histogram with 8 bins.",
+      "judgmentFocus": "Equal-width histogram: history fetch, bin_numeric with binCount 8, then kind histogram."
+    },
+    {
+      "id": 2,
+      "prompt": "Show a histogram of contactForce for ORD-Contacting-01 from September 14, 2026 22:00 to September 15, 2026 02:00 using bin edges 80, 100, 120, 160, 180, in density mode.",
+      "judgmentFocus": "Explicit unequal edges with out-of-range values and density mode."
+    },
+    {
+      "id": 3,
+      "prompt": "Show a box plot comparing contactForce across ORD-Contacting-01, ORD-Contacting-02 and MUC BenchScale 02 from September 14, 2026 22:00 to September 15, 2026 02:00, and add an upper spec limit line at 190.",
+      "judgmentFocus": "Natural three-device comparison: one history per device, union_rows with a device label, box_summary grouped by device. MUC BenchScale 02 has no contactForce: PROPERTY_NOT_FOUND, never the whole value stream."
+    },
+    {
+      "id": 4,
+      "prompt": "Using the utilization event records for ORD-Contacting-01 from 2025-09-03 through 2025-09-14, show a box plot of event duration in seconds grouped by utilization state.",
+      "judgmentFocus": "Grouped boxplot over the full twelve-day records window: 25 JSON rows with hasMore false, promoted to a cached table (TR-1), then box_summary with groupBy utilizationState."
+    },
+    {
+      "id": 5,
+      "prompt": "From the same utilization event records for ORD-Contacting-01 from 2025-09-03 through 2025-09-14, show a heatmap of total event duration by utilization state and reason.",
+      "judgmentFocus": "Two-key group_metric long table drawn as a heatmap with missing combinations kept missing."
+    },
+    {
+      "id": 6,
+      "prompt": "From the same utilization event records for ORD-Contacting-01 from 2025-09-03 through 2025-09-14, show total event duration by reason group as a stacked bar chart, stacked by utilization state.",
+      "judgmentFocus": "Stacked bar over a two-key long table: reasonGroup categories, utilizationState series (at most 6 series; stacking by the 8 distinct reasons is rejected with TOO_MANY_SERIES)."
+    },
+    {
+      "id": 7,
+      "prompt": "Now show the same data as a 100% stacked bar chart, horizontally.",
+      "judgmentFocus": "Follow-up: percent stacking combined with horizontal orientation."
+    },
+    {
+      "id": 8,
+      "prompt": "Show separate pie charts of the utilization-state breakdown on 2025-09-10 for ORD-Contacting-01, ORD-Contacting-02 and AC-Contacting-01, as one comparable group.",
+      "judgmentFocus": "Three-member chart group with shared colours; a later member appends a category the first ones lack."
+    },
+    {
+      "id": 9,
+      "prompt": "Show a pie chart of the utilization-state breakdown for ORD-Contacting-01 on 2025-09-10, and then a histogram of contactForce for ORD-Contacting-01 on January 1, 2020.",
+      "judgmentFocus": "Empty distribution result must not chart the earlier table."
+    },
+    {
+      "id": 10,
+      "prompt": "Show a heatmap of the utilization-state percentage for ORD-Contacting-01 by day and state, for each day from 2025-09-08 through 2025-09-14.",
+      "judgmentFocus": "Per-day comparison that needs N queries: one state summary per day, union_rows with a day label, then a day by state heatmap. Nothing is paged or re-queried automatically."
+    }
+  ]
+}

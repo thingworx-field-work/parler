@@ -1,0 +1,14 @@
+{
+    "ide.css": "./widgetLevel/widgetName.ide.css",
+    "ide.js": "./widgetLevel/widgetName.ide.js",
+    "runtime.css": "./widgetLevel/widgetName.runtime.css",
+    "runtime.js": "./widgetLevel/widgetName.runtime.js",
+    "config.js": {
+        "path":  "./widgetLevel/widgetName.config.js",
+        "overwrite": true
+    },
+    "common.js": {
+        "path":  "./widgetLevel/widgetName.common.js",
+        "excludeTemplate": true
+    }
+}

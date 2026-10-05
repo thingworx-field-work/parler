@@ -1,0 +1,9 @@
+{
+  "description": "After caching a 3-row table with two equal sort keys, expect desc order then tie-break A before B (original row index).",
+  "arguments": {
+    "cacheId": "<PUT_CACHED_TABLE_ID>",
+    "mode": "sort_topn",
+    "sortBy": "score",
+    "limit": 10
+  }
+}

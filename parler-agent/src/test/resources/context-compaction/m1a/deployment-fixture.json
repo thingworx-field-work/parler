@@ -1,0 +1,44 @@
+{
+  "baselineVersion": 2,
+  "taxonomyReady": true,
+  "modelFacingSkillAdmission": false,
+  "playbookLoaded": false,
+    "taxonomyRegisteredToolNames": [
+      "tabulate_cached_result",
+      "build_chart_from_tabular_result",
+      "query_entities_by_taxonomy"
+    ],
+    "taxonomyAdmissionContext": "Fixed M1a taxonomy admission context: query_entities_by_taxonomy advertises taxonomy-aware entity queries; tabulate_cached_result and build_chart_from_tabular_result remain chart-path tools for utilization comparisons.",
+  "extendedToolsMerged": [
+    {
+      "name": "cc_m1a_fixture_read_status",
+      "description": "Fixed M1a census fixture extended tool (READ_ONLY demo shape).",
+      "playbookSafe": true,
+      "parametersSchema": {
+        "type": "object",
+        "description": "Fixture-only extended tool schema for deployment-shaped census.",
+        "properties": {
+          "equipmentId": {
+            "type": "string",
+            "description": "Demo equipment identifier from the fixed deployment fixture."
+          },
+          "includeMetrics": {
+            "type": "boolean",
+            "description": "When true, include utilization metrics in the fixture response."
+          }
+        },
+        "required": ["equipmentId"]
+      }
+    }
+  ],
+  "workflowHostContext": {
+    "scope": "m1a-fixture",
+    "workflowId": "utilization-pie-v1",
+    "hostScopeVersion": 1
+  },
+  "notes": [
+    "Built-in census uses BuiltInTools.registerAll(reg, false, false) plus one fixed extended-tool definition from this fixture.",
+    "Lazy first-round fixture uses taxonomyReady=true with taxonomyRegisteredToolNames from this fixture.",
+    "workflowHostContext is fixed deployment-shaped input; it is not merged into tool schema census but is retained for provenance."
+  ]
+}

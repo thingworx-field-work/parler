@@ -1,0 +1,471 @@
+{
+  "baselineVersion" : 5,
+  "fixtureProvenance" : {
+    "builtInRegistration" : "BuiltInTools.registerAll(reg, false, false)",
+    "deploymentFixtureResource" : "context-compaction/m1a/deployment-fixture.json",
+    "deploymentFixture" : {
+      "baselineVersion" : 2,
+      "taxonomyReady" : true,
+      "modelFacingSkillAdmission" : false,
+      "playbookLoaded" : false,
+      "taxonomyRegisteredToolNames" : [ "tabulate_cached_result", "build_chart_from_tabular_result", "query_entities_by_taxonomy" ],
+      "taxonomyAdmissionContext" : "Fixed M1a taxonomy admission context: query_entities_by_taxonomy advertises taxonomy-aware entity queries; tabulate_cached_result and build_chart_from_tabular_result remain chart-path tools for utilization comparisons.",
+      "extendedToolsMerged" : [ {
+        "name" : "cc_m1a_fixture_read_status",
+        "description" : "Fixed M1a census fixture extended tool (READ_ONLY demo shape).",
+        "playbookSafe" : true,
+        "parametersSchema" : {
+          "type" : "object",
+          "description" : "Fixture-only extended tool schema for deployment-shaped census.",
+          "properties" : {
+            "equipmentId" : {
+              "type" : "string",
+              "description" : "Demo equipment identifier from the fixed deployment fixture."
+            },
+            "includeMetrics" : {
+              "type" : "boolean",
+              "description" : "When true, include utilization metrics in the fixture response."
+            }
+          },
+          "required" : [ "equipmentId" ]
+        }
+      } ],
+      "workflowHostContext" : {
+        "scope" : "m1a-fixture",
+        "workflowId" : "utilization-pie-v1",
+        "hostScopeVersion" : 1
+      },
+      "notes" : [ "Built-in census uses BuiltInTools.registerAll(reg, false, false) plus one fixed extended-tool definition from this fixture.", "Lazy first-round fixture uses taxonomyReady=true with taxonomyRegisteredToolNames from this fixture.", "workflowHostContext is fixed deployment-shaped input; it is not merged into tool schema census but is retained for provenance." ]
+    },
+    "lazyAdmissionSignals" : {
+      "taxonomyReady" : true,
+      "loadedSkills" : false,
+      "loadedPlaybook" : false,
+      "documentScopeActive" : false,
+      "slashActive" : false,
+      "registeredTools" : [ "tabulate_cached_result", "build_chart_from_tabular_result", "query_entities_by_taxonomy" ],
+      "requiredTools" : [ ],
+      "requiredBuckets" : [ ]
+    },
+    "routingGuideSource" : "bundled llm_tool_routing_guide.txt (append=true census)"
+  },
+  "priorityToolNames" : [ "tabulate_cached_result", "query_entities", "build_chart_from_tabular_result", "invoke_service", "query_entities_by_taxonomy", "query_property_history", "build_history_overlay_chart" ],
+  "routingGuideChars" : 28501,
+  "workflowHostContextUtf8Chars" : 78,
+  "taxonomyAdmissionContextUtf8Chars" : 218,
+  "combinations" : [ {
+    "apiShapeId" : "openai-chat-completions-v1",
+    "admissionMode" : "off",
+    "toolCount" : 29,
+    "toolNamesOrdered" : [ "invoke_service", "fetch_cached_result", "tabulate_cached_result", "analyze_entity_set", "summarize_cached_result", "analyze_cached_result", "inspect_cached_payload", "extract_nested", "build_chart_from_tabular_result", "declare_chart_group", "build_history_overlay_chart", "discover_thing_members", "describe_entity_schema", "query_entities", "query_entities_by_taxonomy", "list_asset_types", "resolve_asset_type", "resolve_thing", "list_entities_by_type", "get_property_values", "query_property_history", "query_stream_data", "query_alert_summary", "query_alert_history", "acknowledge_alerts", "set_property_value", "spotlight_search", "get_agent_skill", "cc_m1a_fixture_read_status" ],
+    "toolSchemaChars" : 72803,
+    "perToolSchemaChars" : {
+      "invoke_service" : 5521,
+      "fetch_cached_result" : 1349,
+      "tabulate_cached_result" : 10330,
+      "analyze_entity_set" : 2349,
+      "summarize_cached_result" : 985,
+      "analyze_cached_result" : 2009,
+      "inspect_cached_payload" : 792,
+      "extract_nested" : 597,
+      "build_chart_from_tabular_result" : 6525,
+      "build_history_overlay_chart" : 3426,
+      "discover_thing_members" : 2407,
+      "describe_entity_schema" : 2897,
+      "query_entities" : 6737,
+      "query_entities_by_taxonomy" : 4623,
+      "list_asset_types" : 1020,
+      "resolve_asset_type" : 465,
+      "resolve_thing" : 707,
+      "list_entities_by_type" : 2573,
+      "get_property_values" : 1195,
+      "query_property_history" : 4587,
+      "query_stream_data" : 1991,
+      "query_alert_summary" : 2457,
+      "query_alert_history" : 2561,
+      "acknowledge_alerts" : 1752,
+      "set_property_value" : 928,
+      "spotlight_search" : 571,
+      "get_agent_skill" : 895,
+      "cc_m1a_fixture_read_status" : 525
+    },
+    "perToolEditableChars" : {
+      "invoke_service" : 4610,
+      "fetch_cached_result" : 1076,
+      "tabulate_cached_result" : 7299,
+      "analyze_entity_set" : 1517,
+      "summarize_cached_result" : 709,
+      "analyze_cached_result" : 1171,
+      "inspect_cached_payload" : 477,
+      "extract_nested" : 343,
+      "build_chart_from_tabular_result" : 4986,
+      "build_history_overlay_chart" : 2187,
+      "discover_thing_members" : 1757,
+      "describe_entity_schema" : 2082,
+      "query_entities" : 5445,
+      "query_entities_by_taxonomy" : 3937,
+      "list_asset_types" : 854,
+      "resolve_asset_type" : 280,
+      "resolve_thing" : 477,
+      "list_entities_by_type" : 2024,
+      "get_property_values" : 893,
+      "query_property_history" : 3382,
+      "query_stream_data" : 1462,
+      "query_alert_summary" : 1667,
+      "query_alert_history" : 1817,
+      "acknowledge_alerts" : 1331,
+      "set_property_value" : 511,
+      "spotlight_search" : 341,
+      "get_agent_skill" : 703,
+      "cc_m1a_fixture_read_status" : 248
+    },
+    "sevenPriorityEditableTotal" : 31846,
+    "parameterStructureProjections" : {
+      "invoke_service" : "{\"additionalProperties\":false,\"properties\":{\"entityName\":{\"type\":\"string\"},\"entityType\":{\"enum\":[\"ApplicationKey\",\"Authenticator\",\"Dashboard\",\"DataShape\",\"DataTagVocabulary\",\"DirectoryService\",\"ExtensionPackage\",\"Group\",\"LocalizationTable\",\"Log\",\"Mashup\",\"MediaEntity\",\"Menu\",\"ModelTagVocabulary\",\"Network\",\"NotificationContent\",\"NotificationDefinition\",\"Organization\",\"PersistenceProvider\",\"PersistenceProviderPackage\",\"Project\",\"Resource\",\"ScriptFunctionLibrary\",\"StateDefinition\",\"StyleDefinition\",\"StyleTheme\",\"Subsystem\",\"Thing\",\"ThingGroup\",\"ThingPackage\",\"ThingShape\",\"ThingTemplate\",\"User\",\"Widget\"],\"type\":\"string\"},\"parameters\":{\"type\":\"object\"},\"serviceName\":{\"type\":\"string\"}},\"required\":[\"entityType\",\"entityName\",\"serviceName\"],\"type\":\"object\"}",
+      "fetch_cached_result" : "{\"properties\":{\"cacheId\":{\"type\":\"string\"},\"limit\":{\"type\":\"integer\"},\"offset\":{\"type\":\"integer\"}},\"required\":[\"cacheId\"],\"type\":\"object\"}",
+      "tabulate_cached_result" : "{\"properties\":{\"aggregation\":{\"type\":\"string\"},\"binCount\":{\"maximum\":50,\"minimum\":1,\"type\":\"integer\"},\"binEdges\":{\"items\":{\"type\":\"number\"},\"type\":\"array\"},\"cacheId\":{\"type\":\"string\"},\"calendarBucket\":{\"enum\":[\"day\",\"hour\"],\"type\":\"string\"},\"column\":{\"type\":\"string\"},\"counterModulus\":{\"type\":\"number\"},\"currentWindowEnd\":{\"type\":\"string\"},\"currentWindowStart\":{\"type\":\"string\"},\"derived\":{\"items\":{\"properties\":{\"denominator\":{\"type\":\"string\"},\"factor\":{\"type\":\"number\"},\"groupBy\":{\"items\":{\"type\":\"string\"},\"type\":\"array\"},\"input\":{\"type\":\"string\"},\"inputs\":{\"items\":{\"type\":\"string\"},\"type\":\"array\"},\"left\":{\"type\":\"string\"},\"name\":{\"type\":\"string\"},\"numerator\":{\"type\":\"string\"},\"op\":{\"enum\":[\"ratio\",\"ratio_percent\",\"difference\",\"sum_values\",\"multiply\",\"scale\",\"percent_of_total\",\"percent_of_group\"],\"type\":\"string\"},\"right\":{\"type\":\"string\"}},\"required\":[\"name\",\"op\"],\"type\":\"object\"},\"type\":\"array\"},\"durationWindowSeconds\":{\"type\":\"integer\"},\"entityColumn\":{\"type\":\"string\"},\"fields\":{\"items\":{\"type\":\"string\"},\"type\":\"array\"},\"filters\":{\"type\":\"object\"},\"groupBy\":{\"oneOf\":[{\"type\":\"string\"},{\"items\":{\"type\":\"string\"},\"type\":\"array\"}]},\"having\":{\"type\":\"object\"},\"integrationMethod\":{\"enum\":[\"step_hold\",\"trapezoid\"],\"type\":\"string\"},\"joinType\":{\"type\":\"string\"},\"labelColumn\":{\"type\":\"string\"},\"labelValues\":{\"items\":{\"type\":\"string\"},\"type\":\"array\"},\"maxGapSeconds\":{\"type\":\"integer\"},\"maxItems\":{\"type\":\"integer\"},\"maxRatePerSecond\":{\"type\":\"number\"},\"measures\":{\"items\":{\"properties\":{\"column\":{\"type\":\"string\"},\"direction\":{\"enum\":[\"asc\",\"desc\",\"ascending\",\"descending\"],\"type\":\"string\"},\"filters\":{\"type\":\"object\"},\"name\":{\"type\":\"string\"},\"op\":{\"enum\":[\"count\",\"count_non_null\",\"sum\",\"avg\",\"min\",\"max\",\"count_distinct\",\"weighted_avg\",\"median\",\"percentile\",\"variance\",\"stddev\",\"first\",\"last\",\"mode\"],\"type\":\"string\"},\"orderBy\":{\"type\":\"string\"},\"p\":{\"type\":\"number\"},\"weightColumn\":{\"type\":\"string\"}},\"required\":[\"name\",\"op\"],\"type\":\"object\"},\"type\":\"array\"},\"minSupport\":{\"type\":\"integer\"},\"mode\":{\"enum\":[\"filter_count\",\"filter_rows\",\"filter_sort_topn\",\"group_metric\",\"bin_numeric\",\"box_summary\",\"union_rows\",\"exact_join\",\"quality\",\"resample\",\"rolling\",\"rate_of_change\",\"period_compare\",\"counter_delta\",\"rolling_stats\",\"time_weighted\",\"calendar_bucket\"],\"type\":\"string\"},\"observationWindow\":{\"type\":\"integer\"},\"offset\":{\"type\":\"integer\"},\"originalWindowEnd\":{\"type\":\"string\"},\"originalWindowStart\":{\"type\":\"string\"},\"rangeMax\":{\"type\":\"number\"},\"rangeMin\":{\"type\":\"number\"},\"resetBaseline\":{\"type\":\"number\"},\"rightCacheId\":{\"type\":\"string\"},\"rollingKind\":{\"type\":\"string\"},\"sorts\":{\"items\":{\"properties\":{\"fieldName\":{\"type\":\"string\"},\"isAscending\":{\"type\":\"boolean\"},\"isCaseSensitive\":{\"type\":\"boolean\"}},\"required\":[\"fieldName\"],\"type\":\"object\"},\"type\":\"array\"},\"sourceCacheIds\":{\"items\":{\"type\":\"string\"},\"type\":\"array\"},\"statistic\":{\"enum\":[\"mean\",\"sum\",\"min\",\"max\",\"stddev\",\"count_values\",\"count_records\"],\"type\":\"string\"},\"timeColumn\":{\"type\":\"string\"},\"timeUnit\":{\"enum\":[\"seconds\",\"minutes\",\"hours\"],\"type\":\"string\"},\"timeZone\":{\"type\":\"string\"},\"valueColumn\":{\"type\":\"string\"},\"windowEnd\":{\"type\":\"string\"},\"windowStart\":{\"type\":\"string\"}},\"required\":[\"mode\"],\"type\":\"object\"}",
+      "analyze_entity_set" : "{\"properties\":{\"left\":{\"properties\":{\"cacheId\":{\"type\":\"string\"},\"keyColumn\":{\"type\":\"string\"},\"label\":{\"type\":\"string\"}},\"required\":[\"cacheId\"],\"type\":\"object\"},\"maxItems\":{\"type\":\"integer\"},\"offset\":{\"type\":\"integer\"},\"operation\":{\"enum\":[\"difference\",\"intersection\",\"union\",\"symmetric_difference\"],\"type\":\"string\"},\"projectColumns\":{\"items\":{\"type\":\"string\"},\"type\":\"array\"},\"right\":{\"properties\":{\"cacheId\":{\"type\":\"string\"},\"keyColumn\":{\"type\":\"string\"},\"label\":{\"type\":\"string\"}},\"required\":[\"cacheId\"],\"type\":\"object\"}},\"required\":[\"operation\",\"left\",\"right\"],\"type\":\"object\"}",
+      "summarize_cached_result" : "{\"properties\":{\"cacheId\":{\"type\":\"string\"},\"percentileColumns\":{\"items\":{\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"cacheId\"],\"type\":\"object\"}",
+      "analyze_cached_result" : "{\"additionalProperties\":false,\"properties\":{\"alignment\":{\"enum\":[\"exact\",\"nearest\"],\"type\":\"string\"},\"cacheId\":{\"type\":\"string\"},\"horizonSeconds\":{\"type\":\"number\"},\"methodId\":{\"type\":\"string\"},\"operation\":{\"enum\":[\"outlier\",\"change_point\",\"spc\",\"relationship\",\"trend\",\"threshold_crossing\"],\"type\":\"string\"},\"rightCacheId\":{\"type\":\"string\"},\"rightValueColumn\":{\"type\":\"string\"},\"threshold\":{\"type\":\"number\"},\"timeColumn\":{\"type\":\"string\"},\"toleranceMillis\":{\"type\":\"integer\"},\"valueColumn\":{\"type\":\"string\"}},\"required\":[\"operation\",\"cacheId\"],\"type\":\"object\"}",
+      "inspect_cached_payload" : "{\"properties\":{\"cacheId\":{\"type\":\"string\"},\"mode\":{\"enum\":[\"inspect\",\"extract\"],\"type\":\"string\"},\"path\":{\"type\":\"string\"}},\"required\":[\"cacheId\",\"mode\"],\"type\":\"object\"}",
+      "extract_nested" : "{\"properties\":{\"cellPath\":{\"type\":\"string\"},\"sourceCacheId\":{\"type\":\"string\"}},\"required\":[\"sourceCacheId\",\"cellPath\"],\"type\":\"object\"}",
+      "build_chart_from_tabular_result" : "{\"properties\":{\"cacheId\":{\"type\":\"string\"},\"groupMemberKey\":{\"type\":\"string\"},\"histogramMode\":{\"enum\":[\"count\",\"density\"],\"type\":\"string\"},\"intent\":{\"enum\":[\"time_trend\",\"rank\",\"compare_groups\",\"correlation\",\"distribution\",\"status_timeline\",\"composition\"],\"type\":\"string\"},\"kind\":{\"enum\":[\"line\",\"bar\",\"scatter\",\"pie\",\"histogram\",\"boxplot\",\"heatmap\"],\"type\":\"string\"},\"orientation\":{\"enum\":[\"vertical\",\"horizontal\"],\"type\":\"string\"},\"pieMaxSlices\":{\"maximum\":12,\"minimum\":2,\"type\":\"integer\"},\"pieSliceMode\":{\"enum\":[\"top_with_other\",\"all_nonzero\"],\"type\":\"string\"},\"requestedTimeRange\":{\"properties\":{\"end\":{\"type\":\"string\"},\"start\":{\"type\":\"string\"}},\"type\":\"object\"},\"series\":{\"items\":{\"properties\":{\"name\":{\"type\":\"string\"},\"yColumn\":{\"type\":\"string\"}},\"required\":[\"name\",\"yColumn\"],\"type\":\"object\"},\"type\":\"array\"},\"seriesColumn\":{\"type\":\"string\"},\"source\":{\"type\":\"string\"},\"stackMode\":{\"enum\":[\"grouped\",\"stacked\",\"percent\"],\"type\":\"string\"},\"title\":{\"type\":\"string\"},\"xColumn\":{\"type\":\"string\"},\"xLabel\":{\"type\":\"string\"},\"yColumn\":{\"type\":\"string\"},\"yLabel\":{\"type\":\"string\"},\"yReferenceLines\":{\"items\":{\"properties\":{\"label\":{\"type\":\"string\"},\"role\":{\"enum\":[\"usl\",\"ucl\",\"lcl\",\"lsl\",\"target\",\"limit\",\"warning\"],\"type\":\"string\"},\"y\":{\"type\":\"number\"}},\"required\":[\"y\"],\"type\":\"object\"},\"maxItems\":12,\"type\":\"array\"}},\"required\":[\"source\"],\"type\":\"object\"}",
+      "declare_chart_group" : "{\"properties\":{\"layout\":{\"enum\":[\"auto\",\"stack\",\"grid\"],\"type\":\"string\"},\"members\":{\"items\":{\"properties\":{\"key\":{\"pattern\":\"^[a-z0-9_-]{1,32}$\",\"type\":\"string\"},\"name\":{\"type\":\"string\"}},\"required\":[\"key\",\"name\"],\"type\":\"object\"},\"maxItems\":6,\"minItems\":2,\"type\":\"array\"},\"sharedCategoryDimension\":{\"type\":\"string\"},\"title\":{\"type\":\"string\"}},\"required\":[\"title\",\"members\"],\"type\":\"object\"}",
+      "build_history_overlay_chart" : "{\"properties\":{\"anchorTime\":{\"type\":\"string\"},\"chart_kind\":{\"enum\":[\"line\",\"scatter\"],\"type\":\"string\"},\"propertyName\":{\"type\":\"string\"},\"series\":{\"items\":{\"properties\":{\"anchorOffset\":{\"type\":\"string\"},\"calendarPhrase\":{\"type\":\"string\"},\"endTime\":{\"type\":\"string\"},\"label\":{\"type\":\"string\"},\"relativeDuration\":{\"type\":\"string\"},\"startTime\":{\"type\":\"string\"},\"thingName\":{\"type\":\"string\"}},\"required\":[\"label\",\"thingName\"],\"type\":\"object\"},\"maxItems\":6,\"minItems\":2,\"type\":\"array\"},\"title\":{\"type\":\"string\"},\"xAxisMode\":{\"enum\":[\"absolute_time\",\"elapsed_time\",\"normalized_time\"],\"type\":\"string\"},\"yLabel\":{\"type\":\"string\"},\"yReferenceLines\":{\"items\":{\"properties\":{\"label\":{\"type\":\"string\"},\"role\":{\"type\":\"string\"},\"y\":{\"type\":\"number\"}},\"required\":[\"y\"],\"type\":\"object\"},\"maxItems\":12,\"type\":\"array\"}},\"required\":[\"propertyName\",\"series\"],\"type\":\"object\"}",
+      "discover_thing_members" : "{\"properties\":{\"baseType\":{\"type\":\"string\"},\"category\":{\"type\":\"string\"},\"dataShape\":{\"type\":\"string\"},\"facet\":{\"enum\":[\"properties\",\"property\",\"services\",\"service\",\"events\",\"event\",\"subscriptions\"],\"type\":\"string\"},\"maxItems\":{\"type\":\"integer\"},\"memberName\":{\"type\":\"string\"},\"namePrefix\":{\"type\":\"string\"},\"offset\":{\"type\":\"integer\"},\"thingName\":{\"type\":\"string\"}},\"required\":[\"thingName\"],\"type\":\"object\"}",
+      "describe_entity_schema" : "{\"properties\":{\"baseType\":{\"type\":\"string\"},\"category\":{\"type\":\"string\"},\"dataShape\":{\"type\":\"string\"},\"entityName\":{\"type\":\"string\"},\"entityType\":{\"enum\":[\"ThingTemplate\",\"ThingShape\",\"DataShape\"],\"type\":\"string\"},\"facet\":{\"enum\":[\"summary\",\"properties\",\"services\",\"events\",\"fields\",\"service\"],\"type\":\"string\"},\"maxItems\":{\"type\":\"integer\"},\"memberName\":{\"type\":\"string\"},\"namePrefix\":{\"type\":\"string\"},\"offset\":{\"type\":\"integer\"},\"scope\":{\"enum\":[\"effective\",\"local\"],\"type\":\"string\"}},\"required\":[\"entityType\",\"entityName\"],\"type\":\"object\"}",
+      "query_entities" : "{\"properties\":{\"entityType\":{\"type\":\"string\"},\"hierarchyNodeId\":{\"type\":\"string\"},\"hierarchyNodeName\":{\"type\":\"string\"},\"includeConcreteTemplate\":{\"type\":\"boolean\"},\"includeDescription\":{\"type\":\"boolean\"},\"includeIsSystemObject\":{\"type\":\"boolean\"},\"includeTags\":{\"type\":\"boolean\"},\"intersectExpandHasMore\":{\"type\":\"boolean\"},\"intersectThingNames\":{\"items\":{\"type\":\"string\"},\"maxItems\":5000,\"type\":\"array\"},\"maxItems\":{\"type\":\"integer\"},\"modelTags\":{\"items\":{\"properties\":{\"vocabulary\":{\"type\":\"string\"},\"vocabularyTerm\":{\"type\":\"string\"}},\"required\":[\"vocabulary\",\"vocabularyTerm\"],\"type\":\"object\"},\"type\":\"array\"},\"namePrefix\":{\"type\":\"string\"},\"offset\":{\"type\":\"integer\"},\"query\":{\"type\":\"object\"},\"thingShape\":{\"type\":\"string\"},\"thingTemplate\":{\"type\":\"string\"},\"widePropertyColumns\":{\"type\":\"boolean\"},\"withData\":{\"type\":\"boolean\"},\"withPermissions\":{\"type\":\"boolean\"}},\"required\":[\"entityType\"],\"type\":\"object\"}",
+      "query_entities_by_taxonomy" : "{\"properties\":{\"AdditionalProperties\":{\"type\":\"string\"},\"CriticalProperties\":{\"type\":\"string\"},\"EntityName\":{\"type\":\"string\"},\"EntityType\":{\"type\":\"string\"},\"LookupProperties\":{\"type\":\"object\"},\"hierarchyNodeId\":{\"type\":\"string\"},\"hierarchyNodeName\":{\"type\":\"string\"},\"intersectExpandHasMore\":{\"type\":\"boolean\"},\"intersectThingNames\":{\"items\":{\"type\":\"string\"},\"maxItems\":5000,\"type\":\"array\"}},\"required\":[\"EntityType\",\"EntityName\"],\"type\":\"object\"}",
+      "list_asset_types" : "{\"properties\":{\"maxItems\":{\"type\":\"integer\"}},\"type\":\"object\"}",
+      "resolve_asset_type" : "{\"properties\":{\"text\":{\"type\":\"string\"}},\"required\":[\"text\"],\"type\":\"object\"}",
+      "resolve_thing" : "{\"properties\":{\"assetTypeKey\":{\"type\":\"string\"},\"text\":{\"type\":\"string\"}},\"required\":[\"text\"],\"type\":\"object\"}",
+      "list_entities_by_type" : "{\"properties\":{\"entityCollectionType\":{\"type\":\"string\"},\"maxItems\":{\"type\":\"integer\"},\"nameMask\":{\"type\":\"string\"},\"tags\":{\"items\":{\"properties\":{\"vocabulary\":{\"type\":\"string\"},\"vocabularyTerm\":{\"type\":\"string\"}},\"required\":[\"vocabulary\",\"vocabularyTerm\"],\"type\":\"object\"},\"type\":\"array\"},\"useRegEx\":{\"type\":\"boolean\"}},\"required\":[\"entityCollectionType\"],\"type\":\"object\"}",
+      "get_property_values" : "{\"properties\":{\"propertyNames\":{\"items\":{\"type\":\"string\"},\"maxItems\":40,\"type\":\"array\"},\"thingName\":{\"type\":\"string\"}},\"required\":[\"thingName\",\"propertyNames\"],\"type\":\"object\"}",
+      "query_property_history" : "{\"properties\":{\"actions\":{\"items\":{\"type\":\"string\"},\"type\":\"array\"},\"calendarPhrase\":{\"type\":\"string\"},\"endTime\":{\"type\":\"string\"},\"kind\":{\"enum\":[\"line\",\"bar\",\"scatter\"],\"type\":\"string\"},\"maxItems\":{\"type\":\"integer\"},\"propertyName\":{\"type\":\"string\"},\"relativeDuration\":{\"type\":\"string\"},\"requestedTimeRange\":{\"properties\":{\"end\":{\"type\":\"string\"},\"start\":{\"type\":\"string\"}},\"type\":\"object\"},\"startTime\":{\"type\":\"string\"},\"thingName\":{\"type\":\"string\"},\"title\":{\"type\":\"string\"},\"x_label\":{\"type\":\"string\"},\"y_label\":{\"type\":\"string\"},\"y_reference_lines\":{\"items\":{\"properties\":{\"label\":{\"type\":\"string\"},\"role\":{\"enum\":[\"usl\",\"ucl\",\"lcl\",\"lsl\",\"target\",\"limit\",\"warning\"],\"type\":\"string\"},\"y\":{\"type\":\"number\"}},\"required\":[\"y\"],\"type\":\"object\"},\"maxItems\":12,\"type\":\"array\"}},\"required\":[\"thingName\",\"propertyName\"],\"type\":\"object\"}",
+      "query_stream_data" : "{\"properties\":{\"calendarPhrase\":{\"type\":\"string\"},\"endTime\":{\"type\":\"string\"},\"maxItems\":{\"type\":\"integer\"},\"oldestFirst\":{\"type\":\"boolean\"},\"relativeDuration\":{\"type\":\"string\"},\"source\":{\"type\":\"string\"},\"startTime\":{\"type\":\"string\"},\"thingName\":{\"type\":\"string\"}},\"required\":[\"thingName\"],\"type\":\"object\"}",
+      "query_alert_summary" : "{\"properties\":{\"ackState\":{\"enum\":[\"all\",\"acknowledged\",\"unacknowledged\"],\"type\":\"string\"},\"advancedQuery\":{\"type\":\"string\"},\"alertName\":{\"type\":\"string\"},\"alertType\":{\"type\":\"string\"},\"limit\":{\"type\":\"integer\"},\"priorityMax\":{\"type\":\"integer\"},\"priorityMin\":{\"type\":\"integer\"},\"propertyName\":{\"type\":\"string\"},\"sort\":{\"enum\":[\"default\",\"timestamp_asc\",\"timestamp_desc\",\"priority_asc\",\"priority_desc\"],\"type\":\"string\"},\"thingNames\":{\"items\":{\"type\":\"string\"},\"maxItems\":25,\"minItems\":1,\"type\":\"array\"}},\"required\":[\"thingNames\"],\"type\":\"object\"}",
+      "query_alert_history" : "{\"properties\":{\"advancedQuery\":{\"type\":\"string\"},\"alertName\":{\"type\":\"string\"},\"alertType\":{\"type\":\"string\"},\"calendarPhrase\":{\"type\":\"string\"},\"endTime\":{\"type\":\"string\"},\"limit\":{\"type\":\"integer\"},\"order\":{\"enum\":[\"newest_first\",\"oldest_first\"],\"type\":\"string\"},\"priorityMax\":{\"type\":\"integer\"},\"priorityMin\":{\"type\":\"integer\"},\"propertyName\":{\"type\":\"string\"},\"relativeDuration\":{\"type\":\"string\"},\"startTime\":{\"type\":\"string\"},\"thingName\":{\"type\":\"string\"}},\"required\":[\"thingName\"],\"type\":\"object\"}",
+      "acknowledge_alerts" : "{\"properties\":{\"alertName\":{\"type\":\"string\"},\"message\":{\"type\":\"string\"},\"mode\":{\"enum\":[\"specific_alerts\",\"property_all\"],\"type\":\"string\"},\"propertyName\":{\"type\":\"string\"},\"thingName\":{\"type\":\"string\"}},\"required\":[\"thingName\"],\"type\":\"object\"}",
+      "set_property_value" : "{\"properties\":{\"base_type\":{\"type\":\"string\"},\"property_name\":{\"type\":\"string\"},\"thing_name\":{\"type\":\"string\"},\"value\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"number\"},{\"type\":\"integer\"},{\"type\":\"boolean\"}]}},\"required\":[\"thing_name\",\"property_name\",\"value\"],\"type\":\"object\"}",
+      "spotlight_search" : "{\"properties\":{\"maxItems\":{\"type\":\"integer\"},\"query\":{\"type\":\"string\"}},\"required\":[\"query\"],\"type\":\"object\"}",
+      "get_agent_skill" : "{\"properties\":{\"skill_name\":{\"type\":\"string\"}},\"required\":[\"skill_name\"],\"type\":\"object\"}",
+      "cc_m1a_fixture_read_status" : "{\"properties\":{\"equipmentId\":{\"type\":\"string\"},\"includeMetrics\":{\"type\":\"boolean\"}},\"required\":[\"equipmentId\"],\"type\":\"object\"}"
+    }
+  }, {
+    "apiShapeId" : "anthropic-messages-v1",
+    "admissionMode" : "off",
+    "toolCount" : 29,
+    "toolNamesOrdered" : [ "invoke_service", "fetch_cached_result", "tabulate_cached_result", "analyze_entity_set", "summarize_cached_result", "analyze_cached_result", "inspect_cached_payload", "extract_nested", "build_chart_from_tabular_result", "declare_chart_group", "build_history_overlay_chart", "discover_thing_members", "describe_entity_schema", "query_entities", "query_entities_by_taxonomy", "list_asset_types", "resolve_asset_type", "resolve_thing", "list_entities_by_type", "get_property_values", "query_property_history", "query_stream_data", "query_alert_summary", "query_alert_history", "acknowledge_alerts", "set_property_value", "spotlight_search", "get_agent_skill", "cc_m1a_fixture_read_status" ],
+    "toolSchemaChars" : 72028,
+    "perToolSchemaChars" : {
+      "invoke_service" : 5492,
+      "fetch_cached_result" : 1320,
+      "tabulate_cached_result" : 10301,
+      "analyze_entity_set" : 2320,
+      "summarize_cached_result" : 956,
+      "analyze_cached_result" : 1980,
+      "inspect_cached_payload" : 763,
+      "extract_nested" : 568,
+      "build_chart_from_tabular_result" : 6496,
+      "build_history_overlay_chart" : 3397,
+      "discover_thing_members" : 2378,
+      "describe_entity_schema" : 2868,
+      "query_entities" : 6708,
+      "query_entities_by_taxonomy" : 4594,
+      "list_asset_types" : 991,
+      "resolve_asset_type" : 436,
+      "resolve_thing" : 678,
+      "list_entities_by_type" : 2544,
+      "get_property_values" : 1166,
+      "query_property_history" : 4558,
+      "query_stream_data" : 1962,
+      "query_alert_summary" : 2428,
+      "query_alert_history" : 2532,
+      "acknowledge_alerts" : 1723,
+      "set_property_value" : 899,
+      "spotlight_search" : 542,
+      "get_agent_skill" : 866,
+      "cc_m1a_fixture_read_status" : 496
+    },
+    "perToolEditableChars" : {
+      "invoke_service" : 4610,
+      "fetch_cached_result" : 1076,
+      "tabulate_cached_result" : 7299,
+      "analyze_entity_set" : 1517,
+      "summarize_cached_result" : 709,
+      "analyze_cached_result" : 1171,
+      "inspect_cached_payload" : 477,
+      "extract_nested" : 343,
+      "build_chart_from_tabular_result" : 4986,
+      "build_history_overlay_chart" : 2187,
+      "discover_thing_members" : 1757,
+      "describe_entity_schema" : 2082,
+      "query_entities" : 5445,
+      "query_entities_by_taxonomy" : 3937,
+      "list_asset_types" : 854,
+      "resolve_asset_type" : 280,
+      "resolve_thing" : 477,
+      "list_entities_by_type" : 2024,
+      "get_property_values" : 893,
+      "query_property_history" : 3382,
+      "query_stream_data" : 1462,
+      "query_alert_summary" : 1667,
+      "query_alert_history" : 1817,
+      "acknowledge_alerts" : 1331,
+      "set_property_value" : 511,
+      "spotlight_search" : 341,
+      "get_agent_skill" : 703,
+      "cc_m1a_fixture_read_status" : 248
+    },
+    "sevenPriorityEditableTotal" : 31846,
+    "parameterStructureProjections" : {
+      "invoke_service" : "{\"additionalProperties\":false,\"properties\":{\"entityName\":{\"type\":\"string\"},\"entityType\":{\"enum\":[\"ApplicationKey\",\"Authenticator\",\"Dashboard\",\"DataShape\",\"DataTagVocabulary\",\"DirectoryService\",\"ExtensionPackage\",\"Group\",\"LocalizationTable\",\"Log\",\"Mashup\",\"MediaEntity\",\"Menu\",\"ModelTagVocabulary\",\"Network\",\"NotificationContent\",\"NotificationDefinition\",\"Organization\",\"PersistenceProvider\",\"PersistenceProviderPackage\",\"Project\",\"Resource\",\"ScriptFunctionLibrary\",\"StateDefinition\",\"StyleDefinition\",\"StyleTheme\",\"Subsystem\",\"Thing\",\"ThingGroup\",\"ThingPackage\",\"ThingShape\",\"ThingTemplate\",\"User\",\"Widget\"],\"type\":\"string\"},\"parameters\":{\"type\":\"object\"},\"serviceName\":{\"type\":\"string\"}},\"required\":[\"entityType\",\"entityName\",\"serviceName\"],\"type\":\"object\"}",
+      "fetch_cached_result" : "{\"properties\":{\"cacheId\":{\"type\":\"string\"},\"limit\":{\"type\":\"integer\"},\"offset\":{\"type\":\"integer\"}},\"required\":[\"cacheId\"],\"type\":\"object\"}",
+      "tabulate_cached_result" : "{\"properties\":{\"aggregation\":{\"type\":\"string\"},\"binCount\":{\"maximum\":50,\"minimum\":1,\"type\":\"integer\"},\"binEdges\":{\"items\":{\"type\":\"number\"},\"type\":\"array\"},\"cacheId\":{\"type\":\"string\"},\"calendarBucket\":{\"enum\":[\"day\",\"hour\"],\"type\":\"string\"},\"column\":{\"type\":\"string\"},\"counterModulus\":{\"type\":\"number\"},\"currentWindowEnd\":{\"type\":\"string\"},\"currentWindowStart\":{\"type\":\"string\"},\"derived\":{\"items\":{\"properties\":{\"denominator\":{\"type\":\"string\"},\"factor\":{\"type\":\"number\"},\"groupBy\":{\"items\":{\"type\":\"string\"},\"type\":\"array\"},\"input\":{\"type\":\"string\"},\"inputs\":{\"items\":{\"type\":\"string\"},\"type\":\"array\"},\"left\":{\"type\":\"string\"},\"name\":{\"type\":\"string\"},\"numerator\":{\"type\":\"string\"},\"op\":{\"enum\":[\"ratio\",\"ratio_percent\",\"difference\",\"sum_values\",\"multiply\",\"scale\",\"percent_of_total\",\"percent_of_group\"],\"type\":\"string\"},\"right\":{\"type\":\"string\"}},\"required\":[\"name\",\"op\"],\"type\":\"object\"},\"type\":\"array\"},\"durationWindowSeconds\":{\"type\":\"integer\"},\"entityColumn\":{\"type\":\"string\"},\"fields\":{\"items\":{\"type\":\"string\"},\"type\":\"array\"},\"filters\":{\"type\":\"object\"},\"groupBy\":{\"oneOf\":[{\"type\":\"string\"},{\"items\":{\"type\":\"string\"},\"type\":\"array\"}]},\"having\":{\"type\":\"object\"},\"integrationMethod\":{\"enum\":[\"step_hold\",\"trapezoid\"],\"type\":\"string\"},\"joinType\":{\"type\":\"string\"},\"labelColumn\":{\"type\":\"string\"},\"labelValues\":{\"items\":{\"type\":\"string\"},\"type\":\"array\"},\"maxGapSeconds\":{\"type\":\"integer\"},\"maxItems\":{\"type\":\"integer\"},\"maxRatePerSecond\":{\"type\":\"number\"},\"measures\":{\"items\":{\"properties\":{\"column\":{\"type\":\"string\"},\"direction\":{\"enum\":[\"asc\",\"desc\",\"ascending\",\"descending\"],\"type\":\"string\"},\"filters\":{\"type\":\"object\"},\"name\":{\"type\":\"string\"},\"op\":{\"enum\":[\"count\",\"count_non_null\",\"sum\",\"avg\",\"min\",\"max\",\"count_distinct\",\"weighted_avg\",\"median\",\"percentile\",\"variance\",\"stddev\",\"first\",\"last\",\"mode\"],\"type\":\"string\"},\"orderBy\":{\"type\":\"string\"},\"p\":{\"type\":\"number\"},\"weightColumn\":{\"type\":\"string\"}},\"required\":[\"name\",\"op\"],\"type\":\"object\"},\"type\":\"array\"},\"minSupport\":{\"type\":\"integer\"},\"mode\":{\"enum\":[\"filter_count\",\"filter_rows\",\"filter_sort_topn\",\"group_metric\",\"bin_numeric\",\"box_summary\",\"union_rows\",\"exact_join\",\"quality\",\"resample\",\"rolling\",\"rate_of_change\",\"period_compare\",\"counter_delta\",\"rolling_stats\",\"time_weighted\",\"calendar_bucket\"],\"type\":\"string\"},\"observationWindow\":{\"type\":\"integer\"},\"offset\":{\"type\":\"integer\"},\"originalWindowEnd\":{\"type\":\"string\"},\"originalWindowStart\":{\"type\":\"string\"},\"rangeMax\":{\"type\":\"number\"},\"rangeMin\":{\"type\":\"number\"},\"resetBaseline\":{\"type\":\"number\"},\"rightCacheId\":{\"type\":\"string\"},\"rollingKind\":{\"type\":\"string\"},\"sorts\":{\"items\":{\"properties\":{\"fieldName\":{\"type\":\"string\"},\"isAscending\":{\"type\":\"boolean\"},\"isCaseSensitive\":{\"type\":\"boolean\"}},\"required\":[\"fieldName\"],\"type\":\"object\"},\"type\":\"array\"},\"sourceCacheIds\":{\"items\":{\"type\":\"string\"},\"type\":\"array\"},\"statistic\":{\"enum\":[\"mean\",\"sum\",\"min\",\"max\",\"stddev\",\"count_values\",\"count_records\"],\"type\":\"string\"},\"timeColumn\":{\"type\":\"string\"},\"timeUnit\":{\"enum\":[\"seconds\",\"minutes\",\"hours\"],\"type\":\"string\"},\"timeZone\":{\"type\":\"string\"},\"valueColumn\":{\"type\":\"string\"},\"windowEnd\":{\"type\":\"string\"},\"windowStart\":{\"type\":\"string\"}},\"required\":[\"mode\"],\"type\":\"object\"}",
+      "analyze_entity_set" : "{\"properties\":{\"left\":{\"properties\":{\"cacheId\":{\"type\":\"string\"},\"keyColumn\":{\"type\":\"string\"},\"label\":{\"type\":\"string\"}},\"required\":[\"cacheId\"],\"type\":\"object\"},\"maxItems\":{\"type\":\"integer\"},\"offset\":{\"type\":\"integer\"},\"operation\":{\"enum\":[\"difference\",\"intersection\",\"union\",\"symmetric_difference\"],\"type\":\"string\"},\"projectColumns\":{\"items\":{\"type\":\"string\"},\"type\":\"array\"},\"right\":{\"properties\":{\"cacheId\":{\"type\":\"string\"},\"keyColumn\":{\"type\":\"string\"},\"label\":{\"type\":\"string\"}},\"required\":[\"cacheId\"],\"type\":\"object\"}},\"required\":[\"operation\",\"left\",\"right\"],\"type\":\"object\"}",
+      "summarize_cached_result" : "{\"properties\":{\"cacheId\":{\"type\":\"string\"},\"percentileColumns\":{\"items\":{\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"cacheId\"],\"type\":\"object\"}",
+      "analyze_cached_result" : "{\"additionalProperties\":false,\"properties\":{\"alignment\":{\"enum\":[\"exact\",\"nearest\"],\"type\":\"string\"},\"cacheId\":{\"type\":\"string\"},\"horizonSeconds\":{\"type\":\"number\"},\"methodId\":{\"type\":\"string\"},\"operation\":{\"enum\":[\"outlier\",\"change_point\",\"spc\",\"relationship\",\"trend\",\"threshold_crossing\"],\"type\":\"string\"},\"rightCacheId\":{\"type\":\"string\"},\"rightValueColumn\":{\"type\":\"string\"},\"threshold\":{\"type\":\"number\"},\"timeColumn\":{\"type\":\"string\"},\"toleranceMillis\":{\"type\":\"integer\"},\"valueColumn\":{\"type\":\"string\"}},\"required\":[\"operation\",\"cacheId\"],\"type\":\"object\"}",
+      "inspect_cached_payload" : "{\"properties\":{\"cacheId\":{\"type\":\"string\"},\"mode\":{\"enum\":[\"inspect\",\"extract\"],\"type\":\"string\"},\"path\":{\"type\":\"string\"}},\"required\":[\"cacheId\",\"mode\"],\"type\":\"object\"}",
+      "extract_nested" : "{\"properties\":{\"cellPath\":{\"type\":\"string\"},\"sourceCacheId\":{\"type\":\"string\"}},\"required\":[\"sourceCacheId\",\"cellPath\"],\"type\":\"object\"}",
+      "build_chart_from_tabular_result" : "{\"properties\":{\"cacheId\":{\"type\":\"string\"},\"groupMemberKey\":{\"type\":\"string\"},\"histogramMode\":{\"enum\":[\"count\",\"density\"],\"type\":\"string\"},\"intent\":{\"enum\":[\"time_trend\",\"rank\",\"compare_groups\",\"correlation\",\"distribution\",\"status_timeline\",\"composition\"],\"type\":\"string\"},\"kind\":{\"enum\":[\"line\",\"bar\",\"scatter\",\"pie\",\"histogram\",\"boxplot\",\"heatmap\"],\"type\":\"string\"},\"orientation\":{\"enum\":[\"vertical\",\"horizontal\"],\"type\":\"string\"},\"pieMaxSlices\":{\"maximum\":12,\"minimum\":2,\"type\":\"integer\"},\"pieSliceMode\":{\"enum\":[\"top_with_other\",\"all_nonzero\"],\"type\":\"string\"},\"requestedTimeRange\":{\"properties\":{\"end\":{\"type\":\"string\"},\"start\":{\"type\":\"string\"}},\"type\":\"object\"},\"series\":{\"items\":{\"properties\":{\"name\":{\"type\":\"string\"},\"yColumn\":{\"type\":\"string\"}},\"required\":[\"name\",\"yColumn\"],\"type\":\"object\"},\"type\":\"array\"},\"seriesColumn\":{\"type\":\"string\"},\"source\":{\"type\":\"string\"},\"stackMode\":{\"enum\":[\"grouped\",\"stacked\",\"percent\"],\"type\":\"string\"},\"title\":{\"type\":\"string\"},\"xColumn\":{\"type\":\"string\"},\"xLabel\":{\"type\":\"string\"},\"yColumn\":{\"type\":\"string\"},\"yLabel\":{\"type\":\"string\"},\"yReferenceLines\":{\"items\":{\"properties\":{\"label\":{\"type\":\"string\"},\"role\":{\"enum\":[\"usl\",\"ucl\",\"lcl\",\"lsl\",\"target\",\"limit\",\"warning\"],\"type\":\"string\"},\"y\":{\"type\":\"number\"}},\"required\":[\"y\"],\"type\":\"object\"},\"maxItems\":12,\"type\":\"array\"}},\"required\":[\"source\"],\"type\":\"object\"}",
+      "declare_chart_group" : "{\"properties\":{\"layout\":{\"enum\":[\"auto\",\"stack\",\"grid\"],\"type\":\"string\"},\"members\":{\"items\":{\"properties\":{\"key\":{\"pattern\":\"^[a-z0-9_-]{1,32}$\",\"type\":\"string\"},\"name\":{\"type\":\"string\"}},\"required\":[\"key\",\"name\"],\"type\":\"object\"},\"maxItems\":6,\"minItems\":2,\"type\":\"array\"},\"sharedCategoryDimension\":{\"type\":\"string\"},\"title\":{\"type\":\"string\"}},\"required\":[\"title\",\"members\"],\"type\":\"object\"}",
+      "build_history_overlay_chart" : "{\"properties\":{\"anchorTime\":{\"type\":\"string\"},\"chart_kind\":{\"enum\":[\"line\",\"scatter\"],\"type\":\"string\"},\"propertyName\":{\"type\":\"string\"},\"series\":{\"items\":{\"properties\":{\"anchorOffset\":{\"type\":\"string\"},\"calendarPhrase\":{\"type\":\"string\"},\"endTime\":{\"type\":\"string\"},\"label\":{\"type\":\"string\"},\"relativeDuration\":{\"type\":\"string\"},\"startTime\":{\"type\":\"string\"},\"thingName\":{\"type\":\"string\"}},\"required\":[\"label\",\"thingName\"],\"type\":\"object\"},\"maxItems\":6,\"minItems\":2,\"type\":\"array\"},\"title\":{\"type\":\"string\"},\"xAxisMode\":{\"enum\":[\"absolute_time\",\"elapsed_time\",\"normalized_time\"],\"type\":\"string\"},\"yLabel\":{\"type\":\"string\"},\"yReferenceLines\":{\"items\":{\"properties\":{\"label\":{\"type\":\"string\"},\"role\":{\"type\":\"string\"},\"y\":{\"type\":\"number\"}},\"required\":[\"y\"],\"type\":\"object\"},\"maxItems\":12,\"type\":\"array\"}},\"required\":[\"propertyName\",\"series\"],\"type\":\"object\"}",
+      "discover_thing_members" : "{\"properties\":{\"baseType\":{\"type\":\"string\"},\"category\":{\"type\":\"string\"},\"dataShape\":{\"type\":\"string\"},\"facet\":{\"enum\":[\"properties\",\"property\",\"services\",\"service\",\"events\",\"event\",\"subscriptions\"],\"type\":\"string\"},\"maxItems\":{\"type\":\"integer\"},\"memberName\":{\"type\":\"string\"},\"namePrefix\":{\"type\":\"string\"},\"offset\":{\"type\":\"integer\"},\"thingName\":{\"type\":\"string\"}},\"required\":[\"thingName\"],\"type\":\"object\"}",
+      "describe_entity_schema" : "{\"properties\":{\"baseType\":{\"type\":\"string\"},\"category\":{\"type\":\"string\"},\"dataShape\":{\"type\":\"string\"},\"entityName\":{\"type\":\"string\"},\"entityType\":{\"enum\":[\"ThingTemplate\",\"ThingShape\",\"DataShape\"],\"type\":\"string\"},\"facet\":{\"enum\":[\"summary\",\"properties\",\"services\",\"events\",\"fields\",\"service\"],\"type\":\"string\"},\"maxItems\":{\"type\":\"integer\"},\"memberName\":{\"type\":\"string\"},\"namePrefix\":{\"type\":\"string\"},\"offset\":{\"type\":\"integer\"},\"scope\":{\"enum\":[\"effective\",\"local\"],\"type\":\"string\"}},\"required\":[\"entityType\",\"entityName\"],\"type\":\"object\"}",
+      "query_entities" : "{\"properties\":{\"entityType\":{\"type\":\"string\"},\"hierarchyNodeId\":{\"type\":\"string\"},\"hierarchyNodeName\":{\"type\":\"string\"},\"includeConcreteTemplate\":{\"type\":\"boolean\"},\"includeDescription\":{\"type\":\"boolean\"},\"includeIsSystemObject\":{\"type\":\"boolean\"},\"includeTags\":{\"type\":\"boolean\"},\"intersectExpandHasMore\":{\"type\":\"boolean\"},\"intersectThingNames\":{\"items\":{\"type\":\"string\"},\"maxItems\":5000,\"type\":\"array\"},\"maxItems\":{\"type\":\"integer\"},\"modelTags\":{\"items\":{\"properties\":{\"vocabulary\":{\"type\":\"string\"},\"vocabularyTerm\":{\"type\":\"string\"}},\"required\":[\"vocabulary\",\"vocabularyTerm\"],\"type\":\"object\"},\"type\":\"array\"},\"namePrefix\":{\"type\":\"string\"},\"offset\":{\"type\":\"integer\"},\"query\":{\"type\":\"object\"},\"thingShape\":{\"type\":\"string\"},\"thingTemplate\":{\"type\":\"string\"},\"widePropertyColumns\":{\"type\":\"boolean\"},\"withData\":{\"type\":\"boolean\"},\"withPermissions\":{\"type\":\"boolean\"}},\"required\":[\"entityType\"],\"type\":\"object\"}",
+      "query_entities_by_taxonomy" : "{\"properties\":{\"AdditionalProperties\":{\"type\":\"string\"},\"CriticalProperties\":{\"type\":\"string\"},\"EntityName\":{\"type\":\"string\"},\"EntityType\":{\"type\":\"string\"},\"LookupProperties\":{\"type\":\"object\"},\"hierarchyNodeId\":{\"type\":\"string\"},\"hierarchyNodeName\":{\"type\":\"string\"},\"intersectExpandHasMore\":{\"type\":\"boolean\"},\"intersectThingNames\":{\"items\":{\"type\":\"string\"},\"maxItems\":5000,\"type\":\"array\"}},\"required\":[\"EntityType\",\"EntityName\"],\"type\":\"object\"}",
+      "list_asset_types" : "{\"properties\":{\"maxItems\":{\"type\":\"integer\"}},\"type\":\"object\"}",
+      "resolve_asset_type" : "{\"properties\":{\"text\":{\"type\":\"string\"}},\"required\":[\"text\"],\"type\":\"object\"}",
+      "resolve_thing" : "{\"properties\":{\"assetTypeKey\":{\"type\":\"string\"},\"text\":{\"type\":\"string\"}},\"required\":[\"text\"],\"type\":\"object\"}",
+      "list_entities_by_type" : "{\"properties\":{\"entityCollectionType\":{\"type\":\"string\"},\"maxItems\":{\"type\":\"integer\"},\"nameMask\":{\"type\":\"string\"},\"tags\":{\"items\":{\"properties\":{\"vocabulary\":{\"type\":\"string\"},\"vocabularyTerm\":{\"type\":\"string\"}},\"required\":[\"vocabulary\",\"vocabularyTerm\"],\"type\":\"object\"},\"type\":\"array\"},\"useRegEx\":{\"type\":\"boolean\"}},\"required\":[\"entityCollectionType\"],\"type\":\"object\"}",
+      "get_property_values" : "{\"properties\":{\"propertyNames\":{\"items\":{\"type\":\"string\"},\"maxItems\":40,\"type\":\"array\"},\"thingName\":{\"type\":\"string\"}},\"required\":[\"thingName\",\"propertyNames\"],\"type\":\"object\"}",
+      "query_property_history" : "{\"properties\":{\"actions\":{\"items\":{\"type\":\"string\"},\"type\":\"array\"},\"calendarPhrase\":{\"type\":\"string\"},\"endTime\":{\"type\":\"string\"},\"kind\":{\"enum\":[\"line\",\"bar\",\"scatter\"],\"type\":\"string\"},\"maxItems\":{\"type\":\"integer\"},\"propertyName\":{\"type\":\"string\"},\"relativeDuration\":{\"type\":\"string\"},\"requestedTimeRange\":{\"properties\":{\"end\":{\"type\":\"string\"},\"start\":{\"type\":\"string\"}},\"type\":\"object\"},\"startTime\":{\"type\":\"string\"},\"thingName\":{\"type\":\"string\"},\"title\":{\"type\":\"string\"},\"x_label\":{\"type\":\"string\"},\"y_label\":{\"type\":\"string\"},\"y_reference_lines\":{\"items\":{\"properties\":{\"label\":{\"type\":\"string\"},\"role\":{\"enum\":[\"usl\",\"ucl\",\"lcl\",\"lsl\",\"target\",\"limit\",\"warning\"],\"type\":\"string\"},\"y\":{\"type\":\"number\"}},\"required\":[\"y\"],\"type\":\"object\"},\"maxItems\":12,\"type\":\"array\"}},\"required\":[\"thingName\",\"propertyName\"],\"type\":\"object\"}",
+      "query_stream_data" : "{\"properties\":{\"calendarPhrase\":{\"type\":\"string\"},\"endTime\":{\"type\":\"string\"},\"maxItems\":{\"type\":\"integer\"},\"oldestFirst\":{\"type\":\"boolean\"},\"relativeDuration\":{\"type\":\"string\"},\"source\":{\"type\":\"string\"},\"startTime\":{\"type\":\"string\"},\"thingName\":{\"type\":\"string\"}},\"required\":[\"thingName\"],\"type\":\"object\"}",
+      "query_alert_summary" : "{\"properties\":{\"ackState\":{\"enum\":[\"all\",\"acknowledged\",\"unacknowledged\"],\"type\":\"string\"},\"advancedQuery\":{\"type\":\"string\"},\"alertName\":{\"type\":\"string\"},\"alertType\":{\"type\":\"string\"},\"limit\":{\"type\":\"integer\"},\"priorityMax\":{\"type\":\"integer\"},\"priorityMin\":{\"type\":\"integer\"},\"propertyName\":{\"type\":\"string\"},\"sort\":{\"enum\":[\"default\",\"timestamp_asc\",\"timestamp_desc\",\"priority_asc\",\"priority_desc\"],\"type\":\"string\"},\"thingNames\":{\"items\":{\"type\":\"string\"},\"maxItems\":25,\"minItems\":1,\"type\":\"array\"}},\"required\":[\"thingNames\"],\"type\":\"object\"}",
+      "query_alert_history" : "{\"properties\":{\"advancedQuery\":{\"type\":\"string\"},\"alertName\":{\"type\":\"string\"},\"alertType\":{\"type\":\"string\"},\"calendarPhrase\":{\"type\":\"string\"},\"endTime\":{\"type\":\"string\"},\"limit\":{\"type\":\"integer\"},\"order\":{\"enum\":[\"newest_first\",\"oldest_first\"],\"type\":\"string\"},\"priorityMax\":{\"type\":\"integer\"},\"priorityMin\":{\"type\":\"integer\"},\"propertyName\":{\"type\":\"string\"},\"relativeDuration\":{\"type\":\"string\"},\"startTime\":{\"type\":\"string\"},\"thingName\":{\"type\":\"string\"}},\"required\":[\"thingName\"],\"type\":\"object\"}",
+      "acknowledge_alerts" : "{\"properties\":{\"alertName\":{\"type\":\"string\"},\"message\":{\"type\":\"string\"},\"mode\":{\"enum\":[\"specific_alerts\",\"property_all\"],\"type\":\"string\"},\"propertyName\":{\"type\":\"string\"},\"thingName\":{\"type\":\"string\"}},\"required\":[\"thingName\"],\"type\":\"object\"}",
+      "set_property_value" : "{\"properties\":{\"base_type\":{\"type\":\"string\"},\"property_name\":{\"type\":\"string\"},\"thing_name\":{\"type\":\"string\"},\"value\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"number\"},{\"type\":\"integer\"},{\"type\":\"boolean\"}]}},\"required\":[\"thing_name\",\"property_name\",\"value\"],\"type\":\"object\"}",
+      "spotlight_search" : "{\"properties\":{\"maxItems\":{\"type\":\"integer\"},\"query\":{\"type\":\"string\"}},\"required\":[\"query\"],\"type\":\"object\"}",
+      "get_agent_skill" : "{\"properties\":{\"skill_name\":{\"type\":\"string\"}},\"required\":[\"skill_name\"],\"type\":\"object\"}",
+      "cc_m1a_fixture_read_status" : "{\"properties\":{\"equipmentId\":{\"type\":\"string\"},\"includeMetrics\":{\"type\":\"boolean\"}},\"required\":[\"equipmentId\"],\"type\":\"object\"}"
+    }
+  }, {
+    "apiShapeId" : "openai-chat-completions-v1",
+    "admissionMode" : "lazy",
+    "toolCount" : 6,
+    "toolNamesOrdered" : [ "tabulate_cached_result", "build_chart_from_tabular_result", "query_entities_by_taxonomy", "resolve_thing", "get_agent_skill", "load_tool_schemas" ],
+    "toolSchemaChars" : 27828,
+    "perToolSchemaChars" : {
+      "tabulate_cached_result" : 10330,
+      "build_chart_from_tabular_result" : 6525,
+      "query_entities_by_taxonomy" : 4623,
+      "resolve_thing" : 707,
+      "get_agent_skill" : 895,
+      "load_tool_schemas" : 4741
+    },
+    "perToolEditableChars" : {
+      "tabulate_cached_result" : 7299,
+      "build_chart_from_tabular_result" : 4986,
+      "query_entities_by_taxonomy" : 3937,
+      "resolve_thing" : 477,
+      "get_agent_skill" : 703,
+      "load_tool_schemas" : 4550
+    },
+    "sevenPriorityEditableTotal" : 16222,
+    "parameterStructureProjections" : {
+      "tabulate_cached_result" : "{\"properties\":{\"aggregation\":{\"type\":\"string\"},\"binCount\":{\"maximum\":50,\"minimum\":1,\"type\":\"integer\"},\"binEdges\":{\"items\":{\"type\":\"number\"},\"type\":\"array\"},\"cacheId\":{\"type\":\"string\"},\"calendarBucket\":{\"enum\":[\"day\",\"hour\"],\"type\":\"string\"},\"column\":{\"type\":\"string\"},\"counterModulus\":{\"type\":\"number\"},\"currentWindowEnd\":{\"type\":\"string\"},\"currentWindowStart\":{\"type\":\"string\"},\"derived\":{\"items\":{\"properties\":{\"denominator\":{\"type\":\"string\"},\"factor\":{\"type\":\"number\"},\"groupBy\":{\"items\":{\"type\":\"string\"},\"type\":\"array\"},\"input\":{\"type\":\"string\"},\"inputs\":{\"items\":{\"type\":\"string\"},\"type\":\"array\"},\"left\":{\"type\":\"string\"},\"name\":{\"type\":\"string\"},\"numerator\":{\"type\":\"string\"},\"op\":{\"enum\":[\"ratio\",\"ratio_percent\",\"difference\",\"sum_values\",\"multiply\",\"scale\",\"percent_of_total\",\"percent_of_group\"],\"type\":\"string\"},\"right\":{\"type\":\"string\"}},\"required\":[\"name\",\"op\"],\"type\":\"object\"},\"type\":\"array\"},\"durationWindowSeconds\":{\"type\":\"integer\"},\"entityColumn\":{\"type\":\"string\"},\"fields\":{\"items\":{\"type\":\"string\"},\"type\":\"array\"},\"filters\":{\"type\":\"object\"},\"groupBy\":{\"oneOf\":[{\"type\":\"string\"},{\"items\":{\"type\":\"string\"},\"type\":\"array\"}]},\"having\":{\"type\":\"object\"},\"integrationMethod\":{\"enum\":[\"step_hold\",\"trapezoid\"],\"type\":\"string\"},\"joinType\":{\"type\":\"string\"},\"labelColumn\":{\"type\":\"string\"},\"labelValues\":{\"items\":{\"type\":\"string\"},\"type\":\"array\"},\"maxGapSeconds\":{\"type\":\"integer\"},\"maxItems\":{\"type\":\"integer\"},\"maxRatePerSecond\":{\"type\":\"number\"},\"measures\":{\"items\":{\"properties\":{\"column\":{\"type\":\"string\"},\"direction\":{\"enum\":[\"asc\",\"desc\",\"ascending\",\"descending\"],\"type\":\"string\"},\"filters\":{\"type\":\"object\"},\"name\":{\"type\":\"string\"},\"op\":{\"enum\":[\"count\",\"count_non_null\",\"sum\",\"avg\",\"min\",\"max\",\"count_distinct\",\"weighted_avg\",\"median\",\"percentile\",\"variance\",\"stddev\",\"first\",\"last\",\"mode\"],\"type\":\"string\"},\"orderBy\":{\"type\":\"string\"},\"p\":{\"type\":\"number\"},\"weightColumn\":{\"type\":\"string\"}},\"required\":[\"name\",\"op\"],\"type\":\"object\"},\"type\":\"array\"},\"minSupport\":{\"type\":\"integer\"},\"mode\":{\"enum\":[\"filter_count\",\"filter_rows\",\"filter_sort_topn\",\"group_metric\",\"bin_numeric\",\"box_summary\",\"union_rows\",\"exact_join\",\"quality\",\"resample\",\"rolling\",\"rate_of_change\",\"period_compare\",\"counter_delta\",\"rolling_stats\",\"time_weighted\",\"calendar_bucket\"],\"type\":\"string\"},\"observationWindow\":{\"type\":\"integer\"},\"offset\":{\"type\":\"integer\"},\"originalWindowEnd\":{\"type\":\"string\"},\"originalWindowStart\":{\"type\":\"string\"},\"rangeMax\":{\"type\":\"number\"},\"rangeMin\":{\"type\":\"number\"},\"resetBaseline\":{\"type\":\"number\"},\"rightCacheId\":{\"type\":\"string\"},\"rollingKind\":{\"type\":\"string\"},\"sorts\":{\"items\":{\"properties\":{\"fieldName\":{\"type\":\"string\"},\"isAscending\":{\"type\":\"boolean\"},\"isCaseSensitive\":{\"type\":\"boolean\"}},\"required\":[\"fieldName\"],\"type\":\"object\"},\"type\":\"array\"},\"sourceCacheIds\":{\"items\":{\"type\":\"string\"},\"type\":\"array\"},\"statistic\":{\"enum\":[\"mean\",\"sum\",\"min\",\"max\",\"stddev\",\"count_values\",\"count_records\"],\"type\":\"string\"},\"timeColumn\":{\"type\":\"string\"},\"timeUnit\":{\"enum\":[\"seconds\",\"minutes\",\"hours\"],\"type\":\"string\"},\"timeZone\":{\"type\":\"string\"},\"valueColumn\":{\"type\":\"string\"},\"windowEnd\":{\"type\":\"string\"},\"windowStart\":{\"type\":\"string\"}},\"required\":[\"mode\"],\"type\":\"object\"}",
+      "build_chart_from_tabular_result" : "{\"properties\":{\"cacheId\":{\"type\":\"string\"},\"groupMemberKey\":{\"type\":\"string\"},\"histogramMode\":{\"enum\":[\"count\",\"density\"],\"type\":\"string\"},\"intent\":{\"enum\":[\"time_trend\",\"rank\",\"compare_groups\",\"correlation\",\"distribution\",\"status_timeline\",\"composition\"],\"type\":\"string\"},\"kind\":{\"enum\":[\"line\",\"bar\",\"scatter\",\"pie\",\"histogram\",\"boxplot\",\"heatmap\"],\"type\":\"string\"},\"orientation\":{\"enum\":[\"vertical\",\"horizontal\"],\"type\":\"string\"},\"pieMaxSlices\":{\"maximum\":12,\"minimum\":2,\"type\":\"integer\"},\"pieSliceMode\":{\"enum\":[\"top_with_other\",\"all_nonzero\"],\"type\":\"string\"},\"requestedTimeRange\":{\"properties\":{\"end\":{\"type\":\"string\"},\"start\":{\"type\":\"string\"}},\"type\":\"object\"},\"series\":{\"items\":{\"properties\":{\"name\":{\"type\":\"string\"},\"yColumn\":{\"type\":\"string\"}},\"required\":[\"name\",\"yColumn\"],\"type\":\"object\"},\"type\":\"array\"},\"seriesColumn\":{\"type\":\"string\"},\"source\":{\"type\":\"string\"},\"stackMode\":{\"enum\":[\"grouped\",\"stacked\",\"percent\"],\"type\":\"string\"},\"title\":{\"type\":\"string\"},\"xColumn\":{\"type\":\"string\"},\"xLabel\":{\"type\":\"string\"},\"yColumn\":{\"type\":\"string\"},\"yLabel\":{\"type\":\"string\"},\"yReferenceLines\":{\"items\":{\"properties\":{\"label\":{\"type\":\"string\"},\"role\":{\"enum\":[\"usl\",\"ucl\",\"lcl\",\"lsl\",\"target\",\"limit\",\"warning\"],\"type\":\"string\"},\"y\":{\"type\":\"number\"}},\"required\":[\"y\"],\"type\":\"object\"},\"maxItems\":12,\"type\":\"array\"}},\"required\":[\"source\"],\"type\":\"object\"}",
+      "query_entities_by_taxonomy" : "{\"properties\":{\"AdditionalProperties\":{\"type\":\"string\"},\"CriticalProperties\":{\"type\":\"string\"},\"EntityName\":{\"type\":\"string\"},\"EntityType\":{\"type\":\"string\"},\"LookupProperties\":{\"type\":\"object\"},\"hierarchyNodeId\":{\"type\":\"string\"},\"hierarchyNodeName\":{\"type\":\"string\"},\"intersectExpandHasMore\":{\"type\":\"boolean\"},\"intersectThingNames\":{\"items\":{\"type\":\"string\"},\"maxItems\":5000,\"type\":\"array\"}},\"required\":[\"EntityType\",\"EntityName\"],\"type\":\"object\"}",
+      "resolve_thing" : "{\"properties\":{\"assetTypeKey\":{\"type\":\"string\"},\"text\":{\"type\":\"string\"}},\"required\":[\"text\"],\"type\":\"object\"}",
+      "get_agent_skill" : "{\"properties\":{\"skill_name\":{\"type\":\"string\"}},\"required\":[\"skill_name\"],\"type\":\"object\"}",
+      "load_tool_schemas" : "{\"properties\":{\"names\":{\"items\":{\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"names\"],\"type\":\"object\"}"
+    },
+    "lazyCatalog" : {
+      "rendered" : "- invoke_service: Generic ThingWorx service call when you have a concrete service name from discovery or the task points to a specific service. Do NOT list metadata entities by…\n- fetch_cached_result: After a large tabular tool (**invoke_service** INFOTABLE_LARGE, query_entities, query_entities_by_taxonomy, or list_entities_by_type) returned a **cacheId**, f…\n- analyze_entity_set: Deterministic set algebra over two **already cached** entity/list tables: **difference**, **intersection**, **union**, or **symmetric_difference**. Does **not*…\n- summarize_cached_result: Column-level stats (null counts, numeric min/max/mean and capped p50/p95, categorical cardinality/top) over the **full** cached InfoTable. Success includes sou…\n- analyze_cached_result: Deterministic U5 analysis over a **conversation-cached** series handle. One tool with **operation** enum: outlier | change_point | spc | relationship | trend |…\n- inspect_cached_payload: Bounded inspect/extract over a **cached JSON/TEXT** payload (LARGE_JSON cacheId). Does not load the full oversize body into the model. For nested INFOTABLE cel…\n- extract_nested: Promote a nested INFOTABLE cell from a cached table into a **new** cacheId with lineage (sourceCacheId + cellPath). Use after inspect/tabulate shows nested tab…\n- declare_chart_group: Declare one chart group (2-6 named slots) before building its charts, only when the user asks for a set of comparable charts; then build each member with build…\n- build_history_overlay_chart: Overlay **2–6 numeric property history traces** (each series: own Thing + window). **absolute_time** = same real window; **elapsed_time** = shifted windows; **…\n- discover_thing_members: **Preferred** built-in for **concrete Thing** member metadata (properties, **public** services, **events**, and **configured subscriptions** in v1): visibility…\n- describe_entity_schema: Facet-bounded schema read for ThingTemplate, ThingShape, or DataShape: summary, paginated property/service/event lists, DataShape fields, or one public service…\n- query_entities: List Things implementing a ThingTemplate or ThingShape. Model keys (**Stream**, **DataTable**, …) map to templates/shapes (key-resolution.md Phase 0.5). For ta…\n- list_asset_types: List application asset types from `/taxonomies/asset-types.json` when that v3 object map is configured and loaded (v3 identity array may be absent). For v2 obj…\n- resolve_asset_type: Map user asset type text to an asset type key, ThingTemplate/ThingShape parent, and **criticalProperties** name list. Call **resolve_thing** when the user name…\n- list_entities_by_type: List metadata entities of a given collection type via Resource EntityServices (GetEntityList or GetEntityListByRegEx). Never pass **`entityCollectionType=Strea…\n- get_property_values: Read current values of multiple Thing properties in one call (batch, max 40). **thingName** must be a canonical ThingWorx name; non-canonical labels return **I…\n- query_property_history: Query time-series history for a Thing property. **thingName** must be canonical (else **IDENTITY_RESOLUTION_REQUIRED**; **recoveryHint** to **resolve_thing** w…\n- query_stream_data: Query tabular stream rows via platform **QueryStreamData** on a Stream Thing. **thingName** uses the same canonical Thing preflight as other scalar Thing tools…\n- query_alert_summary: Current alert **summary** for one or more Things via Resource AlertFunctions.QueryAlertSummaryForThing (in-memory snapshot, not history). **thingNames** must b…\n- query_alert_history: Alert **history** timeline for one Thing via AlertFunctions.QueryAlertHistory. **thingName** must be canonical; non-canonical labels return **IDENTITY_RESOLUTI…\n- acknowledge_alerts: Acknowledge alerts on AlertFunctions. **thingName** must be a canonical ThingWorx name; non-canonical labels return **IDENTITY_RESOLUTION_REQUIRED** before any…\n- set_property_value: Request to write a Thing property. Requires human approval on Parler AlwaysOn before execution. Always set base_type when known (discover_thing_members / get_p…\n- spotlight_search: Fuzzy search across ThingWorx metadata via platform SearchFunctions.SpotlightSearchV2 (same as REST Spotlight; invoked in-JVM, not HTTP). For structured filter…\n- cc_m1a_fixture_read_status: Fixed M1a census fixture extended tool (READ_ONLY demo shape).\n",
+      "entries" : [ {
+        "name" : "invoke_service",
+        "blurb" : "Generic ThingWorx service call when you have a concrete service name from discovery or the task points to a specific service. Do NOT list metadata entities by…"
+      }, {
+        "name" : "fetch_cached_result",
+        "blurb" : "After a large tabular tool (**invoke_service** INFOTABLE_LARGE, query_entities, query_entities_by_taxonomy, or list_entities_by_type) returned a **cacheId**, f…"
+      }, {
+        "name" : "analyze_entity_set",
+        "blurb" : "Deterministic set algebra over two **already cached** entity/list tables: **difference**, **intersection**, **union**, or **symmetric_difference**. Does **not*…"
+      }, {
+        "name" : "summarize_cached_result",
+        "blurb" : "Column-level stats (null counts, numeric min/max/mean and capped p50/p95, categorical cardinality/top) over the **full** cached InfoTable. Success includes sou…"
+      }, {
+        "name" : "analyze_cached_result",
+        "blurb" : "Deterministic U5 analysis over a **conversation-cached** series handle. One tool with **operation** enum: outlier | change_point | spc | relationship | trend |…"
+      }, {
+        "name" : "inspect_cached_payload",
+        "blurb" : "Bounded inspect/extract over a **cached JSON/TEXT** payload (LARGE_JSON cacheId). Does not load the full oversize body into the model. For nested INFOTABLE cel…"
+      }, {
+        "name" : "extract_nested",
+        "blurb" : "Promote a nested INFOTABLE cell from a cached table into a **new** cacheId with lineage (sourceCacheId + cellPath). Use after inspect/tabulate shows nested tab…"
+      }, {
+        "name" : "declare_chart_group",
+        "blurb" : "Declare one chart group (2-6 named slots) before building its charts, only when the user asks for a set of comparable charts; then build each member with build…"
+      }, {
+        "name" : "build_history_overlay_chart",
+        "blurb" : "Overlay **2–6 numeric property history traces** (each series: own Thing + window). **absolute_time** = same real window; **elapsed_time** = shifted windows; **…"
+      }, {
+        "name" : "discover_thing_members",
+        "blurb" : "**Preferred** built-in for **concrete Thing** member metadata (properties, **public** services, **events**, and **configured subscriptions** in v1): visibility…"
+      }, {
+        "name" : "describe_entity_schema",
+        "blurb" : "Facet-bounded schema read for ThingTemplate, ThingShape, or DataShape: summary, paginated property/service/event lists, DataShape fields, or one public service…"
+      }, {
+        "name" : "query_entities",
+        "blurb" : "List Things implementing a ThingTemplate or ThingShape. Model keys (**Stream**, **DataTable**, …) map to templates/shapes (key-resolution.md Phase 0.5). For ta…"
+      }, {
+        "name" : "list_asset_types",
+        "blurb" : "List application asset types from `/taxonomies/asset-types.json` when that v3 object map is configured and loaded (v3 identity array may be absent). For v2 obj…"
+      }, {
+        "name" : "resolve_asset_type",
+        "blurb" : "Map user asset type text to an asset type key, ThingTemplate/ThingShape parent, and **criticalProperties** name list. Call **resolve_thing** when the user name…"
+      }, {
+        "name" : "list_entities_by_type",
+        "blurb" : "List metadata entities of a given collection type via Resource EntityServices (GetEntityList or GetEntityListByRegEx). Never pass **`entityCollectionType=Strea…"
+      }, {
+        "name" : "get_property_values",
+        "blurb" : "Read current values of multiple Thing properties in one call (batch, max 40). **thingName** must be a canonical ThingWorx name; non-canonical labels return **I…"
+      }, {
+        "name" : "query_property_history",
+        "blurb" : "Query time-series history for a Thing property. **thingName** must be canonical (else **IDENTITY_RESOLUTION_REQUIRED**; **recoveryHint** to **resolve_thing** w…"
+      }, {
+        "name" : "query_stream_data",
+        "blurb" : "Query tabular stream rows via platform **QueryStreamData** on a Stream Thing. **thingName** uses the same canonical Thing preflight as other scalar Thing tools…"
+      }, {
+        "name" : "query_alert_summary",
+        "blurb" : "Current alert **summary** for one or more Things via Resource AlertFunctions.QueryAlertSummaryForThing (in-memory snapshot, not history). **thingNames** must b…"
+      }, {
+        "name" : "query_alert_history",
+        "blurb" : "Alert **history** timeline for one Thing via AlertFunctions.QueryAlertHistory. **thingName** must be canonical; non-canonical labels return **IDENTITY_RESOLUTI…"
+      }, {
+        "name" : "acknowledge_alerts",
+        "blurb" : "Acknowledge alerts on AlertFunctions. **thingName** must be a canonical ThingWorx name; non-canonical labels return **IDENTITY_RESOLUTION_REQUIRED** before any…"
+      }, {
+        "name" : "set_property_value",
+        "blurb" : "Request to write a Thing property. Requires human approval on Parler AlwaysOn before execution. Always set base_type when known (discover_thing_members / get_p…"
+      }, {
+        "name" : "spotlight_search",
+        "blurb" : "Fuzzy search across ThingWorx metadata via platform SearchFunctions.SpotlightSearchV2 (same as REST Spotlight; invoked in-JVM, not HTTP). For structured filter…"
+      }, {
+        "name" : "cc_m1a_fixture_read_status",
+        "blurb" : "Fixed M1a census fixture extended tool (READ_ONLY demo shape)."
+      } ],
+      "advertisedNames" : [ "tabulate_cached_result", "build_chart_from_tabular_result", "query_entities_by_taxonomy", "resolve_thing", "get_agent_skill" ]
+    },
+    "loadToolSchemasMetaEditableChars" : 4738
+  }, {
+    "apiShapeId" : "anthropic-messages-v1",
+    "admissionMode" : "lazy",
+    "toolCount" : 6,
+    "toolNamesOrdered" : [ "tabulate_cached_result", "build_chart_from_tabular_result", "query_entities_by_taxonomy", "resolve_thing", "get_agent_skill", "load_tool_schemas" ],
+    "toolSchemaChars" : 27691,
+    "perToolSchemaChars" : {
+      "tabulate_cached_result" : 10301,
+      "build_chart_from_tabular_result" : 6496,
+      "query_entities_by_taxonomy" : 4594,
+      "resolve_thing" : 678,
+      "get_agent_skill" : 866,
+      "load_tool_schemas" : 4712
+    },
+    "perToolEditableChars" : {
+      "tabulate_cached_result" : 7299,
+      "build_chart_from_tabular_result" : 4986,
+      "query_entities_by_taxonomy" : 3937,
+      "resolve_thing" : 477,
+      "get_agent_skill" : 703,
+      "load_tool_schemas" : 4550
+    },
+    "sevenPriorityEditableTotal" : 16222,
+    "parameterStructureProjections" : {
+      "tabulate_cached_result" : "{\"properties\":{\"aggregation\":{\"type\":\"string\"},\"binCount\":{\"maximum\":50,\"minimum\":1,\"type\":\"integer\"},\"binEdges\":{\"items\":{\"type\":\"number\"},\"type\":\"array\"},\"cacheId\":{\"type\":\"string\"},\"calendarBucket\":{\"enum\":[\"day\",\"hour\"],\"type\":\"string\"},\"column\":{\"type\":\"string\"},\"counterModulus\":{\"type\":\"number\"},\"currentWindowEnd\":{\"type\":\"string\"},\"currentWindowStart\":{\"type\":\"string\"},\"derived\":{\"items\":{\"properties\":{\"denominator\":{\"type\":\"string\"},\"factor\":{\"type\":\"number\"},\"groupBy\":{\"items\":{\"type\":\"string\"},\"type\":\"array\"},\"input\":{\"type\":\"string\"},\"inputs\":{\"items\":{\"type\":\"string\"},\"type\":\"array\"},\"left\":{\"type\":\"string\"},\"name\":{\"type\":\"string\"},\"numerator\":{\"type\":\"string\"},\"op\":{\"enum\":[\"ratio\",\"ratio_percent\",\"difference\",\"sum_values\",\"multiply\",\"scale\",\"percent_of_total\",\"percent_of_group\"],\"type\":\"string\"},\"right\":{\"type\":\"string\"}},\"required\":[\"name\",\"op\"],\"type\":\"object\"},\"type\":\"array\"},\"durationWindowSeconds\":{\"type\":\"integer\"},\"entityColumn\":{\"type\":\"string\"},\"fields\":{\"items\":{\"type\":\"string\"},\"type\":\"array\"},\"filters\":{\"type\":\"object\"},\"groupBy\":{\"oneOf\":[{\"type\":\"string\"},{\"items\":{\"type\":\"string\"},\"type\":\"array\"}]},\"having\":{\"type\":\"object\"},\"integrationMethod\":{\"enum\":[\"step_hold\",\"trapezoid\"],\"type\":\"string\"},\"joinType\":{\"type\":\"string\"},\"labelColumn\":{\"type\":\"string\"},\"labelValues\":{\"items\":{\"type\":\"string\"},\"type\":\"array\"},\"maxGapSeconds\":{\"type\":\"integer\"},\"maxItems\":{\"type\":\"integer\"},\"maxRatePerSecond\":{\"type\":\"number\"},\"measures\":{\"items\":{\"properties\":{\"column\":{\"type\":\"string\"},\"direction\":{\"enum\":[\"asc\",\"desc\",\"ascending\",\"descending\"],\"type\":\"string\"},\"filters\":{\"type\":\"object\"},\"name\":{\"type\":\"string\"},\"op\":{\"enum\":[\"count\",\"count_non_null\",\"sum\",\"avg\",\"min\",\"max\",\"count_distinct\",\"weighted_avg\",\"median\",\"percentile\",\"variance\",\"stddev\",\"first\",\"last\",\"mode\"],\"type\":\"string\"},\"orderBy\":{\"type\":\"string\"},\"p\":{\"type\":\"number\"},\"weightColumn\":{\"type\":\"string\"}},\"required\":[\"name\",\"op\"],\"type\":\"object\"},\"type\":\"array\"},\"minSupport\":{\"type\":\"integer\"},\"mode\":{\"enum\":[\"filter_count\",\"filter_rows\",\"filter_sort_topn\",\"group_metric\",\"bin_numeric\",\"box_summary\",\"union_rows\",\"exact_join\",\"quality\",\"resample\",\"rolling\",\"rate_of_change\",\"period_compare\",\"counter_delta\",\"rolling_stats\",\"time_weighted\",\"calendar_bucket\"],\"type\":\"string\"},\"observationWindow\":{\"type\":\"integer\"},\"offset\":{\"type\":\"integer\"},\"originalWindowEnd\":{\"type\":\"string\"},\"originalWindowStart\":{\"type\":\"string\"},\"rangeMax\":{\"type\":\"number\"},\"rangeMin\":{\"type\":\"number\"},\"resetBaseline\":{\"type\":\"number\"},\"rightCacheId\":{\"type\":\"string\"},\"rollingKind\":{\"type\":\"string\"},\"sorts\":{\"items\":{\"properties\":{\"fieldName\":{\"type\":\"string\"},\"isAscending\":{\"type\":\"boolean\"},\"isCaseSensitive\":{\"type\":\"boolean\"}},\"required\":[\"fieldName\"],\"type\":\"object\"},\"type\":\"array\"},\"sourceCacheIds\":{\"items\":{\"type\":\"string\"},\"type\":\"array\"},\"statistic\":{\"enum\":[\"mean\",\"sum\",\"min\",\"max\",\"stddev\",\"count_values\",\"count_records\"],\"type\":\"string\"},\"timeColumn\":{\"type\":\"string\"},\"timeUnit\":{\"enum\":[\"seconds\",\"minutes\",\"hours\"],\"type\":\"string\"},\"timeZone\":{\"type\":\"string\"},\"valueColumn\":{\"type\":\"string\"},\"windowEnd\":{\"type\":\"string\"},\"windowStart\":{\"type\":\"string\"}},\"required\":[\"mode\"],\"type\":\"object\"}",
+      "build_chart_from_tabular_result" : "{\"properties\":{\"cacheId\":{\"type\":\"string\"},\"groupMemberKey\":{\"type\":\"string\"},\"histogramMode\":{\"enum\":[\"count\",\"density\"],\"type\":\"string\"},\"intent\":{\"enum\":[\"time_trend\",\"rank\",\"compare_groups\",\"correlation\",\"distribution\",\"status_timeline\",\"composition\"],\"type\":\"string\"},\"kind\":{\"enum\":[\"line\",\"bar\",\"scatter\",\"pie\",\"histogram\",\"boxplot\",\"heatmap\"],\"type\":\"string\"},\"orientation\":{\"enum\":[\"vertical\",\"horizontal\"],\"type\":\"string\"},\"pieMaxSlices\":{\"maximum\":12,\"minimum\":2,\"type\":\"integer\"},\"pieSliceMode\":{\"enum\":[\"top_with_other\",\"all_nonzero\"],\"type\":\"string\"},\"requestedTimeRange\":{\"properties\":{\"end\":{\"type\":\"string\"},\"start\":{\"type\":\"string\"}},\"type\":\"object\"},\"series\":{\"items\":{\"properties\":{\"name\":{\"type\":\"string\"},\"yColumn\":{\"type\":\"string\"}},\"required\":[\"name\",\"yColumn\"],\"type\":\"object\"},\"type\":\"array\"},\"seriesColumn\":{\"type\":\"string\"},\"source\":{\"type\":\"string\"},\"stackMode\":{\"enum\":[\"grouped\",\"stacked\",\"percent\"],\"type\":\"string\"},\"title\":{\"type\":\"string\"},\"xColumn\":{\"type\":\"string\"},\"xLabel\":{\"type\":\"string\"},\"yColumn\":{\"type\":\"string\"},\"yLabel\":{\"type\":\"string\"},\"yReferenceLines\":{\"items\":{\"properties\":{\"label\":{\"type\":\"string\"},\"role\":{\"enum\":[\"usl\",\"ucl\",\"lcl\",\"lsl\",\"target\",\"limit\",\"warning\"],\"type\":\"string\"},\"y\":{\"type\":\"number\"}},\"required\":[\"y\"],\"type\":\"object\"},\"maxItems\":12,\"type\":\"array\"}},\"required\":[\"source\"],\"type\":\"object\"}",
+      "query_entities_by_taxonomy" : "{\"properties\":{\"AdditionalProperties\":{\"type\":\"string\"},\"CriticalProperties\":{\"type\":\"string\"},\"EntityName\":{\"type\":\"string\"},\"EntityType\":{\"type\":\"string\"},\"LookupProperties\":{\"type\":\"object\"},\"hierarchyNodeId\":{\"type\":\"string\"},\"hierarchyNodeName\":{\"type\":\"string\"},\"intersectExpandHasMore\":{\"type\":\"boolean\"},\"intersectThingNames\":{\"items\":{\"type\":\"string\"},\"maxItems\":5000,\"type\":\"array\"}},\"required\":[\"EntityType\",\"EntityName\"],\"type\":\"object\"}",
+      "resolve_thing" : "{\"properties\":{\"assetTypeKey\":{\"type\":\"string\"},\"text\":{\"type\":\"string\"}},\"required\":[\"text\"],\"type\":\"object\"}",
+      "get_agent_skill" : "{\"properties\":{\"skill_name\":{\"type\":\"string\"}},\"required\":[\"skill_name\"],\"type\":\"object\"}",
+      "load_tool_schemas" : "{\"properties\":{\"names\":{\"items\":{\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"names\"],\"type\":\"object\"}"
+    },
+    "lazyCatalog" : {
+      "rendered" : "- invoke_service: Generic ThingWorx service call when you have a concrete service name from discovery or the task points to a specific service. Do NOT list metadata entities by…\n- fetch_cached_result: After a large tabular tool (**invoke_service** INFOTABLE_LARGE, query_entities, query_entities_by_taxonomy, or list_entities_by_type) returned a **cacheId**, f…\n- analyze_entity_set: Deterministic set algebra over two **already cached** entity/list tables: **difference**, **intersection**, **union**, or **symmetric_difference**. Does **not*…\n- summarize_cached_result: Column-level stats (null counts, numeric min/max/mean and capped p50/p95, categorical cardinality/top) over the **full** cached InfoTable. Success includes sou…\n- analyze_cached_result: Deterministic U5 analysis over a **conversation-cached** series handle. One tool with **operation** enum: outlier | change_point | spc | relationship | trend |…\n- inspect_cached_payload: Bounded inspect/extract over a **cached JSON/TEXT** payload (LARGE_JSON cacheId). Does not load the full oversize body into the model. For nested INFOTABLE cel…\n- extract_nested: Promote a nested INFOTABLE cell from a cached table into a **new** cacheId with lineage (sourceCacheId + cellPath). Use after inspect/tabulate shows nested tab…\n- declare_chart_group: Declare one chart group (2-6 named slots) before building its charts, only when the user asks for a set of comparable charts; then build each member with build…\n- build_history_overlay_chart: Overlay **2–6 numeric property history traces** (each series: own Thing + window). **absolute_time** = same real window; **elapsed_time** = shifted windows; **…\n- discover_thing_members: **Preferred** built-in for **concrete Thing** member metadata (properties, **public** services, **events**, and **configured subscriptions** in v1): visibility…\n- describe_entity_schema: Facet-bounded schema read for ThingTemplate, ThingShape, or DataShape: summary, paginated property/service/event lists, DataShape fields, or one public service…\n- query_entities: List Things implementing a ThingTemplate or ThingShape. Model keys (**Stream**, **DataTable**, …) map to templates/shapes (key-resolution.md Phase 0.5). For ta…\n- list_asset_types: List application asset types from `/taxonomies/asset-types.json` when that v3 object map is configured and loaded (v3 identity array may be absent). For v2 obj…\n- resolve_asset_type: Map user asset type text to an asset type key, ThingTemplate/ThingShape parent, and **criticalProperties** name list. Call **resolve_thing** when the user name…\n- list_entities_by_type: List metadata entities of a given collection type via Resource EntityServices (GetEntityList or GetEntityListByRegEx). Never pass **`entityCollectionType=Strea…\n- get_property_values: Read current values of multiple Thing properties in one call (batch, max 40). **thingName** must be a canonical ThingWorx name; non-canonical labels return **I…\n- query_property_history: Query time-series history for a Thing property. **thingName** must be canonical (else **IDENTITY_RESOLUTION_REQUIRED**; **recoveryHint** to **resolve_thing** w…\n- query_stream_data: Query tabular stream rows via platform **QueryStreamData** on a Stream Thing. **thingName** uses the same canonical Thing preflight as other scalar Thing tools…\n- query_alert_summary: Current alert **summary** for one or more Things via Resource AlertFunctions.QueryAlertSummaryForThing (in-memory snapshot, not history). **thingNames** must b…\n- query_alert_history: Alert **history** timeline for one Thing via AlertFunctions.QueryAlertHistory. **thingName** must be canonical; non-canonical labels return **IDENTITY_RESOLUTI…\n- acknowledge_alerts: Acknowledge alerts on AlertFunctions. **thingName** must be a canonical ThingWorx name; non-canonical labels return **IDENTITY_RESOLUTION_REQUIRED** before any…\n- set_property_value: Request to write a Thing property. Requires human approval on Parler AlwaysOn before execution. Always set base_type when known (discover_thing_members / get_p…\n- spotlight_search: Fuzzy search across ThingWorx metadata via platform SearchFunctions.SpotlightSearchV2 (same as REST Spotlight; invoked in-JVM, not HTTP). For structured filter…\n- cc_m1a_fixture_read_status: Fixed M1a census fixture extended tool (READ_ONLY demo shape).\n",
+      "entries" : [ {
+        "name" : "invoke_service",
+        "blurb" : "Generic ThingWorx service call when you have a concrete service name from discovery or the task points to a specific service. Do NOT list metadata entities by…"
+      }, {
+        "name" : "fetch_cached_result",
+        "blurb" : "After a large tabular tool (**invoke_service** INFOTABLE_LARGE, query_entities, query_entities_by_taxonomy, or list_entities_by_type) returned a **cacheId**, f…"
+      }, {
+        "name" : "analyze_entity_set",
+        "blurb" : "Deterministic set algebra over two **already cached** entity/list tables: **difference**, **intersection**, **union**, or **symmetric_difference**. Does **not*…"
+      }, {
+        "name" : "summarize_cached_result",
+        "blurb" : "Column-level stats (null counts, numeric min/max/mean and capped p50/p95, categorical cardinality/top) over the **full** cached InfoTable. Success includes sou…"
+      }, {
+        "name" : "analyze_cached_result",
+        "blurb" : "Deterministic U5 analysis over a **conversation-cached** series handle. One tool with **operation** enum: outlier | change_point | spc | relationship | trend |…"
+      }, {
+        "name" : "inspect_cached_payload",
+        "blurb" : "Bounded inspect/extract over a **cached JSON/TEXT** payload (LARGE_JSON cacheId). Does not load the full oversize body into the model. For nested INFOTABLE cel…"
+      }, {
+        "name" : "extract_nested",
+        "blurb" : "Promote a nested INFOTABLE cell from a cached table into a **new** cacheId with lineage (sourceCacheId + cellPath). Use after inspect/tabulate shows nested tab…"
+      }, {
+        "name" : "declare_chart_group",
+        "blurb" : "Declare one chart group (2-6 named slots) before building its charts, only when the user asks for a set of comparable charts; then build each member with build…"
+      }, {
+        "name" : "build_history_overlay_chart",
+        "blurb" : "Overlay **2–6 numeric property history traces** (each series: own Thing + window). **absolute_time** = same real window; **elapsed_time** = shifted windows; **…"
+      }, {
+        "name" : "discover_thing_members",
+        "blurb" : "**Preferred** built-in for **concrete Thing** member metadata (properties, **public** services, **events**, and **configured subscriptions** in v1): visibility…"
+      }, {
+        "name" : "describe_entity_schema",
+        "blurb" : "Facet-bounded schema read for ThingTemplate, ThingShape, or DataShape: summary, paginated property/service/event lists, DataShape fields, or one public service…"
+      }, {
+        "name" : "query_entities",
+        "blurb" : "List Things implementing a ThingTemplate or ThingShape. Model keys (**Stream**, **DataTable**, …) map to templates/shapes (key-resolution.md Phase 0.5). For ta…"
+      }, {
+        "name" : "list_asset_types",
+        "blurb" : "List application asset types from `/taxonomies/asset-types.json` when that v3 object map is configured and loaded (v3 identity array may be absent). For v2 obj…"
+      }, {
+        "name" : "resolve_asset_type",
+        "blurb" : "Map user asset type text to an asset type key, ThingTemplate/ThingShape parent, and **criticalProperties** name list. Call **resolve_thing** when the user name…"
+      }, {
+        "name" : "list_entities_by_type",
+        "blurb" : "List metadata entities of a given collection type via Resource EntityServices (GetEntityList or GetEntityListByRegEx). Never pass **`entityCollectionType=Strea…"
+      }, {
+        "name" : "get_property_values",
+        "blurb" : "Read current values of multiple Thing properties in one call (batch, max 40). **thingName** must be a canonical ThingWorx name; non-canonical labels return **I…"
+      }, {
+        "name" : "query_property_history",
+        "blurb" : "Query time-series history for a Thing property. **thingName** must be canonical (else **IDENTITY_RESOLUTION_REQUIRED**; **recoveryHint** to **resolve_thing** w…"
+      }, {
+        "name" : "query_stream_data",
+        "blurb" : "Query tabular stream rows via platform **QueryStreamData** on a Stream Thing. **thingName** uses the same canonical Thing preflight as other scalar Thing tools…"
+      }, {
+        "name" : "query_alert_summary",
+        "blurb" : "Current alert **summary** for one or more Things via Resource AlertFunctions.QueryAlertSummaryForThing (in-memory snapshot, not history). **thingNames** must b…"
+      }, {
+        "name" : "query_alert_history",
+        "blurb" : "Alert **history** timeline for one Thing via AlertFunctions.QueryAlertHistory. **thingName** must be canonical; non-canonical labels return **IDENTITY_RESOLUTI…"
+      }, {
+        "name" : "acknowledge_alerts",
+        "blurb" : "Acknowledge alerts on AlertFunctions. **thingName** must be a canonical ThingWorx name; non-canonical labels return **IDENTITY_RESOLUTION_REQUIRED** before any…"
+      }, {
+        "name" : "set_property_value",
+        "blurb" : "Request to write a Thing property. Requires human approval on Parler AlwaysOn before execution. Always set base_type when known (discover_thing_members / get_p…"
+      }, {
+        "name" : "spotlight_search",
+        "blurb" : "Fuzzy search across ThingWorx metadata via platform SearchFunctions.SpotlightSearchV2 (same as REST Spotlight; invoked in-JVM, not HTTP). For structured filter…"
+      }, {
+        "name" : "cc_m1a_fixture_read_status",
+        "blurb" : "Fixed M1a census fixture extended tool (READ_ONLY demo shape)."
+      } ],
+      "advertisedNames" : [ "tabulate_cached_result", "build_chart_from_tabular_result", "query_entities_by_taxonomy", "resolve_thing", "get_agent_skill" ]
+    },
+    "loadToolSchemasMetaEditableChars" : 4738
+  } ]
+}

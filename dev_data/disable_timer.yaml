@@ -1,0 +1,26 @@
+import_order:
+- action: rest_call
+  service: /Thingworx/Things/PTCTDD.SimulatorFleetTracking.Timer.30Mins/Services/DisableTimer
+  payload: |
+    {}
+
+- action: rest_call
+  service: /Thingworx/Things/PTCTDD.SimulateDataGenerator.Timer_TI/Services/DisableTimer
+  payload: |
+    {}
+
+# ThingShape PTCSC.Utilization.ModelLogic_TS subscribes to this timer.
+- action: rest_call
+  service: /Thingworx/Things/PTCSC.Utilization.Simulation_TM/Services/DisableTimer
+  payload: |
+    {}
+
+- action: rest_call
+  service: /Thingworx/Things/PTCTDD.SimulatorFleetTracking.5MinTimer/Services/DisableTimer
+  payload: |
+    {}
+
+- action: rest_call
+  service: /Thingworx/Things/PTCSC.Utilization.RecordPurge_TM/Services/DisableTimer
+  payload: |
+    {}

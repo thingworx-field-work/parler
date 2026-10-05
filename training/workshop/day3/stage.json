@@ -1,0 +1,18 @@
+{
+  "schema": "parler-training-stage-v1",
+  "stage": "day3",
+  "phase": "pre-llm-friendly",
+  "uploads": [
+    { "repoPath": "workshop/day3/playbooks/cross_asset_pair_health/playbook.json", "target": "/playbooks/cross_asset_pair_health/playbook.json" }
+  ],
+  "expectedRuntime": {
+    "extendedTools": [],
+    "skills": [],
+    "playbooks": ["cross_asset_pair_health"],
+    "shadowedSkills": [],
+    "policyRules": []
+  },
+  "tests": {
+    "static": ["parse-payloads", "stage-manifest"]
+  }
+}

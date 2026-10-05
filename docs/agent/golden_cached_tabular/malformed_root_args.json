@@ -1,0 +1,8 @@
+{
+  "description": "Negative N-06: entire tool `arguments` string is not valid JSON. Harness should invoke the tool with `arguments` exactly equal to `rawArguments` (not this file as a whole).",
+  "rawArguments": "{ not valid json",
+  "expect": {
+    "status": "error",
+    "code": "INVALID_PARAMETERS"
+  }
+}

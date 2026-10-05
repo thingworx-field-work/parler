@@ -1,0 +1,20 @@
+{
+  "schema": "parler-training-stage-v1",
+  "stage": "day1",
+  "phase": "pre-llm-friendly",
+  "uploads": [
+    { "repoPath": "workshop/day1/policies/invoke_service.json", "target": "/policies/invoke_service.json" },
+    { "repoPath": "workshop/day1/taxonomies/identity-types.json", "target": "/taxonomies/identity-types.json" },
+    { "repoPath": "workshop/day1/taxonomies/asset-types.json", "target": "/taxonomies/asset-types.json" }
+  ],
+  "expectedRuntime": {
+    "extendedTools": [],
+    "skills": [],
+    "playbooks": [],
+    "shadowedSkills": [],
+    "policyRules": ["allow-datatable-reads"]
+  },
+  "tests": {
+    "static": ["parse-payloads", "stage-manifest"]
+  }
+}

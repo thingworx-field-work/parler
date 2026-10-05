@@ -1,0 +1,142 @@
+# Utilization playbook + skill eval (live ThingWorx).
+# Final four-tool surface — see dev_data/scpa_utilization/tools/extended_tools.json.
+# Playbook cases assert start_playbook + final evidence only (internal DAG tool calls are not
+# guaranteed in AgentMessageStream assistant toolCalls). Skill cases assert model-facing routes.
+#   uv run agent-eval --suite docs/agent/evals/utilization_v1.yaml --agent-matrix env
+
+version: 1
+suite: utilization-v1
+
+baselineRef:
+  rateControl: tmp/agent-eval/rate-control-utilization/
+
+agentMatrix:
+  gpt_5_5:
+    thingName: SCPA_Demo_Agent
+    defaultEnabled: true
+
+cases:
+  - id: utilization_summary_playbook_nl
+    tags: [playbook, utilization, optional-env]
+    turns:
+      - user: >
+          Please run playbook utilization_summary with StartDate 2025-09-03T00:00:00Z and EndDate 2025-09-26T23:59:59Z.
+        acceptableOutcomes:
+          - name: playbook_utilization_summary
+            score: 1.0
+            assertions:
+              - toolCalled: start_playbook
+              - toolNotCalled: invoke_service
+              - finalRegex: "(?i)utilization|percent|state"
+
+  - id: utilization_summary_skill_baseline
+    skill: utilization_summary
+    tags: [skill-baseline, utilization, optional-env]
+    turns:
+      - user: >
+          /utilization_summary Show overall utilization from 2025-09-03 to 2025-09-26.
+        acceptableOutcomes:
+          - name: skill_state_summary
+            score: 1.0
+            assertions:
+              - toolNotCalled: invoke_service
+              - toolsCalledSubsequence:
+                  - get_utilization_state_summary
+
+  - id: utilization_summary_skill_raw_records
+    skill: utilization_summary
+    tags: [skill-baseline, utilization, optional-env]
+    turns:
+      - user: >
+          /utilization_summary List raw utilization event records for all machines from 2025-09-03 to 2025-09-26.
+        acceptableOutcomes:
+          - name: skill_raw_records
+            score: 1.0
+            assertions:
+              - toolNotCalled: invoke_service
+              - toolsCalledSubsequence:
+                  - get_utilization_records
+
+  - id: machine_utilization_summary_playbook_nl
+    tags: [playbook, utilization, optional-env]
+    turns:
+      - user: >
+          Please run playbook machine_utilization_summary with machine SE.CellFab.Model.Workunit.ORD-JetDryer-01,
+          StartDate 2025-09-03T00:00:00Z, and EndDate 2025-09-26T23:59:59Z.
+        acceptableOutcomes:
+          - name: playbook_machine_utilization_summary
+            score: 1.0
+            assertions:
+              - toolCalled: start_playbook
+              - toolNotCalled: invoke_service
+              - finalRegex: "(?i)utilization|percent|state"
+
+  - id: machine_utilization_summary_skill_exact_thing
+    skill: machine_utilization_summary
+    tags: [skill-baseline, utilization, optional-env]
+    turns:
+      - user: >
+          /machine_utilization_summary Show utilization for SE.CellFab.Model.Workunit.ORD-JetDryer-01 from 2025-09-03 to 2025-09-26.
+        acceptableOutcomes:
+          - name: skill_route_exact_machine
+            score: 1.0
+            assertions:
+              - toolNotCalled: invoke_service
+              - toolsCalledSubsequence:
+                  - get_utilization_state_summary
+
+  - id: machine_utilization_summary_skill_display_label
+    skill: machine_utilization_summary
+    tags: [skill-baseline, utilization, optional-env]
+    turns:
+      - user: >
+          /machine_utilization_summary Show utilization for JetDryer 01 from 2025-09-03 to 2025-09-26.
+        acceptableOutcomes:
+          - name: skill_route_disambiguation
+            score: 1.0
+            assertions:
+              - toolNotCalled: invoke_service
+              - toolsCalledSubsequence:
+                  - list_utilization_machines
+                  - get_utilization_state_summary
+
+  - id: utilization_overview_playbook_nl
+    tags: [playbook, utilization, optional-env]
+    turns:
+      - user: >
+          Please run playbook utilization_overview with StartDate 2025-09-03T00:00:00Z and EndDate 2025-09-26T23:59:59Z.
+        acceptableOutcomes:
+          - name: playbook_utilization_overview
+            score: 1.0
+            assertions:
+              - toolCalled: start_playbook
+              - toolNotCalled: invoke_service
+              - finalRegex: "(?i)utilization|overview|machine|state"
+
+  - id: utilization_overview_skill_baseline
+    skill: utilization_overview
+    tags: [skill-baseline, utilization, optional-env]
+    turns:
+      - user: >
+          /utilization_overview Show utilization overview across machines from 2025-09-03 to 2025-09-26.
+        acceptableOutcomes:
+          - name: skill_route_overview
+            score: 1.0
+            assertions:
+              - toolNotCalled: invoke_service
+              - toolsCalledSubsequence:
+                  - get_utilization_overview
+
+  - id: utilization_overview_skill_machine_listing
+    skill: utilization_overview
+    tags: [skill-baseline, utilization, optional-env]
+    turns:
+      - user: >
+          /utilization_overview Which machines are available for utilization reporting?
+        acceptableOutcomes:
+          - name: skill_route_listing
+            score: 1.0
+            assertions:
+              - toolNotCalled: invoke_service
+              - toolsCalledSubsequence:
+                  - list_utilization_machines

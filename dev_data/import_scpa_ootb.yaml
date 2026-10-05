@@ -1,0 +1,175 @@
+# Run from the repository root:
+#   uv run import-dev --apply --import_control import_scpa_ootb
+#
+# Prerequisites (not part of this repository):
+# - .env in the repository root with DEV_SERVER and DEV_KEY; DEV_KEY is an Application Key you created
+#   on the target ThingWorx server.
+# - parler-agent/build/parler-agent.zip and parler-ui-widget/dist/parler-ui-widget.zip, built with
+#   ./build-extension.sh and ./build-widget.sh.
+# - The SCPA solution dataset archives in dev_data/SCPA/ (ALL_DATASETS_DEV_*.zip).
+import_order:
+- action: import_extension
+  files:
+  - parler-agent/build/parler-agent.zip
+  - parler-ui-widget/dist/parler-ui-widget.zip
+  - dev_data/SCPA/ALL_DATASETS_DEV_0001_Platform.zip
+  - dev_data/SCPA/ALL_DATASETS_DEV_1001_SCPA_Core.zip
+  - dev_data/SCPA/ALL_DATASETS_DEV_2001_SCPA.zip
+  
+- action: import_file
+  files:
+  - dev_data/Entities_SteamSensor.xml
+  - dev_data/ParlerAgentBasic.xml
+  - dev_data/Things_AIDocRepository.xml
+  - dev_data/Things_ConfigurationRepository.xml
+
+- action: rest_call
+  service: /Thingworx/Things/ConfigurationRepository/services/CreateFolder
+  payload: |
+    {"path":"/skills/region_health"}
+
+- action: rest_call
+  service: /Thingworx/Things/ConfigurationRepository/services/CreateFolder
+  payload: |
+    {"path":"/skills/asset_pair_health"}
+
+- action: rest_call
+  service: /Thingworx/Things/ConfigurationRepository/services/CreateFolder
+  payload: |
+    {"path":"/skills/machine_utilization_summary"}
+
+- action: rest_call
+  service: /Thingworx/Things/ConfigurationRepository/services/CreateFolder
+  payload: |
+    {"path":"/skills/utilization_overview"}
+
+- action: rest_call
+  service: /Thingworx/Things/ConfigurationRepository/services/CreateFolder
+  payload: |
+    {"path":"/skills/utilization_summary"}
+
+- action: rest_call
+  service: /Thingworx/Things/ConfigurationRepository/services/CreateFolder
+  payload: |
+    {"path":"/policies"}
+
+- action: rest_call
+  service: /Thingworx/Things/ConfigurationRepository/services/CreateFolder
+  payload: |
+    {"path":"/playbooks"}
+
+- action: rest_call
+  service: /Thingworx/Things/ConfigurationRepository/services/CreateFolder
+  payload: |
+    {"path":"/taxonomies"}
+
+- action: rest_call
+  service: /Thingworx/Things/ConfigurationRepository/services/CreateFolder
+  payload: |
+    {"path":"/tools"}
+
+- action: rest_call
+  service: /Thingworx/Things/ConfigurationRepository/services/CreateFolder
+  payload: |
+    {"path":"/host-contexts"}
+
+
+
+# - action: upload_file
+#   file_repository: ConfigurationRepository
+#   path: /tools
+#   files:
+#   - dev_data/scpa_utilization/tools/extended_tools.json
+
+# Playbooks
+# - action: upload_file
+#   file_repository: ConfigurationRepository
+#   path: /playbooks/utilization_summary
+#   files:
+#   - dev_data/scpa_utilization/playbooks/utilization_summary/playbook.json
+#
+# - action: upload_file
+#   file_repository: ConfigurationRepository
+#   path: /playbooks/machine_utilization_summary
+#   files:
+#   - dev_data/scpa_utilization/playbooks/machine_utilization_summary/playbook.json
+#
+# - action: upload_file
+#   file_repository: ConfigurationRepository
+#   path: /playbooks/utilization_overview
+#   files:
+#   - dev_data/scpa_utilization/playbooks/utilization_overview/playbook.json
+#
+# - action: upload_file
+#   file_repository: ConfigurationRepository
+#   path: /playbooks/cross_region_health
+#   files:
+#   - dev_data/scpa_utilization/playbooks/cross_region_health/playbook.json
+#
+# - action: upload_file
+#   file_repository: ConfigurationRepository
+#   path: /playbooks/cross_asset_pair_health
+#   files:
+#   - dev_data/scpa_utilization/playbooks/cross_asset_pair_health/playbook.json
+
+# Skills
+# - action: upload_file
+#   file_repository: ConfigurationRepository
+#   path: /skills/machine_utilization_summary
+#   files:
+#   - dev_data/scpa_utilization/skills/machine_utilization_summary/SKILL.md
+
+# - action: upload_file
+#   file_repository: ConfigurationRepository
+#   path: /skills/utilization_overview
+#   files:
+#   - dev_data/scpa_utilization/skills/utilization_overview/SKILL.md
+
+# - action: upload_file
+#   file_repository: ConfigurationRepository
+#   path: /skills/utilization_summary
+#   files:
+#   - dev_data/scpa_utilization/skills/utilization_summary/SKILL.md
+
+# - action: upload_file
+#   file_repository: ConfigurationRepository
+#   path: /skills/region_health
+#   files:
+#   - dev_data/scpa_utilization/skills/region_health/SKILL.md
+
+# - action: upload_file
+#   file_repository: ConfigurationRepository
+#   path: /skills/asset_pair_health
+#   files:
+#   - dev_data/scpa_utilization/skills/asset_pair_health/SKILL.md
+
+- action: upload_file
+  file_repository: ConfigurationRepository
+  path: /policies
+  files:
+  - dev_data/scpa_utilization/policies/invoke_service.json
+
+- action: upload_file
+  file_repository: ConfigurationRepository
+  path: /taxonomies
+  files:
+  - dev_data/scpa_utilization/taxonomies/identity-types.json
+  - dev_data/scpa_utilization/taxonomies/asset-types.json
+
+# disable demoMode and set DaysToKeepWhenPurging to 1000
+# - action: rest_call
+#   service: /Thingworx/Things/PTCSC.UtilizationTWImpl.Manager
+#   method: PUT
+#   payload_file: dev_data/scpa_utilization/PTCSC.UtilizationTWImpl.Manager.json
+
+- action: rest_call
+  service: /Thingworx/Things/PTC.Base.Manager/services/InitializeSolution
+  timeout: 600
+  payload: |
+    {"deploymentConfig":{}}
+    
+- action: rest_call
+  service: /Thingworx/Logs/ApplicationLog/Services/SetLogLevel
+  timeout: 60
+  payload: |
+    {"level":"INFO"}

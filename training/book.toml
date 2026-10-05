@@ -1,0 +1,28 @@
+[book]
+title = "Parler — Team extension guide (SCPA utilization track)"
+authors = ["Xu Desheng"]
+description = "Hands-on curriculum: architecture, taxonomy, hierarchy, built-in tools, skills from built-ins, extended tools, skills, playbooks, LLM-friendly UI, outlook, and SCPA utilization environment."
+language = "en"
+
+[output.html]
+additional-css = ["theme/custom.css"]
+additional-js = ["mermaid.min.js", "mermaid-init.js"]
+
+[preprocessor]
+
+[preprocessor.mermaid]
+command = "mdbook-mermaid"
+optional = true
+
+[output.codi]
+optional = true
+formats = ["pdf"]
+output_dir = "book/codi"
+output_name = "parler-training"
+profile = "typora-a4-reference"
+
+[output.codi.release]
+version = "v0.1.248-0.1.97"
+date = "2026-09-21"
+label = "Release"
+version_footer = true

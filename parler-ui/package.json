@@ -1,0 +1,28 @@
+{
+  "name": "parler-ui",
+  "description": "Lit chat shell for Parler / ThingWorx (no transport inside)",
+  "version": "0.1.8",
+  "type": "module",
+  "main": "parler-ui.js",
+  "scripts": {
+    "build:tw": "node scripts/gen-widget-package-version.mjs && node scripts/esbuild-tw.mjs",
+    "test": "node --experimental-wasm-modules --test lib/activeTurnIndicator.test.mjs lib/alwaysOnConnectGuards.test.mjs lib/approvalDecisionSubmit.test.mjs lib/artifactPresentation.test.mjs lib/assistantResponseActions.test.mjs lib/assistantTurnInfo.test.mjs lib/boundTransportString.test.mjs lib/cancelUserPromptDispatchPlan.test.mjs lib/cancelUserPromptResult.test.mjs lib/chartCard.test.mjs lib/chartDataNotes.test.mjs lib/chartDrawBar.test.mjs lib/chartDrawBarHorizontal.test.mjs lib/chartDrawHistogram.test.mjs lib/chartDrawBoxplot.test.mjs lib/chartDrawHeatmap.test.mjs lib/chartDrawBarStacked.test.mjs lib/chartGroup.test.mjs lib/chartSharedColors.test.mjs lib/chartDrawInputDefense.test.mjs lib/chartDrawPieTitles.test.mjs lib/chartHitModel.test.mjs lib/chartSizePolicy.test.mjs lib/chartTheme.test.mjs lib/chartTimeFormat.test.mjs lib/chartViewState.test.mjs lib/chartWire.test.mjs lib/chartXDomain.test.mjs lib/chatSessionActivity.test.mjs lib/chatSessionArtifacts.test.mjs lib/clipboardFallback.test.mjs lib/connectionInfoHandshake.test.mjs lib/emptyStateMedia.test.mjs lib/getConnectionInfoInfoTable.test.mjs lib/historyHydrate.charts.test.mjs lib/historyHydrate.feedback.test.mjs lib/keyboardReachable.test.mjs lib/hostContextRow.test.mjs lib/llmUsageWire.test.mjs lib/openPrintDocumentWindow.test.mjs lib/parlerUiChartExpand.test.mjs lib/parlerUiChartGrid.test.mjs lib/parlerUiChartGroup.test.mjs lib/parlerUiChartSharedColors.test.mjs lib/parlerUiChartPrint.test.mjs lib/parlerUiChartViewData.test.mjs lib/parlerUiThemeState.test.mjs lib/productSafeTableExportMessage.test.mjs lib/promptHistoryNavigation.test.mjs lib/rateControlWire.test.mjs lib/sessionCancelledWire.test.mjs lib/taskStateWire.test.mjs lib/taskStatePanelVisibility.test.mjs lib/themeMode.test.mjs lib/themeTokens.test.mjs lib/thingworxDocumentLinks.test.mjs"
+  },
+  "dependencies": {
+    "@xudesheng/alwayson-js-codec": "^0.1.4",
+    "d3-array": "^3.2.4",
+    "d3-axis": "^3.0.0",
+    "d3-scale": "^4.0.2",
+    "d3-selection": "^3.0.0",
+    "d3-shape": "^3.2.0",
+    "lit": "^3.2.0",
+    "markdown-it": "^14.1.0"
+  },
+  "devDependencies": {
+    "@webassemblyjs/wasm-parser": "^1.14.1",
+    "esbuild": "^0.25.0",
+    "jsdom": "^26.0.0",
+    "lodash": "^4.17.21",
+    "long": "^3.2.0"
+  }
+}

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Entities>
+    <DataShapes>
+        <DataShape name="AgentConversationSummary"
+                   description="Summary row for conversation list: conversationId and title (e.g. GetOrCreateConversationId result)">
+            <FieldDefinitions>
+                <FieldDefinition name="conversationId" baseType="STRING"
+                                 description="Thread/session identifier" ordinal="0"/>
+                <FieldDefinition name="title" baseType="STRING"
+                                 description="Thread title" ordinal="1"/>
+            </FieldDefinitions>
+        </DataShape>
+    </DataShapes>
+</Entities>

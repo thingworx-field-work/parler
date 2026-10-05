@@ -1,0 +1,11 @@
+how many devices do you have?
+
+how many properties are on SteamSensor?
+
+what's the last time of Temperature in the last 24 hours?
+
+please show me the trend of Temperature in the last hour before that last time?
+
+the limit is 435, please include it on the chart too
+
+how many readings exceeded the limit during the period?

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Entities>
+    <DataShapes>
+        <DataShape name="AgentToolCallEventData"
+                   description="Data shape for AgentToolCallEvent (observability)"
+>
+            <FieldDefinitions>
+                <FieldDefinition name="conversationId" baseType="STRING"
+                                 description="Conversation ID" ordinal="0"/>
+                <FieldDefinition name="toolName" baseType="STRING"
+                                 description="Name of the tool called" ordinal="1"/>
+                <FieldDefinition name="toolArguments" baseType="TEXT"
+                                 description="Tool call arguments (JSON)" ordinal="2"/>
+                <FieldDefinition name="toolResult" baseType="TEXT"
+                                 description="Tool execution result" ordinal="3"/>
+                <FieldDefinition name="iteration" baseType="INTEGER"
+                                 description="Agent loop iteration number" ordinal="4"/>
+                <FieldDefinition name="durationMs" baseType="INTEGER"
+                                 description="Tool execution duration in ms" ordinal="5"/>
+            </FieldDefinitions>
+        </DataShape>
+    </DataShapes>
+</Entities>

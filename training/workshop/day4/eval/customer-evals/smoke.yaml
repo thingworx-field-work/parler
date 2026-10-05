@@ -1,0 +1,37 @@
+version: 1
+suite: customer-smoke
+
+agentMatrix:
+  gpt_5_4:
+    thingName: Customer_Agent_GPT54
+    defaultEnabled: true
+  sonnet_4_6:
+    thingName: Customer_Agent_Sonnet46
+    defaultEnabled: false
+
+cases:
+  - id: environment_agent_responds
+    tags: [environment, smoke]
+    turns:
+      - user: "who are you?"
+        acceptableOutcomes:
+          - name: agent_identity_response
+            score: 1.0
+            assertions:
+              - finalRegex: "(?i)parler|thingworx|agent"
+              - traceParseErrorsAbsent: true
+
+  - id: environment_taxonomy_loaded
+    tags: [environment, taxonomy]
+    turns:
+      - user: "Please list the configured asset types available to you."
+        acceptableOutcomes:
+          - name: asset_type_catalog_available
+            score: 1.0
+            assertions:
+              - toolCalled: list_asset_types
+              - finalRegex: "(?i)asset\\s+type|configured|available"
+          - name: no_taxonomy_loaded_but_clear
+            score: 0.4
+            assertions:
+              - finalRegex: "(?i)taxonomy|asset\\s+types?"

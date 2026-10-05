@@ -1,0 +1,13 @@
+{
+  "name": "parler-ui-widget",
+  "private": true,
+  "version": "0.1.2",
+  "description": "ThingWorx extension wrapper for parler-ui (run npm run sync before mub)",
+  "scripts": {
+    "sync": "node scripts/sync-parler-ui.mjs",
+    "test": "node --test test/themeInput.test.mjs",
+    "verify:theme-config": "node scripts/verify-theme-generated-config.mjs",
+    "mub": "mub",
+    "build:extension": "npm run sync && mub"
+  }
+}

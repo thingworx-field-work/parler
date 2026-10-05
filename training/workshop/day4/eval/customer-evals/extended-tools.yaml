@@ -1,0 +1,25 @@
+version: 1
+suite: customer-extended-tools
+
+agentMatrix:
+  gpt_5_4:
+    thingName: Customer_Agent_GPT54
+    defaultEnabled: true
+
+cases:
+  - id: app_wrapper_tool_route
+    tags: [extended-tool, wrapper]
+    turns:
+      - user: "Show readings for asset Contacting 01 for today."
+        acceptableOutcomes:
+          - name: used_app_wrapper
+            score: 1.0
+            assertions:
+              # Neutral placeholder — replace customer_query_readings with the customer's
+              # actual extended-tool name from their extended_tools.json upload.
+              - toolCalled: customer_query_readings
+              - finalRegex: "(?i)reading|record|value"
+          - name: targeted_clarification
+            score: 0.6
+            assertions:
+              - finalRegex: "(?i)which\\s+machine|which\\s+asset|clarify"

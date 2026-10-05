@@ -1,0 +1,15 @@
+{
+    "version": 1,
+    "rules": [
+      {
+        "id": "allow-datatable-reads",
+        "priority": 100,
+        "description": "Allow common DataTable read services.",
+        "match": {
+          "entityTypes": ["Thing"],
+          "entityNames": ["*"],
+          "serviceNames": ["GetDataTableEntries", "QueryDataTableEntries"]
+        }
+      }
+    ]
+  }

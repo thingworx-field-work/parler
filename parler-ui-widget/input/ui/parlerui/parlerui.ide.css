@@ -1,0 +1,29 @@
+/* Mashup Builder design-time chrome (class matches widget id parlerui) */
+.widget-parlerui {
+  box-sizing: border-box;
+  min-height: 320px;
+  min-width: 280px;
+  border: 1px dashed rgba(138, 180, 255, 0.35);
+}
+
+ptcs-widget[widget-type="parlerui"] {
+  min-height: 320px;
+  min-width: 280px;
+}
+
+.widget-parlerui-helper {
+  display: flex;
+}
+
+.widget-parlerui-helper span {
+  display: inline-block;
+  height: 48px;
+  width: 48px;
+  background: url(default_widget_icon.ide.svg) no-repeat;
+  background-size: 48px 48px;
+}
+
+.widget-parlerui-helper:after {
+  content: "\A0parlerui";
+  color: blue;
+}

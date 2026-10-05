@@ -1,0 +1,11 @@
+{
+  "description": "Negative: percentileColumns must be JSON array of strings.",
+  "arguments": {
+    "cacheId": "<PUT_CACHED_TABLE_ID>",
+    "percentileColumns": "n"
+  },
+  "expect": {
+    "status": "error",
+    "code": "INVALID_PARAMETERS"
+  }
+}

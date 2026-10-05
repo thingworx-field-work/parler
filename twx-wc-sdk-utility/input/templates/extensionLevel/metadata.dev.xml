@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Entities>
+    <ExtensionPackages>
+        <ExtensionPackage dependsOn="" description="" minimumThingWorxVersion="8.0.0" name="{{extensionName}}" packageVersion="{{version}}" vendor="PTC" haCompatible="{{#if haCompatible}}true{{else}}false{{/if}}">
+            {{#if dependsOnExternalLibs}}
+            <WebAppResources>
+                {{#dependencies}}
+                <FileResource description="Library folder for PTCS components" file="{{id}}" type="WEBAPP"/>
+                {{/dependencies}}
+            </WebAppResources>
+            {{/if}}
+        </ExtensionPackage>
+    </ExtensionPackages>
+    {{#if components}}
+    <Widgets>
+        <!-- repeat this for all generated widgets -->
+        {{#components}}
+        <Widget name="{{widgetName}}">
+            <UIResources>
+                <FileResource description="Template for a polymer widget" url="{{../rootPath}}{{widgetName}}/{{widgetName}}.config.js" isDevelopment="true" isRuntime="true" type="JS"/>
+                <FileResource description="Template for a polymer widget" url="{{../rootPath}}{{widgetName}}/{{widgetName}}.ide.js" isDevelopment="true" isRuntime="false" type="JS"/>
+                <FileResource description="Template for a polymer widget" url="{{../rootPath}}{{widgetName}}/{{widgetName}}.ide.css" isDevelopment="true" isRuntime="false" type="CSS"/>
+                <FileResource description="Template for a polymer widget" url="{{../rootPath}}{{widgetName}}/{{widgetName}}.runtime.js" isDevelopment="false" isRuntime="true" type="JS"/>
+                <FileResource description="Template for a polymer widget" url="{{../rootPath}}{{widgetName}}/{{widgetName}}.runtime.css" isDevelopment="false" isRuntime="true" type="CSS"/>
+            </UIResources>
+        </Widget>
+        {{/components}}
+    </Widgets>
+    {{/if}}
+</Entities>

@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "rules": [
+    {
+      "id": "allow-datatable-reads",
+      "priority": 100,
+      "description": "Allow common DataTable read services.",
+      "match": {
+        "entityTypes": ["Thing"],
+        "entityNames": ["*"],
+        "serviceNames": ["GetDataTableEntries", "QueryDataTableEntries"]
+      }
+    },
+    {
+      "id": "GetAssetModelForView",
+      "priority": 200,
+      "description": "Allow GetAssetModelForView service.",
+      "match": {
+        "entityTypes": ["Thing"],
+        "entityNames": ["PTCTS.ConfigurationManagement.Manager"],
+        "serviceNames": ["GetAssetModelForView"]
+      }
+    }
+  ]
+}

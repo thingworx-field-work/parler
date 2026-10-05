@@ -1,0 +1,17 @@
+/* Runtime shell: ThingWorx flex rows/columns often pass 0 height — force a real box */
+.widget-aiparler {
+  box-sizing: border-box;
+  min-height: 320px;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+}
+
+.widget-aiparler parler-ui {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 300px;
+  align-self: stretch;
+}

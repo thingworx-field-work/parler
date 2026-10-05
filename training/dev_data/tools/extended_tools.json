@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "tools": [
+    {
+      "name": "resolve_shift_windows_for_thing",
+      "title": "Resolve shift windows for thing",
+      "whenToUse": "Use whenever the user's question involves shift-relative time for a specific Thing — current shift, last shift, previous shift, a named shift (shift A, night shift), or any comparison across shifts. Call this tool BEFORE constructing any time range from shift language; never derive shift boundaries yourself. thingName must be an exact Thing name — resolve colloquial equipment names to the canonical Thing first. Vocabulary: \"last shift\", \"previous shift\", and \"last completed shift\" all refer to the lastCompletedShift field; \"the shift before that\" is recentShifts[1]; \"same shift yesterday\" is the recentShifts entry with the same name and the prior productionDate. Timezone discipline: the shift pattern runs in the Thing's site timezone (UTC offset siteUtcOffset, read from the Thing), which may differ from the user's timezone — interpret all shift words in site time, and resolve day words inside shift phrases (\"yesterday's night shift\") against productionDate, which is a site-local date. startTime and endTime are UTC — pass them verbatim as query-window arguments to ThingWorx data services; never pass site-local timestamps to queries. When presenting times to the user, use startTimeLocal and endTimeLocal and label them as site time (they carry the siteUtcOffset suffix); do not convert them into the user's own timezone unless the user explicitly asks. Omit referenceTime unless the user anchors to a specific past instant; referenceTime is UTC. Do not use for absolute time ranges or purely calendar-relative ranges (yesterday, last week) that contain no shift wording.",
+      "target": {
+        "entityName": "ShiftHelper",
+        "serviceName": "resolve_shift_windows_for_thing"
+      },
+      "hitl": false,
+      "playbookSafe": true,
+      "risk": "READ_ONLY",
+      "purpose": "Resolve deterministic site-local shift windows for one canonical Thing.",
+      "dryRun": {
+        "supported": false
+      },
+      "idempotency": {
+        "mode": "NONE"
+      },
+      "admission": "DEFAULT",
+      "enabled": true
+    }
+  ]
+}

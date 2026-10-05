@@ -1,0 +1,67 @@
+# Playbook cross_asset_pair_health V1b eval suite (live ThingWorx).
+# Run: uv run agent-eval --suite docs/agent/evals/cross_asset_pair_health_v1b.yaml --agent-matrix env
+
+version: 1
+suite: cross-asset-pair-health-v1b
+
+agentMatrix:
+  gpt_5_5:
+    thingName: SCPA_Demo_Agent
+    defaultEnabled: true
+
+cases:
+  - id: cross_asset_pair_jetdryer_nl
+    tags: [playbook, nl-start-playbook, happy-path, trend]
+    turns:
+      - user: >
+          Please use playbook cross_asset_pair_health, compare Jet Dryer assets
+          ORD JetDryer 02 and AC JetDryer 01 over the past 24 hours. Focus on alerts and trends.
+        acceptableOutcomes:
+          - name: pair_completed_with_trend
+            score: 1.0
+            assertions:
+              - toolCalled: start_playbook
+              - finalRegex: "(?i)alert|evidence gap"
+              - finalRegex: "(?i)(rose|fell|spiked|stable|increased|decreased|trend|over time|min|max|average|mean|rising|falling|flat)"
+
+  - id: cross_asset_pair_jetdryer_slash
+    tags: [playbook, structured-slash, trend]
+    turns:
+      - user: >
+          /cross_asset_pair_health {"assetType":"Jet Dryer","assetIdentifierA":"ORD JetDryer 02","assetIdentifierB":"AC JetDryer 01","timeWindow":"24h"}
+        acceptableOutcomes:
+          - name: direct_playbook_with_trend
+            score: 1.0
+            assertions:
+              - toolNotCalled: start_playbook
+              - finalRegex: "(?i)alert|evidence gap"
+              - finalRegex: "(?i)(rose|fell|spiked|stable|increased|decreased|trend|over time|min|max|average|mean|rising|falling|flat)"
+
+  - id: asset_pair_health_skill_baseline
+    skill: asset_pair_health
+    tags: [skill-baseline]
+    turns:
+      - user: >
+          /asset_pair_health Compare Jet Dryer assets ORD JetDryer 02 and AC JetDryer 01 over the past 24 hours.
+        acceptableOutcomes:
+          - name: skill_completed
+            score: 1.0
+            assertions:
+              - toolCalled: query_entities_by_taxonomy
+              - toolCalled: query_alert_summary
+
+  # Requires dev assets with no current alerts on either side; set AGENT_EVAL_HAS_NO_ALERT_PAIR=1 when ready.
+  - id: cross_asset_pair_no_alert_no_history
+    tags: [playbook, no-alert, fixture-gated]
+    requiresFixture: noAlertPair
+    skipReason: fixture_missing_no_alert_pair
+    turns:
+      - user: >
+          /cross_asset_pair_health {"assetType":"Jet Dryer","assetIdentifierA":"ORD JetDryer 01","assetIdentifierB":"AC JetDryer 02","timeWindow":"24h"}
+        acceptableOutcomes:
+          - name: playbook_without_trend_tool
+            score: 1.0
+            assertions:
+              - toolNotCalled: start_playbook
+              - toolCalledTimesAtMost: { tool: query_property_history, count: 0 }
+              - finalRegex: "(?i)alert|evidence gap|no alert"

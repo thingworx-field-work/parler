@@ -1,0 +1,14 @@
+how many contacting assets in USA have active alert?
+can you show me the trend of cntactForce on ORD-Contacting-02 in the last hour?
+please show me the trend of contactForce on ORD-Contacting-01 and BOS-Contacting-01 too in the same chart
+please include BOS-Contacting-02 too
+please compare them from a statistic view
+please compare contacting assets overall health status between USA and Germany, and let me know which region I should pay attention to first.
+please do the same check for Sealing assets and Cutting assets
+drill into the Germany Sealing assets
+
+overlay sealingTime vs operationalVoltage or num_ConveyorSpeed on a single chart to check for correlation
+
+/region_health Cutting assets in Germany
+
+please use cross_region_health to check Sealing assets in USA and Germany

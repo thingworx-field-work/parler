@@ -1,0 +1,12 @@
+{
+  "name": "ptcs-widgets",
+  "version": "{{version}}",
+  "description": "PTC Shell is a collection of widgets (web components) for developing UI and communicating with TWX Composer backend.",
+  "directories": {
+  },
+  "scripts": {
+  },
+  "author": "",
+  "devDependencies": {
+  }
+}

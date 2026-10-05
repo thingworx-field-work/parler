@@ -1,0 +1,218 @@
+{
+  "elementName": "parler-ui",
+  "htmlImports": [
+    {
+      "from": "npm",
+      "id": "parler-ui",
+      "version": "file:parler-ui",
+      "url": "parler-ui/parler-ui.tw.js"
+    }
+  ],
+  "flags": {
+    "supportsAutoResize": true,
+    "name": "AI Parler",
+    "description": "Parler chat with embedded ThingWorx AlwaysOn Transport only (ConnectAndBind + Send + ReceiveMessage). No Composer event for user turns. See docs/architecture/agent-alwayson.md"
+  },
+  "properties": {
+    "ThemeMode": {
+      "baseType": "STRING",
+      "isBindingTarget": true,
+      "isBindingSource": false,
+      "defaultValue": "mashup",
+      "description": "Theme source: mashup | parler-dark",
+      "src": "themeMode"
+    },
+    "ProgressPresentation": {
+      "baseType": "STRING",
+      "isBindingTarget": true,
+      "isBindingSource": false,
+      "defaultValue": "detailed",
+      "description": "Active-turn detail: detailed | compact",
+      "src": "progressPresentation"
+    },
+    "ProgressLabel": {
+      "baseType": "STRING",
+      "isBindingTarget": true,
+      "isBindingSource": false,
+      "isLocalizable": true,
+      "defaultValue": "Thinking...",
+      "description": "Compact ordinary-working label",
+      "src": "progressLabel"
+    },
+    "RateControlLabel": {
+      "baseType": "STRING",
+      "isBindingTarget": true,
+      "isBindingSource": false,
+      "isLocalizable": true,
+      "defaultValue": "Waiting for capacity...",
+      "description": "Compact provider rate-control label",
+      "src": "rateControlLabel"
+    },
+    "EmptyStateMedia": {
+      "baseType": "IMAGELINK",
+      "isBindingTarget": true,
+      "isBindingSource": false,
+      "defaultValue": "",
+      "description": "Optional Media Entity image for an empty conversation",
+      "src": "emptyStateMedia"
+    },
+    "CustomClass": {
+      "baseType": "STRING",
+      "description": "Custom class for the element",
+      "isBindingTarget": true,
+      "isBindingSource": true
+    },
+    "Placeholder": {
+      "baseType": "STRING",
+      "isBindingTarget": true,
+      "isBindingSource": false,
+      "defaultValue": "Ask about device / property history…",
+      "description": "Composer placeholder",
+      "src": "placeholder"
+    },
+    "Disabled": {
+      "baseType": "BOOLEAN",
+      "isBindingTarget": true,
+      "isBindingSource": false,
+      "defaultValue": false,
+      "description": "Disable composer",
+      "src": "disabled"
+    },
+    "HideHeader": {
+      "baseType": "BOOLEAN",
+      "isBindingTarget": true,
+      "isBindingSource": false,
+      "defaultValue": true,
+      "description": "When true, hide the title region (default: compact UI)",
+      "src": "hideHeader"
+    },
+    "HeaderTitle": {
+      "baseType": "STRING",
+      "isBindingTarget": true,
+      "isBindingSource": false,
+      "defaultValue": "AI Parler",
+      "description": "Header title (visible only when HideHeader is false)",
+      "src": "headerTitle"
+    },
+    "HeaderSubtitle": {
+      "baseType": "STRING",
+      "isBindingTarget": true,
+      "isBindingSource": false,
+      "defaultValue": "",
+      "description": "Deprecated: not rendered; kept for existing imports",
+      "src": "headerSubtitle"
+    },
+    "ThingworxWsUrl": {
+      "baseType": "STRING",
+      "isBindingTarget": true,
+      "isBindingSource": false,
+      "defaultValue": "",
+      "description": "Transport: full AlwaysOn WebSocket URL (ws:// or wss://). If empty, derived from page location + /Thingworx/WS",
+      "src": "thingworxWsUrl"
+    },
+    "AppKey": {
+      "baseType": "STRING",
+      "isBindingTarget": true,
+      "isBindingSource": false,
+      "defaultValue": "",
+      "description": "Transport: application key (e.g. short-lived key before ConnectAndBind)",
+      "src": "appKey"
+    },
+    "AgentThingName": {
+      "baseType": "STRING",
+      "isBindingTarget": true,
+      "isBindingSource": false,
+      "defaultValue": "",
+      "description": "Transport: AIAgent Thing name. Phase F default: Send → SubmitUserPrompt on ParlerGateway uses this; legacy path (UseSubmitUserPromptOnConversation false): ParlerStreamToRemoteThing on agent. See docs/architecture/agent-alwayson.md §2.",
+      "src": "agentThingName"
+    },
+    "UseSubmitUserPromptOnConversation": {
+      "baseType": "BOOLEAN",
+      "isBindingTarget": true,
+      "isBindingSource": false,
+      "defaultValue": true,
+      "description": "Transport: Phase F default true — Send invokes SubmitUserPrompt on ParlerGateway (conversationId). False = ParlerStreamToRemoteThing on agent; extension still enforces AgentThreadDataTable ownership for conversationId on both paths.",
+      "src": "useSubmitUserPromptOnConversation"
+    },
+    "ConnectionStatus": {
+      "baseType": "STRING",
+      "isBindingTarget": false,
+      "isBindingSource": true,
+      "defaultValue": "disconnected",
+      "description": "Transport state: disconnected | connecting | connected",
+      "src": "connectionStatus"
+    },
+    "ConversationId": {
+      "baseType": "STRING",
+      "isBindingTarget": true,
+      "isBindingSource": true,
+      "defaultValue": "",
+      "description": "Phase F: transient ParlerGateway Thing name — single AlwaysOn bind target (same value as conversationId / AgentThreadDataTable row key). Not a persistent Conversation RemoteThing. Default Send: SubmitUserPrompt on this gateway; uncheck UseSubmitUserPromptOnConversation for §2.1 ParlerStreamToRemoteThing on agent (debug/legacy).",
+      "src": "conversationId"
+    },
+    "HostScopeJson": {
+      "baseType": "STRING",
+      "isBindingTarget": true,
+      "isBindingSource": false,
+      "defaultValue": "",
+      "description": "Optional Mashup HostScopeJson (UTF-8 JSON text: key + context). Read synchronously on Send; uplink as hostContext per CONTRACTS/API_CONTRACT.md and docs/architecture/host-context.md.",
+      "src": "hostScopeJson"
+    },
+    "LoadHistoryOnBind": {
+      "baseType": "BOOLEAN",
+      "isBindingTarget": true,
+      "isBindingSource": false,
+      "defaultValue": true,
+      "description": "After ConnectAndBind, invoke ParlerGateway.GetConversationHistoryJson and hydrate thread (docs/ui/load-history.md). Set false for empty thread / manual LoadHistoryJson only.",
+      "src": "loadHistoryOnBind"
+    },
+    "HistoryServiceName": {
+      "baseType": "STRING",
+      "isBindingTarget": true,
+      "isBindingSource": false,
+      "defaultValue": "",
+      "description": "Gateway service name for history JSON (default GetConversationHistoryJson if empty).",
+      "src": "historyServiceName"
+    },
+    "HistoryMaxItems": {
+      "baseType": "NUMBER",
+      "isBindingTarget": true,
+      "isBindingSource": false,
+      "defaultValue": 500,
+      "description": "Max stream rows for GetConversationHistoryJson (QueryStreamData). Default 500; server clamps 1..20000. Newest rows are fetched first, then shown in chronological order.",
+      "src": "historyMaxItems"
+    },
+    "HistoryLoadingMessage": {
+      "baseType": "STRING",
+      "isBindingTarget": true,
+      "isBindingSource": false,
+      "defaultValue": "",
+      "description": "Banner while loading history; empty uses built-in default.",
+      "src": "historyLoadingMessage"
+    }
+  },
+  "services": {
+    "ConnectAndBind": {
+      "warnIfNotBound": false,
+      "description": "Transport: WebSocket + Auth + Bind to ConversationId (ParlerGateway name); ReceiveMessage on that name. Run only after Mashup binds AppKey, ConversationId, and AgentThingName (runtime aborts if any are empty). Set ThingworxWsUrl or use a page host that resolves to /Thingworx/WS.",
+      "src": "connectAndBind"
+    },
+    "DisconnectAlwaysOn": {
+      "warnIfNotBound": false,
+      "description": "Transport: close AlwaysOn client opened by ConnectAndBind",
+      "src": "disconnectAlwaysOn"
+    },
+    "ApplyLiveJson": {
+      "warnIfNotBound": false,
+      "description": "Push one wire JSON string (fallback when not using embedded ReceiveMessage, or hybrid testing)"
+    },
+    "ResetChat": {
+      "warnIfNotBound": false,
+      "description": "Clear thread state in the widget"
+    },
+    "LoadHistoryJson": {
+      "warnIfNotBound": false,
+      "description": "Advanced: replace thread from one-shot JSON (docs/ui/AI_PARLER_HISTORY.md). Ignored when busy or approval gate open; bumps epoch vs in-flight GetConversationHistoryJson."
+    }
+  }
+}

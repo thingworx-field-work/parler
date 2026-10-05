@@ -1,0 +1,31 @@
+{
+  "Filter": {
+    "aliases": [
+      "filter",
+      "acme filter"
+    ],
+    "entityType": "ThingTemplate",
+    "entityName": "TWSC.SMProfileModel.AcmeFiller_TT",
+    "criticalProperties": [
+      "PTCDisplayName",
+      "PTCMake",
+      "PTCModel",
+      "PTCSerialNumber"
+    ]
+  },
+  "Mixing Tank": {
+    "aliases": [
+      "mixing tank",
+      "MixingTank",
+      "acme mixing tank"
+    ],
+    "entityType": "ThingTemplate",
+    "entityName": "TWSC.SMProfileModel.AcmeMixTank_TT",
+    "criticalProperties": [
+      "PTCDisplayName",
+      "PTCMake",
+      "PTCModel",
+      "PTCSerialNumber"
+    ]
+  }
+}

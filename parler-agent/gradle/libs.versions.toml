@@ -1,0 +1,32 @@
+[versions]
+thingworx = "9.7.0-b47"
+jackson = "2.17.2"
+commons-math3 = "3.6.1"
+json = "20240303"
+
+[libraries]
+thingworx-common = { module = "com.thingworx:thingworx-common", version.ref = "thingworx" }
+thingworx-platform-common = { module = "com.thingworx:thingworx-platform-common", version.ref = "thingworx" }
+# RemoteThing / platform compile needs communications API (IEndpointBindingObserver, etc.)
+thingworx-communications-client = { module = "com.thingworx:thingworx-communications-client", version.ref = "thingworx" }
+
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
+jackson-annotations = { module = "com.fasterxml.jackson.core:jackson-annotations", version.ref = "jackson" }
+
+httpclient = "org.apache.httpcomponents:httpclient:4.5.13"
+jodaTime = "joda-time:joda-time:2.12.7"
+slf4j-api = "org.slf4j:slf4j-api:1.7.21"
+
+commons-compiler = "org.codehaus.janino:commons-compiler:3.1.10"
+janino = "org.codehaus.janino:janino:3.1.10"
+logback-classic = "ch.qos.logback:logback-classic:1.2.9"
+logback-core = "ch.qos.logback:logback-core:1.2.9"
+logback-jackson = "ch.qos.logback.contrib:logback-jackson:0.1.5"
+logback-json-classic = "ch.qos.logback.contrib:logback-json-classic:0.1.5"
+logstash-logback-encoder = "net.logstash.logback:logstash-logback-encoder:5.3"
+
+commons-math3 = { module = "org.apache.commons:commons-math3", version.ref = "commons-math3" }
+json = { module = "org.json:json", version.ref = "json" }
+
+[bundles]
+logging = [ "commons-compiler", "janino", "logback-classic", "logback-core", "logback-jackson", "logback-json-classic", "logstash-logback-encoder", "slf4j-api" ]

@@ -1,0 +1,57 @@
+{
+  "schema": "parler-playbook-conversion-report-v1",
+  "sourceSkill": "region_health",
+  "targetPlaybook": "cross_region_health",
+  "requiredAgentVersion": "0.1.191",
+  "runnable": false,
+  "validation": {
+    "status": "invalid",
+    "playbookId": "cross_region_health_draft",
+    "agentVersion": "0.1.191",
+    "errors": [
+      {
+        "code": "PLAYBOOK_VALIDATION",
+        "path": "nodes[4]",
+        "nodeId": "per_region_alerts",
+        "message": "draft fan_out child graph incomplete in converter v1"
+      }
+    ],
+    "warnings": []
+  },
+  "deriveOpsUsed": [
+    "pick_taxonomy_row",
+    "flatten_region_entities",
+    "summarize_current_values_by_region"
+  ],
+  "converted": [
+    "resolve asset type from taxonomy",
+    "scope entities per hierarchy node",
+    "summarize current values by region"
+  ],
+  "partiallyConverted": [
+    {
+      "step": "per-node fan_out alert reads for every hierarchy node",
+      "reason": "Skill loops regions with separate query_entities_by_taxonomy + query_alert_summary; v1 converter emits aggregate derive path only — author must add fan_out children or accept cross_region_health packaging fixture"
+    },
+    {
+      "step": "normalized comparison by asset count",
+      "reason": "no dedicated rank_with_ties / compare_series op in v1 converter templates"
+    }
+  ],
+  "notConverted": [],
+  "runtimeRequirements": [
+    "query_entities_by_taxonomy playbookSafe",
+    "query_alert_summary playbookSafe",
+    "get_property_values playbookSafe",
+    "flatten_region_entities",
+    "summarize_current_values_by_region"
+  ],
+  "authorActions": [
+    "Review partial conversion — extend fan_out nodes or adopt cross_region_health fixture",
+    "Do not mark runnable until ValidatePlaybookDocument status is valid",
+    "RefreshPromptContextCache after install"
+  ],
+  "suggestedLiveTests": [
+    "compare Jet Dryer health across ORD and AC sites for the past week"
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "schema": "parler-playbook-feature-version-v1",
+  "description": "Minimum parler-agent version when generated Playbook uses the feature. Converter sets requiredAgentVersion to the numeric-max applicable row (compare semver segments as integers, not lexicographic strings).",
+  "rows": [
+    {
+      "feature": "base_playbook_v1",
+      "minimumAgentVersion": "0.1.127",
+      "signals": ["schema: parler-playbook-v1", "tool_call + derive graph"]
+    },
+    {
+      "feature": "playbook_runtime_snapshot",
+      "minimumAgentVersion": "0.1.191",
+      "signals": ["GetAgentRuntimeSnapshot includePlaybooks", "playbookRuntime.deriveOps check"]
+    },
+    {
+      "feature": "service_orchestration_34_35",
+      "minimumAgentVersion": "0.1.190",
+      "signals": [
+        "extract_tool_envelope",
+        "build_nested_object",
+        "stringify_json",
+        "derive_time_window",
+        "optional_branch_rows",
+        "$infotable binding"
+      ]
+    },
+    {
+      "feature": "slice_e_authoring_helpers",
+      "minimumAgentVersion": "0.1.191",
+      "signals": [
+        "normalize_text",
+        "match_candidates",
+        "dedupe",
+        "limit_rows",
+        "format_evidence_lines"
+      ]
+    },
+    {
+      "feature": "fan_out_child_results",
+      "minimumAgentVersion": "0.1.191",
+      "signals": ["fan_out with output.childResults", "continueOnChildGap"]
+    }
+  ]
+}

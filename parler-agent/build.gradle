@@ -1,0 +1,401 @@
+boolean useLocalTwxLib = gradle.ext.has('parlerUseLocalTwxLib') ? (gradle.ext.parlerUseLocalTwxLib as boolean) : false
+
+// gradle.properties defines twxRepoUrl as a project property; project.ext { } runs later, so set this before buildscript.
+if (!project.ext.has('twxRepoUrl')) {
+    project.ext.twxRepoUrl = (project.findProperty('twxRepoUrl') ?: 'https://artifactory.rd2.thingworx.io/artifactory').toString()
+}
+
+if (useLocalTwxLib) {
+    def jdir = file('twx-lib/all')
+    def hasJars = jdir.exists() && (jdir.listFiles() ?: []).any { it.isFile() && it.name.endsWith('.jar') }
+    if (!hasJars) {
+        throw new GradleException(
+                "useLocalTwxLib is enabled but twx-lib/all has no JARs. " +
+                "On a networked machine run: .\\gradlew.bat -PuseLocalTwxLib=false syncTwxLib " +
+                "(or unset PARLER_AGENT_USE_LOCAL_LIBS), then set useLocalTwxLib=true.")
+    }
+}
+
+buildscript {
+    // Do not use the name `useLocalTwxLib` here: inside this block it resolves to the *String* project property from
+    // gradle.properties ("false"), and Groovy treats non-empty strings as true — so the fileTree branch would run by mistake.
+    def offlineLibs = gradle.ext.has('parlerUseLocalTwxLib') ? (gradle.ext.parlerUseLocalTwxLib as boolean) : false
+    repositories {
+        if (!offlineLibs) {
+            gradlePluginPortal()
+            mavenLocal()
+            maven {
+                url "${project.ext.twxRepoUrl}/twxlibs-release"
+                credentials {
+                    username System.getenv('twxRepoUsername') ?: System.getenv('TWX_REPO_USERNAME')
+                            ?: project.findProperty('twxRepoUsername')?.toString()
+                    password System.getenv('twxRepoPassword') ?: System.getenv('TWX_REPO_PASSWORD')
+                            ?: project.findProperty('twxRepoPassword')?.toString()
+                }
+            }
+        }
+    }
+    dependencies {
+        if (offlineLibs) {
+            classpath fileTree(dir: 'twx-lib/all', include: '*.jar')
+        } else {
+            classpath('com.thingworx.gradle:releasable-plugin:1.0.0')
+            classpath('com.thingworx.gradle:java-plugin:1.1.0')
+            classpath('com.thingworx.gradle:staging-plugin:1.0.0')
+            classpath 'com.gradleup.shadow:shadow-gradle-plugin:8.3.10'
+        }
+    }
+}
+
+// Bare `configurations.classpath` inside buildscript { } targets the project configuration named "classpath", not the
+// buildscript plugin classpath — keep resolutionStrategy and eager resolve on `buildscript.configurations`.
+if (!useLocalTwxLib) {
+    def u = System.getenv('twxRepoUsername') ?: System.getenv('TWX_REPO_USERNAME') ?: project.findProperty('twxRepoUsername')?.toString()
+    def p = System.getenv('twxRepoPassword') ?: System.getenv('TWX_REPO_PASSWORD') ?: project.findProperty('twxRepoPassword')?.toString()
+    if (!u?.trim() || !p?.trim()) {
+        throw new GradleException(
+                'Missing ThingWorx Artifactory credentials for Gradle plugins (releasable/java/staging). ' +
+                'Add twxRepoUsername and twxRepoPassword to parler-agent/gradle.properties or ~/.gradle/gradle.properties, ' +
+                'or set environment variables twxRepoUsername / twxRepoPassword (or TWX_REPO_USERNAME / TWX_REPO_PASSWORD).')
+    }
+    buildscript.configurations.classpath {
+        resolutionStrategy.cacheDynamicVersionsFor 0, 'seconds'
+        resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+    }
+    buildscript.configurations.classpath.files
+}
+
+group = 'com.thingworx.extensions'
+
+project.ext {
+    // During active development: bump revisionVersion + CHANGELOG section only when cutting a release.
+    // Table-view topic (2026-04): see **parler-agent/CHANGELOG.md** for dated cuts (**`[0.1.17]`**, **`[0.1.18]`**, …).
+    majorVersion = 0
+    minorVersion = 1
+    revisionVersion = 250
+    useBuildNumber = true
+
+    artifact_version = majorVersion + "." + minorVersion + "." + revisionVersion
+
+    minimumThingWorxVersion = "9.5.0"
+
+    forceSnapshot = true
+    releaseBranches = ['main', ~/release-.*/]
+
+    jvmVersion = org.gradle.internal.jvm.Jvm.current()
+    startTime = new Date()
+    vendor = "Desheng Xu"
+    title = "parler-agent"
+
+    checkStyleProfile = "local"
+    jarFiles = []
+}
+
+apply plugin: 'com.thingworx.gradle.releasable'
+apply plugin: 'com.thingworx.gradle.java'
+apply plugin: 'com.gradleup.shadow'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    // ThingWorx Gradle plugins add Artifactory; JUnit is not mirrored there — pin to Central.
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = 'MavenCentralJUnit'
+                url = uri('https://repo1.maven.org/maven2/')
+            }
+        }
+        filter {
+            includeGroupByRegex 'org\\.junit\\..*'
+            includeGroup 'org.apiguardian'
+            includeGroup 'org.opentest4j'
+        }
+    }
+    mavenCentral()
+}
+
+dependencies {
+    if (useLocalTwxLib) {
+        def localJars = fileTree(dir: 'twx-lib/all', include: '*.jar')
+        def localRuntimeJars = fileTree(dir: 'twx-lib/all', include: 'commons-math3-*.jar')
+        if (localRuntimeJars.files.isEmpty()) {
+            throw new GradleException(
+                    "useLocalTwxLib is enabled but twx-lib/all is missing commons-math3-*.jar. " +
+                    "Refresh local dependencies with: .\\gradlew.bat -PuseLocalTwxLib=false syncTwxLib")
+        }
+        compileOnly localJars
+        implementation localRuntimeJars
+        testImplementation localJars
+    } else {
+        // ThingWorx platform (provided at runtime)
+        compileOnly libs.bundles.logging
+        compileOnly libs.jodaTime
+        compileOnly libs.httpclient
+        compileOnly libs.thingworx.common
+        compileOnly libs.thingworx.platform.common
+        compileOnly libs.thingworx.communications.client
+        compileOnly libs.json
+
+        // Jackson for JSON (ThingWorx already bundles it, but we need compile-time access)
+        compileOnly libs.jackson.databind
+        compileOnly libs.jackson.annotations
+
+        // Bundled in shadow JAR for numeric history aggregation (DescriptiveStatistics, Percentile)
+        implementation libs.commons.math3
+
+        testImplementation libs.json
+    }
+    // Local `twx-lib/all` does not include JUnit; keep Jupiter on the test classpath for `-PuseLocalTwxLib=true` runs.
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+}
+
+tasks.named('test', Test).configure {
+    useJUnitPlatform()
+    // With -PuseLocalTwxLib=true, JaCoCo agent may still resolve from Artifactory; disable for offline local JAR runs.
+    if (useLocalTwxLib) {
+        jacoco.enabled = false
+    }
+}
+
+/** Generated `parler-runtime-version.properties` on the runtime classpath (`ParlerRuntimeVersion`). */
+def generatedParlerResources = layout.buildDirectory.dir('generated-parler-resources')
+sourceSets.main.resources.srcDir(generatedParlerResources)
+
+tasks.register('generateParlerRuntimeVersionProps') {
+    def outDir = generatedParlerResources.get().asFile
+    def outFile = new File(outDir, 'parler-runtime-version.properties')
+    outputs.file(outFile)
+    inputs.property('artifactVersion', { project.ext.artifact_version })
+    inputs.property('implementationVersion', { project.version.toString() })
+    doLast {
+        outDir.mkdirs()
+        outFile.setText(
+                'artifactVersion=' + project.ext.artifact_version + '\n' +
+                        'implementationVersion=' + project.version + '\n',
+                'UTF-8')
+    }
+}
+
+tasks.named('processResources').configure {
+    dependsOn('generateParlerRuntimeVersionProps')
+}
+
+tasks.register('validateExtensionJarNoProvidedClasses') {
+    dependsOn shadowJar
+    doLast {
+        def forbiddenPrefixes = [
+                'ch/qos/logback/',
+                'com/fasterxml/jackson/',
+                'com/github/jengelman/',
+                'com/thingworx/common/',
+                'com/thingworx/communications/',
+                'com/thingworx/entities/',
+                'com/thingworx/gradle/',
+                'com/thingworx/logging/',
+                'com/thingworx/metadata/',
+                'com/thingworx/persistence/',
+                'com/thingworx/platform/',
+                'com/thingworx/resources/',
+                'com/thingworx/security/',
+                'com/thingworx/system/',
+                'com/thingworx/types/',
+                'com/thingworx/webservices/',
+                'nebula/plugin/',
+                'org/apache/http/',
+                'org/apache/ivy/',
+                'org/apache/logging/',
+                'org/apache/lucene/',
+                'org/gradle/',
+                'org/jfrog/',
+                'org/joda/time/',
+                'org/json/',
+                'org/junit/',
+                'org/owasp/dependencycheck/',
+                'org/slf4j/',
+                'org/tmatesoft/'
+        ]
+        def jarFile = shadowJar.archiveFile.get().asFile
+        def matches = []
+        new java.util.zip.ZipFile(jarFile).withCloseable { zip ->
+            zip.entries().each { entry ->
+                if (!entry.isDirectory() && forbiddenPrefixes.any { prefix -> entry.name.startsWith(prefix) }) {
+                    matches.add(entry.name)
+                }
+            }
+        }
+        matches = matches.sort().take(20)
+        if (!matches.isEmpty()) {
+            throw new GradleException(
+                    "Extension shadow JAR contains provided/build/test classes that must not be bundled: " +
+                    matches.join(', '))
+        }
+    }
+}
+
+tasks.register('syncTwxLib', Sync) {
+    group = 'build setup'
+    description = 'Copy ThingWorx Gradle plugins plus all compile/runtime/test JARs into twx-lib/all for offline builds. Requires network and Artifactory credentials; run with -PuseLocalTwxLib=false when useLocalTwxLib is true in gradle.properties.'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    into layout.projectDirectory.dir('twx-lib/all')
+
+    doFirst {
+        if (useLocalTwxLib) {
+            throw new GradleException(
+                    'syncTwxLib must run with useLocalTwxLib disabled so dependencies resolve from the network, e.g. ' +
+                    '.\\gradlew.bat -PuseLocalTwxLib=false syncTwxLib')
+        }
+    }
+
+    from { buildscript.configurations.classpath.files }
+    from { configurations.compileClasspath.files }
+    from { configurations.runtimeClasspath.files }
+    from { configurations.testRuntimeClasspath.files }
+}
+
+jar {
+    manifest {
+        attributes("Created-By": jvmVersion,
+                "Built-By": vendor,
+                "Build-Date": startTime,
+                "Package-Title": title,
+                "Package-Version": version,
+                "Package-Vendor": vendor)
+    }
+    from sourceSets.main.output
+}
+
+shadowJar {
+    archiveClassifier.set('all')
+    mergeServiceFiles()
+
+    manifest {
+        attributes("Created-By": jvmVersion,
+                "Built-By": vendor,
+                "Build-Date": startTime,
+                "Package-Title": title,
+                "Package-Version": version,
+                "Package-Vendor": vendor)
+    }
+}
+
+task collectJars(dependsOn: 'shadowJar') {
+    doLast {
+        jarFiles = [shadowJar.archiveFileName.get()]
+    }
+}
+
+task updateMetadata(dependsOn: 'collectJars') {
+    doLast {
+        def metadataFile = file("metadata.xml")
+        def xml = new XmlParser().parse(metadataFile)
+
+        def extensionPackagesNode = xml.ExtensionPackages?.getAt(0) ?: new Node(xml, 'ExtensionPackages')
+
+        println "Updated metadata.xml with packageVersion=${project.ext.artifact_version} and minimumThingWorxVersion=${minimumThingWorxVersion}"
+
+        def extensionPackageNode = xml.ExtensionPackages?.ExtensionPackage?.getAt(0)
+        if (extensionPackageNode) {
+            extensionPackageNode.@packageVersion = project.ext.artifact_version
+            extensionPackageNode.@minimumThingWorxVersion = minimumThingWorxVersion
+            extensionPackageNode.@buildNumber = "${project.version.build}"
+        } else {
+            throw new GradleException("No <ExtensionPackage> node found in metadata.xml.")
+        }
+
+        def thingPackages = xml.ThingPackages?.ThingPackage
+        if (!thingPackages || thingPackages.isEmpty()) {
+            throw new GradleException("No <ThingPackage> node found in metadata.xml.")
+        }
+        // ThingWorx contract: a JAR shared by multiple ThingPackages MUST be listed once on ExtensionPackage
+        // (the platform checks the extension JAR manifest on import), not duplicated
+        // on each ThingPackage — duplicates break the "no dups in a single extension" assumption and can misbehave on restart.
+        def commonDescription = "${title} Dependency JAR"
+        def extJarResources = extensionPackageNode.JarResources?.getAt(0)
+        if (!extJarResources) {
+            extJarResources = new Node(extensionPackageNode, 'JarResources')
+        } else {
+            extJarResources.children().clear()
+        }
+        jarFiles.each { jar ->
+            new Node(extJarResources, 'FileResource', [
+                    type       : "JAR",
+                    file       : jar,
+                    description: commonDescription
+            ])
+        }
+        thingPackages.each { thingPackageNode ->
+            def stale = thingPackageNode.children().findAll { it.name() == 'JarResources' }
+            stale.each { thingPackageNode.remove(it) }
+        }
+
+        def tempDir = file("${project.layout.buildDirectory.get()}/tmp")
+        tempDir.mkdirs()
+
+        def tempFile = new File(tempDir, "metadata.xml")
+        tempFile.withWriter("UTF-8") { writer ->
+            var printer = new XmlNodePrinter(new PrintWriter(writer))
+            printer.setPreserveWhitespace(true)
+            printer.print(xml)
+        }
+    }
+}
+
+task extensionZip(type: Zip, dependsOn: ["updateMetadata", "validateExtensionJarNoProvidedClasses"]) {
+    destinationDirectory = project.layout.buildDirectory.get()
+
+    from("${project.layout.buildDirectory.get()}/tmp") {
+        include "metadata.xml"
+    }
+
+    from(shadowJar) {
+        into 'lib/common'
+    }
+
+    from("Entities") {
+        into 'Entities'
+    }
+
+    // Stable filename for scripts that do not want to parse versioned names (e.g. parler-agent-0.1.0.0-SNAPSHOT.zip).
+    doLast {
+        copy {
+            from archiveFile
+            into destinationDirectory
+            rename { _ -> 'parler-agent.zip' }
+        }
+    }
+}
+
+assemble.dependsOn('extensionZip')
+
+gradle.taskGraph.whenReady { taskGraph ->
+    tasks.matching { it.name.toLowerCase().contains("nebulapublication") }.configureEach {
+        enabled = false
+        doFirst { println "Skipping $name" }
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            suppressPomMetadataWarningsFor('runtimeElements')
+            artifacts.removeIf { it.classifier == null && it.file.name.endsWith('.jar') }
+            artifact extensionZip
+        }
+    }
+}
+
+artifactory {
+    publish {
+        publishBuildInfo = false
+    }
+}
+
+artifactoryPublish {
+    publishPom = false
+    publications('mavenJava')
+}

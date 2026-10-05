@@ -1,0 +1,6 @@
+{
+  "description": "Positive: cached table with zero rows → CACHED_SUMMARY_EMPTY; still expect insightEnvelope.",
+  "arguments": {
+    "cacheId": "<PUT_EMPTY_CACHED_TABLE_ID>"
+  }
+}

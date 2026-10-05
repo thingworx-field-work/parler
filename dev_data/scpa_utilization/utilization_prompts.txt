@@ -1,0 +1,42 @@
+show all asset data for the  week ending 15th, Sep 2025 in a table
+Which assets have utilization above 60%
+Can you list all assets with utilization above 60% with count
+Which assets have utilization below 30%
+Which assets have utilization that is positive but below 30%
+What is the asset with positive but lowest utilization?
+show the utilization %ages between Sep 10 and Sep 15, 2025
+Can you show the original data with just downtime in hours and utilization in hours as well as %ages for each in a table be3tween Sep 10 and Sep 15, 2025
+Reset the session at this time or open a new session
+Show all machine data in tabular format for the week of Sep 15, 2025
+Summarize the above data with fewer columns
+Show all machine data in tabular format for the week of Sep 7-13, 2025 listing only downtime, uptime and utilization
+Show all machine data for the 2-week period ending September 15, 2025 in a table format
+Can you show state wise breakdown of the above data in the tabular format
+List top 3 machine by idle hours
+List top 3 machine by hours in 'idle' state
+List top 3 machines by hours in 'running' state
+Compare the hours in running state for SE.CellFab.Model.Workunit.BOS-Cutting-02 to SE.CellFab.Model.Workunit.AC-Cutting-02 from 15th till 26th Sep, 2025
+Compare the SE.CellFab.Model.Workunit.BOS-Cutting-02 to SE.CellFab.Model.Workunit.AC-Cutting-02 for uptime from 15th till 26th Sep, 2025
+Based on the above, which is the most productive machine?
+using the table earlier, can you plot a bar chart of utilization percentage for machines in ascending order
+list the shifts from 1sep to 26th Sep, 2025
+List the best and worst utilized assets for each of the shifts from 1st Sep to 26th Sep, 2025
+List all data for the assets for the last 2 weeks in a tabular format one row per shift
+List all data for the assets for the last 2 weeks in a tabular format for morning shift
+which machine had the highest utilization from Sep 8 to Sep 14, 2025?
+give me the top 5 machines with highest utilization betweenAug 31 to Sep 8, 2025
+identify the 5 machines with minimum utilization from Sep 4 to Sep 14, 2025
+which 2 machines have the lowest utilization for the week of Sep 8, 2025?
+show the three machines with least utilization from Sep 8 to Sep 14, 2025
+What was the 4th most utilized machine between Sep 8 to Sep 14, 2025?
+what are the top 3 machines by utilization for the week of Sep 10, 2025?
+show the two machines with maximum utilization from Sep 8 to Sep 14, 2025
+show me a pie chart comparing the utilization of SE.CellFab.Model.Workunit.AC-BenchScale-02 and SE.CellFab.Model.Workunit.MUC-CoatingAggregate-01 for Sep 1 to Sep 14, 2025
+compare utilization of SE.CellFab.Model.Workunit.AC-BenchScale-02 and SE.CellFab.Model.Workunit.MUC-CoatingAggregate-01 from Sep 1 to Sep 14 and show in a bar graph
+show does the utilization of SE.CellFab.Model.Workunit.AC-Calendering-01 and SE.CellFab.Model.Workunit.AC-CellAging-01 for the week of Sep 10, 2025
+compare the utilization of SE.CellFab.Model.Workunit.AC-QualityCamera-02 and SE.CellFab.Model.Workunit.AC-Calendering-01 from Sep 4 to Sep 10, 2025
+show does the utilization of SE.CellFab.Model.Workunit.AC-Calendering-01 and SE.CellFab.Model.Workunit.AC-CellAging-01 for the week of Sep 10, 2025
+show me the utilization for SE.CellFab.Model.Workunit.AC-BenchScale-01 for the week of Sep 10, 2025
+What is the utilization for SE.CellFab.Model.Workunit.BOS-Calendering-01 on Sep 9, 2025
+what was the downtime for SE.CellFab.Model.Workunit.AC-BenchScale-01 from Aug 31 to Sep 10, 2025?
+which machine had the highest downtime from Aug 15 to Sep 8, 2025 even if the value is 0

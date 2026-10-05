@@ -1,0 +1,8 @@
+{
+  "description": "Negative N-07: root tool `arguments` parses as JSON but is not a JSON object (array). Harness injects `rawArguments` verbatim.",
+  "rawArguments": "[1,2,3]",
+  "expect": {
+    "status": "error",
+    "code": "INVALID_PARAMETERS"
+  }
+}

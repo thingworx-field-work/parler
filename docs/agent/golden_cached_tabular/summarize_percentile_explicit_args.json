@@ -1,0 +1,7 @@
+{
+  "description": "Summarize with explicit percentileColumns for numeric column n.",
+  "arguments": {
+    "cacheId": "<PUT_CACHED_TABLE_ID>",
+    "percentileColumns": ["n"]
+  }
+}

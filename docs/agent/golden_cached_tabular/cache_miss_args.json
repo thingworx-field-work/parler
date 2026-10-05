@@ -1,0 +1,13 @@
+{
+  "description": "Negative: random UUID unlikely to exist in conversation cache.",
+  "arguments": {
+    "cacheId": "00000000-0000-0000-0000-000000000001",
+    "mode": "sort_topn",
+    "sortBy": "x",
+    "limit": 5
+  },
+  "expect": {
+    "status": "error",
+    "code": "CACHE_MISS"
+  }
+}

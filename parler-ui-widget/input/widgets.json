@@ -1,0 +1,8 @@
+{
+  "description": "Parler UI chat widget extension",
+  "extensionName": "parler-ui-widget",
+  "version": "0.1.98",
+  "htmlImports": [],
+  "haCompatible": true,
+  "components": ["import!parler-ui.json"]
+}

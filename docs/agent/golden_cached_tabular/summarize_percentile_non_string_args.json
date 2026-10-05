@@ -1,0 +1,11 @@
+{
+  "description": "Negative N-03: percentileColumns array element is not a string (number).",
+  "arguments": {
+    "cacheId": "<PUT_CACHED_TABLE_ID>",
+    "percentileColumns": [123]
+  },
+  "expect": {
+    "status": "error",
+    "code": "INVALID_PARAMETERS"
+  }
+}

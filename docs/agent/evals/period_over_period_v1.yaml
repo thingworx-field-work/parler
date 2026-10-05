@@ -1,0 +1,96 @@
+# Period-over-period eval suite (live ThingWorx) — thin-wrap for build_history_overlay_chart.
+# Primary suite: docs/agent/evals/history_overlay_v1.yaml
+# Replaces the retired model-facing period-over-period tool; design: docs/agent/history-overlay-chart.md
+#
+# Run from repo root:
+#   export AGENT_EVAL_HAS_HISTORY_OVERLAY=1
+#   uv run agent-eval --suite docs/agent/evals/period_over_period_v1.yaml --agent-filter gpt_5_5
+
+version: 1
+suite: period-over-period-v1
+
+agentMatrix:
+  gpt_5_5:
+    thingName: SCPA_Demo_Agent
+    defaultEnabled: true
+
+cases:
+  - id: pop_alert_triage_same_thing
+    tags: [pop, m1, happy-path, chart]
+    skipUnlessEnv: AGENT_EVAL_HAS_HISTORY_OVERLAY
+    skipReason: history_overlay_dev_assets_not_confirmed
+    turns:
+      - user: >
+          For SE.CellFab.Model.Workunit.ORD-Mixer-01, plot current draw for the last hour and overlay
+          yesterday's same one-hour window and last week's same one-hour window on one chart.
+        acceptableOutcomes:
+          - name: pop_tool_emits_chart
+            score: 1.0
+            assertions:
+              - toolCalled: build_history_overlay_chart
+              - finalRegex: "(?i)(chart|overlay|yesterday|last week|current draw|elapsed)"
+          - name: pop_without_explicit_tool_name
+            score: 0.75
+            assertions:
+              - finalRegex: "(?i)(three|3).*(series|period|window|overlay)"
+              - finalRegex: "(?i)(chart|visual)"
+        rejectIf:
+          - finalRegex: "(?i)if you (?:need|want) a chart"
+
+  - id: pop_cross_device_different_windows
+    tags: [pop, m2, cross-device, chart]
+    skipUnlessEnv: AGENT_EVAL_HAS_HISTORY_OVERLAY
+    skipReason: history_overlay_dev_assets_not_confirmed
+    turns:
+      - user: >
+          Compare current draw on ORD-Mixer-01 for the last hour with REF-Mixer-02 for yesterday's
+          same clock hour on one chart.
+        acceptableOutcomes:
+          - name: cross_device_pop
+            score: 1.0
+            assertions:
+              - toolCalled: build_history_overlay_chart
+              - finalRegex: "(?i)(ORD|REF|mixer|current draw|chart)"
+          - name: explains_without_chart
+            score: 0.6
+            assertions:
+              - finalRegex: "(?i)(cannot|unable|not available|separate|multi-series)"
+
+  - id: pop_unequal_duration_elapsed_overlay
+    tags: [overlay, elapsed, routing]
+    skipUnlessEnv: AGENT_EVAL_HAS_HISTORY_OVERLAY
+    skipReason: history_overlay_dev_assets_not_confirmed
+    turns:
+      - user: >
+          Overlay current draw for the last hour with current draw for the last week on one chart
+          for ORD-Mixer-01.
+        acceptableOutcomes:
+          - name: elapsed_overlay_or_clarify
+            score: 1.0
+            assertions:
+              - toolCalled: build_history_overlay_chart
+              - finalRegex: "(?i)(chart|overlay|elapsed|week|hour)"
+          - name: clarifies_duration_honestly
+            score: 0.75
+            assertions:
+              - finalRegex: "(?i)(different (?:length|duration)|longer|shorter|span)"
+        rejectIf:
+          - toolResultRegex: POP_WINDOW_DURATION_MISMATCH
+
+  - id: pop_same_window_two_devices_uses_overlay
+    tags: [overlay, absolute, routing]
+    skipUnlessEnv: AGENT_EVAL_HAS_HISTORY_OVERLAY
+    skipReason: history_overlay_dev_assets_not_confirmed
+    turns:
+      - user: >
+          Compare current draw on ORD-Mixer-01 and REF-Mixer-02 for the last hour on one chart.
+        acceptableOutcomes:
+          - name: overlay_absolute_same_window
+            score: 1.0
+            assertions:
+              - toolCalled: build_history_overlay_chart
+              - finalRegex: "(?i)(chart|current draw|mixer)"
+        rejectIf:
+          - toolResultRegex: POP_MULTI_SERIES_UNAVAILABLE
+          - toolCalled: build_period_over_period_chart
+          - toolCalled: build_multi_series_history_chart

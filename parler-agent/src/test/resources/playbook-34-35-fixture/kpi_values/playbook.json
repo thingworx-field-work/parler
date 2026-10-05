@@ -1,0 +1,259 @@
+{
+  "schema": "parler-playbook-v1",
+  "title": "KPI values by equipment",
+  "budgets": {
+    "timeoutSeconds": 900,
+    "maxNodes": 40,
+    "maxToolCalls": 80,
+    "maxEvidenceBytes": 12000
+  },
+  "vars": {},
+  "nodes": [
+    {
+      "id": "equipment_uids",
+      "kind": "derive",
+      "dependsOn": [],
+      "op": "project",
+      "args": {
+        "rows": [
+          {
+            "UID": 4
+          }
+        ],
+        "fields": [
+          {
+            "from": "UID",
+            "as": "UID"
+          }
+        ]
+      },
+      "evidence": {
+        "label": "Equipment UID rows (fixture stub)"
+      }
+    },
+    {
+      "id": "product_gate",
+      "kind": "condition",
+      "dependsOn": [],
+      "if": {
+        "op": "is_present",
+        "left": {
+          "$input": "productFilter"
+        }
+      },
+      "then": "product_lookup",
+      "else": "product_skip"
+    },
+    {
+      "id": "product_skip",
+      "kind": "derive",
+      "dependsOn": [
+        "product_gate"
+      ],
+      "op": "project",
+      "args": {
+        "rows": [],
+        "fields": [
+          {
+            "from": "FilterCriteria",
+            "as": "FilterCriteria"
+          }
+        ]
+      },
+      "evidence": {
+        "label": "Optional product branch not taken (placeholder)"
+      }
+    },
+    {
+      "id": "product_lookup",
+      "kind": "derive",
+      "dependsOn": [
+        "product_gate"
+      ],
+      "op": "project",
+      "args": {
+        "rows": [
+          {
+            "FilterCriteria": "PRODUCT",
+            "UIDValue": 8
+          }
+        ],
+        "fields": [
+          {
+            "from": "FilterCriteria",
+            "as": "FilterCriteria"
+          },
+          {
+            "from": "UIDValue",
+            "as": "UIDValue"
+          }
+        ]
+      },
+      "evidence": {
+        "label": "Product filter criteria when productFilter input is present"
+      }
+    },
+    {
+      "id": "filter_entries",
+      "kind": "derive",
+      "dependsOn": [
+        "product_gate"
+      ],
+      "op": "empty_rows_if_skipped",
+      "args": {
+        "sourceNodeId": "product_lookup",
+        "label": "product"
+      },
+      "evidence": {
+        "label": "Optional product filter rows (empty when branch skipped)"
+      }
+    },
+    {
+      "id": "quick_intervals",
+      "kind": "derive",
+      "dependsOn": [],
+      "op": "project",
+      "args": {
+        "rows": [
+          {
+            "name": "Today",
+            "QuickTimeIntervalUID": 3
+          }
+        ],
+        "fields": [
+          {
+            "from": "name",
+            "as": "name"
+          },
+          {
+            "from": "QuickTimeIntervalUID",
+            "as": "QuickTimeIntervalUID"
+          }
+        ]
+      },
+      "evidence": {
+        "label": "Quick interval listing (fixture stub)"
+      }
+    },
+    {
+      "id": "time_window",
+      "kind": "derive",
+      "dependsOn": [
+        "quick_intervals"
+      ],
+      "op": "resolve_time_window_for_playbook",
+      "args": {
+        "phrase": {
+          "$input": "timeWindow"
+        },
+        "quickIntervalRows": {
+          "$ref": "quick_intervals.output.rows"
+        },
+        "defaultQuickIntervalName": "Today",
+        "timezone": "UTC"
+      },
+      "evidence": {
+        "label": "Resolve KPI time window (quick interval or explicit range)"
+      }
+    },
+    {
+      "id": "filters_payload",
+      "kind": "derive",
+      "dependsOn": [
+        "equipment_uids",
+        "filter_entries",
+        "time_window"
+      ],
+      "op": "build_nested_object",
+      "args": {
+        "sources": {
+          "equipment": {
+            "$ref": "equipment_uids.output.rows"
+          },
+          "criteria": {
+            "$ref": "filter_entries.output.rows"
+          }
+        },
+        "template": {
+          "Filters": {
+            "$map": {
+              "over": "equipment",
+              "each": {
+                "EquipmentUID": {
+                  "$path": "UID"
+                },
+                "FilterCriterias": {
+                  "$src": "criteria"
+                }
+              }
+            }
+          },
+          "QuickTimeIntervalUID": {
+            "$nodeRef": "time_window.output.QuickTimeIntervalUID"
+          },
+          "StartTime": {
+            "$nodeRef": "time_window.output.StartTime"
+          },
+          "EndTime": {
+            "$nodeRef": "time_window.output.EndTime"
+          }
+        },
+        "maxParents": 25,
+        "maxChildren": 100,
+        "minParents": 1,
+        "omitNull": true
+      },
+      "evidence": {
+        "label": "Assemble CallGetKPIs Filters payload"
+      }
+    },
+    {
+      "id": "filters_string",
+      "kind": "derive",
+      "dependsOn": [
+        "filters_payload"
+      ],
+      "op": "json_stringify",
+      "args": {
+        "value": {
+          "$ref": "filters_payload.output.object"
+        },
+        "maxBytes": 12000
+      },
+      "evidence": {
+        "label": "Serialize Filters payload for service parameter"
+      }
+    },
+    {
+      "id": "kpi_call",
+      "kind": "tool_call",
+      "dependsOn": [
+        "filters_string"
+      ],
+      "tool": "CallGetKPIs",
+      "args": {
+        "Filters": {
+          "$ref": "filters_string.output.value"
+        }
+      },
+      "evidence": {
+        "label": "Query KPI values with assembled Filters JSON"
+      }
+    },
+    {
+      "id": "end",
+      "kind": "llm_summary",
+      "dependsOn": [
+        "kpi_call"
+      ],
+      "evidenceRefs": [
+        "kpi_call",
+        "time_window",
+        "filters_string"
+      ],
+      "prompt": "Summarize KPI values for the requested equipment and time window."
+    }
+  ],
+  "finalNode": "end",
+  "description": "Workshop #35 KPI path: optional product filter branch → time window → nested Filters → json_stringify → CallGetKPIs."
+}

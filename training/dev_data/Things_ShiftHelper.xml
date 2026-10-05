@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><Entities build="b195" majorVersion="10" minorVersion="1" modelPersistenceProviderPackage="PostgresPersistenceProviderPackage" revision="1" schemaVersion="1210" universal=""><Things><Thing description="" documentationContent="" effectiveThingPackage="ConfiguredThing" enabled="true" homeMashup="" identifier="" inheritedValueStream="" lastModifiedDate="2026-07-21T21:56:30.228Z" name="ShiftHelper" projectName="Parler_SCPA_Guidance" published="false" tags="" thingTemplate="GenericThing" valueStream=""><Owner name="Administrator" type="User"/><avatar/><DesignTimePermissions><Create/><Read/><Update/><Delete/><Metadata/></DesignTimePermissions><RunTimePermissions/><VisibilityPermissions><Visibility/></VisibilityPermissions><ConfigurationTableDefinitions/><ConfigurationTables/><ThingShape><PropertyDefinitions/><ServiceDefinitions><ServiceDefinition aspect.isAsync="false" category="" description="" isAllowOverride="false" isLocalOnly="false" isOpen="false" isPrivate="false" name="resolve_shift_windows_for_thing"><ResultType baseType="JSON" description="" name="result" ordinal="0"/><ParameterDefinitions><FieldDefinition baseType="DATETIME" description="" name="referenceTime" ordinal="2"/><FieldDefinition aspect.isRequired="true" baseType="THINGNAME" description="" name="thingName" ordinal="1"/></ParameterDefinitions></ServiceDefinition></ServiceDefinitions><EventDefinitions/><ServiceMappings/><ServiceImplementations><ServiceImplementation description="" handlerName="Script" name="resolve_shift_windows_for_thing"><ConfigurationTables><ConfigurationTable dataShapeName="" description="" isMultiRow="false" name="Script" ordinal="0"><DataShape><FieldDefinitions><FieldDefinition baseType="STRING" description="code" name="code" ordinal="0"/></FieldDefinitions></DataShape><Rows><Row><code><![CDATA[var targetThing = Things[thingName];
+if (!targetThing) {
+  throw "Thing not found: " + thingName + ". Pass the exact Thing name.";
+}
+var TIMEZONE_OFFSET_HOURS = Number(targetThing.TimezoneOffset);
+if (!isFinite(TIMEZONE_OFFSET_HOURS)) {
+  throw "TimezoneOffset property missing or not numeric on Thing: " + thingName;
+}
+
+var RECENT_SHIFT_LIMIT = 6;
+var LOOKBACK_DAYS = 3;
+
+// Temporary hardcode; read from the target Thing's configuration later.
+var shiftPatternConfig = [
+  { name: "A", start: "07:00", end: "15:00" },
+  { name: "B", start: "15:00", end: "23:00" },
+  { name: "C", start: "23:00", end: "07:00" }
+];
+
+if (!referenceTime) {
+  referenceTime = new Date();
+} else {
+  referenceTime = new Date(referenceTime);
+}
+
+var offsetMinutes = Math.round(TIMEZONE_OFFSET_HOURS * 60);
+
+var shiftPattern = [];
+for (var p = 0; p < shiftPatternConfig.length; p++) {
+  var cfg = shiftPatternConfig[p];
+  var startHM = parseHHMM(cfg.start);
+  var endHM = parseHHMM(cfg.end);
+  var startMinutes = startHM.hour * 60 + startHM.minute;
+  var endMinutes = endHM.hour * 60 + endHM.minute;
+  shiftPattern.push({
+    name: cfg.name,
+    start: cfg.start,
+    end: cfg.end,
+    startMinutes: startMinutes,
+    endMinutes: endMinutes,
+    crossesMidnight: endMinutes <= startMinutes
+  });
+}
+
+var localRef = addMinutes(referenceTime, offsetMinutes);
+var localYear = localRef.getUTCFullYear();
+var localMonth = localRef.getUTCMonth();
+var localDate = localRef.getUTCDate();
+
+var candidates = [];
+
+for (var dayOffset = -LOOKBACK_DAYS; dayOffset <= 1; dayOffset++) {
+  for (var i = 0; i < shiftPattern.length; i++) {
+    var shift = shiftPattern[i];
+
+    var localStart = new Date(Date.UTC(
+      localYear, localMonth, localDate + dayOffset,
+      0, shift.startMinutes, 0, 0
+    ));
+
+    var endDayOffset = shift.crossesMidnight ? dayOffset + 1 : dayOffset;
+    var localEnd = new Date(Date.UTC(
+      localYear, localMonth, localDate + endDayOffset,
+      0, shift.endMinutes, 0, 0
+    ));
+
+    candidates.push({
+      name: shift.name,
+      startTimeDate: addMinutes(localStart, -offsetMinutes),
+      endTimeDate: addMinutes(localEnd, -offsetMinutes),
+      productionDate: formatLocalDate(localStart)
+    });
+  }
+}
+
+candidates.sort(function (a, b) {
+  return a.startTimeDate.getTime() - b.startTimeDate.getTime();
+});
+
+var refMs = referenceTime.getTime();
+var currentShift = null;
+var completedShifts = [];
+
+for (var j = 0; j < candidates.length; j++) {
+  var c = candidates[j];
+
+  if (refMs >= c.startTimeDate.getTime() && refMs < c.endTimeDate.getTime()) {
+    currentShift = formatInstance(c, "in_progress");
+  }
+
+  if (c.endTimeDate.getTime() <= refMs) {
+    completedShifts.push(c);
+  }
+}
+
+completedShifts.sort(function (a, b) {
+  return b.endTimeDate.getTime() - a.endTimeDate.getTime();
+});
+
+var recentShifts = [];
+for (var k = 0; k < completedShifts.length && k < RECENT_SHIFT_LIMIT; k++) {
+  recentShifts.push(formatInstance(completedShifts[k], "completed"));
+}
+
+var reportedPattern = [];
+for (var q = 0; q < shiftPattern.length; q++) {
+  reportedPattern.push({
+    name: shiftPattern[q].name,
+    start: shiftPattern[q].start,
+    end: shiftPattern[q].end,
+    crossesMidnight: shiftPattern[q].crossesMidnight
+  });
+}
+
+var result = {
+  thingName: thingName,
+  //timezone: TIMEZONE_NAME,
+  referenceTime: referenceTime.toISOString(),
+  shiftPattern: reportedPattern,
+  currentShift: currentShift,
+  lastCompletedShift: recentShifts.length > 0 ? recentShifts[0] : null,
+  recentShifts: recentShifts
+};
+
+// result is the final output.
+
+function parseHHMM(value) {
+  var parts = value.split(":");
+  return {
+    hour: parseInt(parts[0], 10),
+    minute: parseInt(parts[1], 10)
+  };
+}
+
+function addMinutes(date, minutes) {
+  return new Date(date.getTime() + minutes * 60 * 1000);
+}
+
+function pad2(n) {
+  return n < 10 ? "0" + n : String(n);
+}
+
+function offsetSuffix() {
+  var total = Math.round(TIMEZONE_OFFSET_HOURS * 60);
+  var sign = total < 0 ? "-" : "+";
+  var abs = Math.abs(total);
+  return sign + pad2(Math.floor(abs / 60)) + ":" + pad2(abs % 60);
+}
+
+function formatLocalDate(localAsUtc) {
+  return localAsUtc.getUTCFullYear() + "-" +
+    pad2(localAsUtc.getUTCMonth() + 1) + "-" +
+    pad2(localAsUtc.getUTCDate());
+}
+
+function formatLocalIso(utcDate) {
+  var local = addMinutes(utcDate, offsetMinutes);
+  return formatLocalDate(local) + "T" +
+    pad2(local.getUTCHours()) + ":" +
+    pad2(local.getUTCMinutes()) + ":" +
+    pad2(local.getUTCSeconds()) + offsetSuffix();
+}
+
+function formatInstance(candidate, status) {
+  return {
+    name: candidate.name,
+    productionDate: candidate.productionDate,
+    status: status,
+    startTime: candidate.startTimeDate.toISOString(),
+    endTime: candidate.endTimeDate.toISOString(),
+    startTimeLocal: formatLocalIso(candidate.startTimeDate),
+    endTimeLocal: formatLocalIso(candidate.endTimeDate)
+  };
+}]]></code></Row></Rows></ConfigurationTable></ConfigurationTables></ServiceImplementation></ServiceImplementations><Subscriptions/></ThingShape><PropertyBindings/><RemotePropertyBindings/><RemoteServiceBindings/><RemoteEventBindings/><AlertConfigurations/><ImplementedShapes/><ThingProperties/><ConfigurationChanges><ConfigurationChange changeAction="CREATE" changeReason="header : name : updated&#10;" timestamp="2026-07-21T20:39:46.389Z" user="Administrator"/><ConfigurationChange changeAction="MODIFY" changeReason="services : resolve_shift_windows_for_thing : service added&#10;" timestamp="2026-07-21T20:46:33.713Z" user="Administrator"/><ConfigurationChange changeAction="MODIFY" changeReason="services : resolve_shift_windows_for_thing : service updated&#10;" timestamp="2026-07-21T20:49:26.817Z" user="Administrator"/><ConfigurationChange changeAction="MODIFY" changeReason="services : resolve_shift_windows_for_thing : service updated&#10;" timestamp="2026-07-21T20:59:38.938Z" user="Administrator"/><ConfigurationChange changeAction="MODIFY" changeReason="services : resolve_shift_windows_for_thing : service updated&#10;" timestamp="2026-07-21T21:13:07.454Z" user="Administrator"/><ConfigurationChange changeAction="MODIFY" changeReason="services : resolve_shift_windows_for_thing : service updated&#10;" timestamp="2026-07-21T21:43:58.202Z" user="Administrator"/><ConfigurationChange changeAction="MODIFY" changeReason="services : resolve_shift_windows_for_thing : service updated&#10;" timestamp="2026-07-21T21:44:45.500Z" user="Administrator"/><ConfigurationChange changeAction="MODIFY" changeReason="services : resolve_shift_windows_for_thing : service updated&#10;" timestamp="2026-07-21T21:45:16.736Z" user="Administrator"/><ConfigurationChange changeAction="MODIFY" changeReason="services : resolve_shift_windows_for_thing : service updated&#10;" timestamp="2026-07-21T21:51:19.446Z" user="Administrator"/></ConfigurationChanges></Thing></Things></Entities>

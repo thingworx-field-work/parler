@@ -1,0 +1,8 @@
+rootProject.name = 'parler-agent'
+
+// Offline / air-gapped builds: set useLocalTwxLib=true in gradle.properties (or -PuseLocalTwxLib=true),
+// after populating twx-lib/all via: ./gradlew -PuseLocalTwxLib=false syncTwxLib
+boolean parlerUseLocalTwxLib =
+        (providers.environmentVariable('PARLER_AGENT_USE_LOCAL_LIBS').getOrNull() == '1') ||
+        providers.gradleProperty('useLocalTwxLib').map { it.equalsIgnoreCase('true') }.getOrElse(false)
+gradle.ext.parlerUseLocalTwxLib = parlerUseLocalTwxLib

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Entities build="b48" majorVersion="10" minorVersion="1" modelPersistenceProviderPackage="PostgresPersistenceProviderPackage" revision="0" schemaVersion="1210" universal="">
+    <Things>
+        <Thing description="" documentationContent="" effectiveThingPackage="DataTableThing" enabled="true" homeMashup="DataTableEditor" identifier="" inheritedValueStream="" lastModifiedDate="2026-03-17T15:09:46.036Z" name="AgentThreadDataTable" projectName="PTCDefaultProject" published="false" tags="" thingTemplate="DataTable" valueStream="">
+            <Owner name="Administrator" type="User"/>
+            <ConfigurationTables>
+                <ConfigurationTable dataShapeName="" description="Data Thing Configuration" isMultiRow="false" name="DataThingSettings" ordinal="0">
+                    <DataShape>
+                        <FieldDefinitions>
+                            <FieldDefinition baseType="STRING" description="Persistence Provider Name" name="persistenceProvider" ordinal="0"/>
+                        </FieldDefinitions>
+                    </DataShape>
+                    <Rows>
+                        <Row>
+                            <persistenceProvider><![CDATA[ThingworxPersistenceProvider]]></persistenceProvider>
+                        </Row>
+                    </Rows>
+                </ConfigurationTable>
+                <ConfigurationTable dataShapeName="" description="Data Shape Configuration" isMultiRow="false" name="Settings" ordinal="0">
+                    <DataShape>
+                        <FieldDefinitions>
+                            <FieldDefinition aspect.friendlyName="Data Shape" baseType="DATASHAPENAME" description="Data shape" name="dataShape" ordinal="0"/>
+                        </FieldDefinitions>
+                    </DataShape>
+                    <Rows>
+                        <Row>
+                            <accumulatedDataShape>
+                                <json><![CDATA[{"fieldDefinitions":{"createdAt":{"name":"createdAt","aspects":{},"description":"Thread creation time","baseType":"DATETIME","ordinal":2},"conversationId":{"name":"conversationId","aspects":{"isPrimaryKey":true},"description":"Thread/session identifier (business key)","baseType":"STRING","ordinal":1},"agentName":{"name":"agentName","aspects":{},"description":"Agent Thing name","baseType":"STRING","ordinal":0},"title":{"name":"title","aspects":{},"description":"Optional thread title","baseType":"STRING","ordinal":3},"updatedAt":{"name":"updatedAt","aspects":{},"description":"Last update time","baseType":"DATETIME","ordinal":4},"username":{"name":"username","aspects":{},"description":"Owner (user) of the thread","baseType":"STRING","ordinal":5},"historyClearedAt":{"name":"historyClearedAt","aspects":{},"description":"Clear boundary for effective transcript","baseType":"DATETIME","ordinal":6}}}]]></json>
+                            </accumulatedDataShape>
+                            <dataShape><![CDATA[AgentThreadData]]></dataShape>
+                        </Row>
+                    </Rows>
+                </ConfigurationTable>
+                <ConfigurationTable dataShapeName="" description="Index Settings" isMultiRow="true" name="Indexes" ordinal="1">
+                    <DataShape>
+                        <FieldDefinitions>
+                            <FieldDefinition aspect.friendlyName="Index Field Names" baseType="STRING" description="Index fields" name="fieldNames" ordinal="1"/>
+                            <FieldDefinition aspect.friendlyName="Index Name" baseType="STRING" description="Index name" name="name" ordinal="0"/>
+                        </FieldDefinitions>
+                    </DataShape>
+                    <Rows/>
+                </ConfigurationTable>
+                <ConfigurationTable dataShapeName="" description="Configurable options to tune Data Table performance" isMultiRow="false" name="PersistenceProviderCustomSettings" ordinal="2">
+                    <DataShape>
+                        <FieldDefinitions>
+                            <FieldDefinition aspect.friendlyName="Persistence Provider Custom Settings Table" baseType="INFOTABLE" description="Persistence Provider Custom Config Table" name="customConfigTable" ordinal="0"/>
+                        </FieldDefinitions>
+                    </DataShape>
+                    <Rows>
+                        <Row>
+                            <customConfigTable>
+                                <infoTable>
+                                    <DataShape>
+                                        <FieldDefinitions/>
+                                    </DataShape>
+                                    <Rows/>
+                                </infoTable>
+                            </customConfigTable>
+                        </Row>
+                    </Rows>
+                </ConfigurationTable>
+            </ConfigurationTables>
+            
+        </Thing>
+    </Things>
+</Entities>

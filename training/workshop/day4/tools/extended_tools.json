@@ -1,0 +1,89 @@
+{
+  "version": 1,
+  "tools": [
+    {
+      "name": "list_utilization_machines",
+      "title": "List utilization machines",
+      "whenToUse": "Use when the user asks which machines are available for utilization reporting, or when a utilization workflow needs machine coverage before querying records or summaries. For a plain availability/listing question, do not request effective dates. Set IncludeEffectiveDates only when the user explicitly asks for effective date fences and StartDate plus EndDate are available. Set ShiftID only when the user names a concrete shift; do not use All, any, or * for unfiltered queries.",
+      "target": {
+        "entityName": "SCPA_Utilization_helper",
+        "serviceName": "ListUtilizationMachines"
+      },
+      "hitl": false,
+      "playbookSafe": true,
+      "risk": "READ_ONLY",
+      "purpose": "Return the utilization-capable machine catalog and optional effective date fences.",
+      "dryRun": {
+        "supported": false
+      },
+      "idempotency": {
+        "mode": "NONE"
+      },
+      "admission": "DEFAULT",
+      "enabled": true
+    },
+    {
+      "name": "get_utilization_records",
+      "title": "Query utilization records",
+      "whenToUse": "Use when the user asks for raw utilization event records over a time range. Machine is optional; omit the Machine argument entirely when querying all utilization-capable machines; do not send an empty string for Machine. Set ShiftID only when the user names a concrete shift; do not use All, any, or * for unfiltered queries. Prefer get_utilization_state_summary for aggregate or percent-by-state questions.",
+      "target": {
+        "entityName": "SCPA_Utilization_helper",
+        "serviceName": "GetUtilizationRecords"
+      },
+      "hitl": false,
+      "playbookSafe": true,
+      "risk": "READ_ONLY",
+      "purpose": "Read raw utilization event records for a bounded machine and time scope.",
+      "dryRun": {
+        "supported": false
+      },
+      "idempotency": {
+        "mode": "NONE"
+      },
+      "admission": "DEFAULT",
+      "enabled": true
+    },
+    {
+      "name": "get_utilization_state_summary",
+      "title": "Summarize utilization by state",
+      "whenToUse": "Use when the user asks for utilization grouped by state, percentage of time by state, counts, total duration, min/max duration, average duration, uptime, downtime, or state-level utilization comparison. Set ShiftID only when the user names a concrete shift; do not use All, any, or * for unfiltered queries.",
+      "target": {
+        "entityName": "SCPA_Utilization_helper",
+        "serviceName": "GetUtilizationStateSummary"
+      },
+      "hitl": false,
+      "playbookSafe": true,
+      "risk": "READ_ONLY",
+      "purpose": "Read deterministic utilization state aggregates for a bounded scope.",
+      "dryRun": {
+        "supported": false
+      },
+      "idempotency": {
+        "mode": "NONE"
+      },
+      "admission": "DEFAULT",
+      "enabled": true
+    },
+    {
+      "name": "get_utilization_overview",
+      "title": "Get utilization overview",
+      "whenToUse": "Use when the user asks for a broad utilization overview that should include machine coverage and state summary evidence in one result. Set ShiftID only when the user names a concrete shift; do not use All, any, or * for unfiltered queries.",
+      "target": {
+        "entityName": "SCPA_Utilization_helper",
+        "serviceName": "GetUtilizationOverview"
+      },
+      "hitl": false,
+      "playbookSafe": true,
+      "risk": "READ_ONLY",
+      "purpose": "Read machine coverage and deterministic utilization state aggregates in one result.",
+      "dryRun": {
+        "supported": false
+      },
+      "idempotency": {
+        "mode": "NONE"
+      },
+      "admission": "DEFAULT",
+      "enabled": true
+    }
+  ]
+}

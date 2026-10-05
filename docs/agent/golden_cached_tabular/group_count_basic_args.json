@@ -1,0 +1,8 @@
+{
+  "description": "group_count on column g; expect two groups with counts.",
+  "arguments": {
+    "cacheId": "<PUT_CACHED_TABLE_ID>",
+    "mode": "group_count",
+    "groupBy": "g"
+  }
+}

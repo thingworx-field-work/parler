@@ -1,0 +1,8 @@
+{
+  "description": "Negative N-04: omit cacheId for summarize_cached_result (empty JSON object).",
+  "arguments": {},
+  "expect": {
+    "status": "error",
+    "code": "MISSING_CACHE_ID"
+  }
+}

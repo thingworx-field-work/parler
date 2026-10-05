@@ -1,0 +1,37 @@
+version: 1
+suite: customer-workflows
+
+agentMatrix:
+  gpt_5_4:
+    thingName: Customer_Agent_GPT54
+    defaultEnabled: true
+  sonnet_4_6:
+    thingName: Customer_Agent_Sonnet46
+    defaultEnabled: false
+
+cases:
+  - id: asset_current_status
+    tags: [identity, current-values]
+    turns:
+      - user: "For ORD Contacting 01, what is the current value of property currentDraw?"
+        acceptableOutcomes:
+          - name: resolved_and_read
+            score: 1.0
+            assertions:
+              - toolCalled: resolve_thing
+              - toolCalled: get_property_values
+              - finalRegex: "(?i)currentDraw|current\\s+draw"
+
+  - id: asset_trend
+    tags: [identity, trend]
+    skipUnlessEnv: CUSTOMER_HAS_HISTORY
+    skipReason: fixture_missing_history
+    turns:
+      - user: "Show the trend of currentDraw for ORD Contacting 01 over the past 24 hours."
+        acceptableOutcomes:
+          - name: resolved_and_read_history
+            score: 1.0
+            assertions:
+              - toolCalled: resolve_thing
+              - toolCalled: query_property_history
+              - finalRegex: "(?i)trend|rising|falling|flat|stable|history"

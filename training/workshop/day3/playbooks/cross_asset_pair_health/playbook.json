@@ -1,0 +1,503 @@
+{
+  "schema": "parler-playbook-v1",
+  "id": "cross_asset_pair_health",
+  "title": "Cross asset pair health comparison",
+  "description": "Compare time-windowed alert history, current alert summary, and trend charts for two assets identified by name, display name, suffix, serial number, or canonical Thing name. Optional asset type narrows identity rules only.",
+  "whenToUse": "Use when the user asks to compare the health, condition, degradation, or operational risk of two individual assets over a stated recent time window. The playbook queries the top two alert-driving property histories without aggregate actions so the history tool can emit chart-ready inline evidence. If an asset type is supplied, use it only as a narrowing hint.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "assetType": {
+        "type": "string"
+      },
+      "assetIdentifierA": {
+        "type": "string"
+      },
+      "assetIdentifierB": {
+        "type": "string"
+      },
+      "timeWindow": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "assetIdentifierA",
+      "assetIdentifierB",
+      "timeWindow"
+    ]
+  },
+  "execution": {
+    "timeoutSeconds": 900,
+    "maxNodes": 80,
+    "maxToolCalls": 200,
+    "maxEvidenceBytes": 12000
+  },
+  "budgets": {
+    "timeoutSeconds": 900,
+    "maxNodes": 80,
+    "maxToolCalls": 200,
+    "maxEvidenceBytes": 12000
+  },
+  "vars": {},
+  "nodes": [
+    {
+      "id": "taxonomy_row",
+      "kind": "derive",
+      "dependsOn": [],
+      "op": "pick_taxonomy_row",
+      "args": {
+        "assetType": {
+          "$input": "assetType"
+        },
+        "taxonomyRows": {
+          "$var": "assetTaxonomy.rows"
+        },
+        "whenAssetTypeMissing": "empty_taxonomy"
+      },
+      "evidence": {
+        "label": "Resolve optional asset-type hint from taxonomy"
+      }
+    },
+    {
+      "id": "resolve_a",
+      "kind": "tool_call",
+      "dependsOn": [
+        "taxonomy_row"
+      ],
+      "tool": "resolve_thing",
+      "args": {
+        "text": {
+          "$input": "assetIdentifierA"
+        },
+        "assetTypeKey": {
+          "$var": "taxonomy.AssetType"
+        }
+      },
+      "evidence": {
+        "label": "Resolve first asset via identity rules"
+      }
+    },
+    {
+      "id": "normalize_a",
+      "kind": "derive",
+      "dependsOn": [
+        "resolve_a"
+      ],
+      "op": "normalize_resolved_thing",
+      "args": {
+        "sourceNodeId": "resolve_a",
+        "label": "asset A"
+      },
+      "evidence": {
+        "label": "Normalize resolve_thing result for asset A"
+      }
+    },
+    {
+      "id": "resolve_b",
+      "kind": "tool_call",
+      "dependsOn": [
+        "taxonomy_row"
+      ],
+      "tool": "resolve_thing",
+      "args": {
+        "text": {
+          "$input": "assetIdentifierB"
+        },
+        "assetTypeKey": {
+          "$var": "taxonomy.AssetType"
+        }
+      },
+      "evidence": {
+        "label": "Resolve second asset via identity rules"
+      }
+    },
+    {
+      "id": "normalize_b",
+      "kind": "derive",
+      "dependsOn": [
+        "resolve_b"
+      ],
+      "op": "normalize_resolved_thing",
+      "args": {
+        "sourceNodeId": "resolve_b",
+        "label": "asset B"
+      },
+      "evidence": {
+        "label": "Normalize resolve_thing result for asset B"
+      }
+    },
+    {
+      "id": "pair_assets",
+      "kind": "derive",
+      "dependsOn": [
+        "normalize_a",
+        "normalize_b"
+      ],
+      "op": "flatten_pair_assets",
+      "args": {
+        "matchNodeA": "normalize_a",
+        "matchNodeB": "normalize_b"
+      },
+      "evidence": {
+        "label": "Resolve asset pair"
+      }
+    },
+    {
+      "id": "alert_history_by_asset",
+      "kind": "fan_out",
+      "dependsOn": [
+        "pair_assets"
+      ],
+      "items": {
+        "$ref": "pair_assets.output.assets"
+      },
+      "itemVar": "asset",
+      "maxItems": 2,
+      "maxConcurrency": 1,
+      "node": {
+        "kind": "tool_call",
+        "tool": "query_alert_history",
+        "args": {
+          "thingName": {
+            "$item": "name"
+          },
+          "ackState": "all",
+          "relativeDuration": {
+            "$input": "timeWindow"
+          },
+          "order": "newest_first",
+          "limit": 100
+        },
+        "evidence": {
+          "label": "Read alert history window",
+          "includeToolOutputRootFields": [
+            "thingName",
+            "appliedStartTime",
+            "appliedEndTime",
+            "rowCount"
+          ],
+          "table": {
+            "maxRows": 8,
+            "columns": [
+              "sourceProperty",
+              "timestamp",
+              "severity"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "alert_thing_names",
+      "kind": "derive",
+      "dependsOn": [
+        "pair_assets"
+      ],
+      "op": "collect_thing_names_from_assets",
+      "args": {
+        "assetsRef": "pair_assets.output.assets",
+        "maxNames": 25
+      },
+      "evidence": {
+        "label": "Collect Thing names for current alert comparison"
+      }
+    },
+    {
+      "id": "alerts_by_pair",
+      "kind": "tool_call",
+      "dependsOn": [
+        "alert_thing_names"
+      ],
+      "tool": "query_alert_summary",
+      "args": {
+        "thingNames": {
+          "$ref": "alert_thing_names.output.names"
+        },
+        "ackState": "all",
+        "limit": 100
+      },
+      "evidence": {
+        "label": "Read current alert summaries (multi-Thing)",
+        "include": [
+          "status",
+          "resultKind",
+          "completeness",
+          "thingsRequested",
+          "thingsSucceeded"
+        ]
+      }
+    },
+    {
+      "id": "alert_groups",
+      "kind": "derive",
+      "dependsOn": [
+        "alerts_by_pair",
+        "pair_assets"
+      ],
+      "op": "group_alerts_by_source_property",
+      "args": {
+        "assetsRef": "pair_assets.output.assets",
+        "alertSummaryNodeId": "alerts_by_pair"
+      },
+      "evidence": {
+        "label": "Group alert history by source property"
+      }
+    },
+    {
+      "id": "current_alert_groups",
+      "kind": "derive",
+      "dependsOn": [
+        "alerts_by_pair",
+        "pair_assets"
+      ],
+      "op": "group_alerts_by_source_property",
+      "args": {
+        "assetsRef": "pair_assets.output.assets",
+        "alertSummaryNodeId": "alerts_by_pair"
+      },
+      "evidence": {
+        "label": "Group current alert summary by source property"
+      }
+    },
+    {
+      "id": "primary_property",
+      "kind": "derive",
+      "dependsOn": [
+        "current_alert_groups"
+      ],
+      "op": "select_primary_problem_property",
+      "args": {
+        "alertGroupsRef": "current_alert_groups.output.groups"
+      },
+      "evidence": {
+        "label": "Select primary current alert-driving property"
+      }
+    },
+    {
+      "id": "property_union",
+      "kind": "derive",
+      "dependsOn": [
+        "taxonomy_row",
+        "primary_property",
+        "current_alert_groups"
+      ],
+      "op": "union_property_names",
+      "args": {
+        "criticalProperties": {
+          "$var": "taxonomy.CriticalPropertiesList"
+        },
+        "primaryProperty": {
+          "$ref": "primary_property.output.primaryProperty"
+        },
+        "alertGroups": {
+          "$ref": "current_alert_groups.output.groups"
+        }
+      },
+      "evidence": {
+        "label": "Build bounded current property read list"
+      }
+    },
+    {
+      "id": "values_by_asset",
+      "kind": "fan_out",
+      "dependsOn": [
+        "property_union",
+        "pair_assets"
+      ],
+      "items": {
+        "$ref": "pair_assets.output.assets"
+      },
+      "itemVar": "asset",
+      "maxItems": 2,
+      "maxConcurrency": 1,
+      "node": {
+        "kind": "tool_call",
+        "tool": "get_property_values",
+        "args": {
+          "thingName": {
+            "$item": "name"
+          },
+          "propertyNames": {
+            "$var": "propertyUnion.names"
+          }
+        },
+        "evidence": {
+          "label": "Read current operational properties"
+        }
+      }
+    },
+    {
+      "id": "top_trend_properties",
+      "kind": "derive",
+      "dependsOn": [
+        "current_alert_groups"
+      ],
+      "op": "top_n",
+      "args": {
+        "rows": {
+          "$ref": "current_alert_groups.output.groups"
+        },
+        "n": 2,
+        "orderBy": [
+          {
+            "field": "alertCount",
+            "direction": "desc"
+          },
+          {
+            "field": "property",
+            "direction": "asc"
+          }
+        ]
+      },
+      "evidence": {
+        "label": "Select top two current alert-driving properties for trend charts"
+      }
+    },
+    {
+      "id": "trend_targets",
+      "kind": "derive",
+      "dependsOn": [
+        "top_trend_properties",
+        "pair_assets"
+      ],
+      "op": "build_targets",
+      "args": {
+        "sources": {
+          "asset": {
+            "$ref": "pair_assets.output.assets"
+          },
+          "prop": {
+            "$ref": "top_trend_properties.output.rows"
+          }
+        },
+        "template": {
+          "thingName": {
+            "$path": "asset.name"
+          },
+          "propertyName": {
+            "$path": "prop.property"
+          }
+        },
+        "maxTargets": 4
+      },
+      "evidence": {
+        "label": "Build asset x top-property trend chart targets"
+      }
+    },
+    {
+      "id": "trends_by_target",
+      "kind": "fan_out",
+      "dependsOn": [
+        "trend_targets"
+      ],
+      "items": {
+        "$ref": "trend_targets.output.targets"
+      },
+      "itemVar": "target",
+      "maxItems": 4,
+      "maxConcurrency": 1,
+      "node": {
+        "kind": "tool_call",
+        "tool": "query_property_history",
+        "args": {
+          "thingName": {
+            "$item": "thingName"
+          },
+          "propertyName": {
+            "$item": "propertyName"
+          },
+          "relativeDuration": {
+            "$input": "timeWindow"
+          },
+          "kind": "line"
+        },
+        "evidence": {
+          "label": "Read top alert-driving property trend chart",
+          "includeToolOutputRootFields": [
+            "thingName",
+            "propertyName",
+            "pointsReturned",
+            "returnedRows",
+            "totalRows",
+            "rowCount"
+          ],
+          "table": {
+            "maxRows": 5,
+            "columns": [
+              "timestamp",
+              "value"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "trend_summary",
+      "kind": "derive",
+      "dependsOn": [
+        "trends_by_target"
+      ],
+      "op": "trend_summary",
+      "args": {
+        "trendsFanOutNodeId": "trends_by_target"
+      },
+      "evidence": {
+        "label": "Compact per-target trend evidence"
+      }
+    },
+    {
+      "id": "pair_summary",
+      "kind": "derive",
+      "dependsOn": [
+        "pair_assets",
+        "alert_history_by_asset",
+        "alerts_by_pair",
+        "alert_groups",
+        "current_alert_groups",
+        "primary_property",
+        "values_by_asset",
+        "trend_summary"
+      ],
+      "op": "summarize_asset_pair_health",
+      "args": {
+        "assets": {
+          "$ref": "pair_assets.output.assets"
+        },
+        "alertGroupsNodeId": "current_alert_groups",
+        "primaryNodeId": "primary_property",
+        "alertsFanOutNodeId": "alerts_by_pair",
+        "valuesFanOutNodeId": "values_by_asset"
+      },
+      "evidence": {
+        "label": "Summarize current-state pair health evidence"
+      }
+    },
+    {
+      "id": "final_summary",
+      "kind": "llm_summary",
+      "dependsOn": [
+        "pair_summary"
+      ],
+      "prompt": "Write a concise evidence-grounded ranked health assessment for the two resolved assets. Use only the provided playbook evidence. Use alert-history evidence for the requested time-window comparison and current alert-summary evidence as the current-state snapshot. Ranking rule: current alert-summary rows are the strongest current-health signal; an asset with current alert rows is more urgent than an asset with none, even if 24-hour alert history is tied or empty. Preserve per-asset attribution from alerts_by_pair: cite which resolved asset/source produced each current alert row. If the time-window alert history is empty but current alert summary has rows, do not call the assets clean; treat the current summary sourceProperty rows as active issue-driver evidence. Do not infer that a larger numeric property value is worse unless the alert evidence or message explicitly says so. For alertType Below or messages like value <= threshold, the lower threshold-breaching value is the problematic signal. The playbook queries the top two current alert-driving property histories without aggregate actions so the tool can emit chart-ready trend evidence for both assets. If trend charts or sample rows are available, describe the visible direction and cite chart/sample evidence; do not invent FIRST/LAST/MEAN statistics unless the tool evidence explicitly includes them. If a trend target returns no data or an error, report that as a limitation. Use this structure: Ranked assessment; Most urgent; Why; Likely issue driver; Recommended next check; Next priority; Overall call; Evidence used; Limitations. Treat health as a conclusion from alerts, current values, and trend evidence, not as a literal property. Do not end with an offer to do more work.",
+      "evidenceRefs": [
+        "taxonomy_row",
+        "resolve_a",
+        "resolve_b",
+        "pair_assets",
+        "alert_history_by_asset",
+        "alert_thing_names",
+        "alerts_by_pair",
+        "alert_groups",
+        "current_alert_groups",
+        "primary_property",
+        "top_trend_properties",
+        "trend_targets",
+        "trends_by_target",
+        "trend_summary",
+        "pair_summary"
+      ],
+      "maxEvidenceBytes": 8000
+    }
+  ],
+  "finalNode": "final_summary"
+}

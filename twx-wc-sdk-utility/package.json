@@ -1,0 +1,34 @@
+{
+  "name": "twx-wc-sdk-utility",
+  "version": "11.0.0-1765455789",
+  "description": "A module to generate Mashup Builder widgets from PTCS Web Components",
+  "main": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "pack": "npm-pack-zip"
+  },
+  "bin": {
+    "mub": "bin/cli.js"
+  },
+  "dependencies": {
+    "del": "^5.1.0",
+    "fs-extra": "^9.0.0",
+    "gulp": "^4.0.2",
+    "gulp-clean": "^0.4.0",
+    "gulp-edit-xml": "^3.1.1",
+    "gulp-if": "^3.0.0",
+    "gulp-install": "^1.1.0",
+    "gulp-rename": "^2.0.0",
+    "gulp-replace": "^1.0.0",
+    "gulp-zip": "^5.0.1",
+    "handlebars": "^4.7.6",
+    "npm-pack-zip": "^1.2.7",
+    "rollup": "^2.7.2",
+    "@rollup/plugin-node-resolve": "^15.3.0",
+    "@rollup/plugin-terser": "^0.4.4",
+    "vinyl-paths": "^3.0.1",
+    "winston": "^3.2.1",
+    "yargs": "^11.0.0"
+  },
+  "license": "ISC"
+}

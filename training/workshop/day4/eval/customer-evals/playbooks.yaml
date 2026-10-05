@@ -1,0 +1,21 @@
+version: 1
+suite: customer-playbooks
+
+agentMatrix:
+  gpt_5_4:
+    thingName: Customer_Agent_GPT54
+    defaultEnabled: true
+
+cases:
+  - id: asset_pair_health_playbook
+    tags: [playbook, health]
+    turns:
+      - user: >
+          Please use playbook cross_asset_pair_health, compare ORD Contacting 01 and ORD Contacting 02
+          over the past 24 hours. Focus on alerts and trends.
+        acceptableOutcomes:
+          - name: playbook_started_or_completed
+            score: 1.0
+            assertions:
+              - toolCalled: start_playbook
+              - finalRegex: "(?i)alert|trend|evidence|health|gap"

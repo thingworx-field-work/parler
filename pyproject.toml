@@ -1,0 +1,30 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "parler-tools"
+version = "0.1.0"
+description = "Repository utilities (dev import / reset helpers)"
+requires-python = ">=3.11"
+dependencies = [
+    "pyyaml>=6.0",
+]
+
+[project.scripts]
+reset-dev = "test_scripts.reset_dev:main"
+import-dev = "test_scripts.dev_import_control:main"
+get-application-log = "test_scripts.GetApplicationLog:main"
+agent-eval = "test_scripts.agent_eval:main"
+context-compaction-eval = "test_scripts.run_context_compaction_eval:main"
+parler-collect-live = "test_scripts.live_diagnostics.collect:main"
+load-ext-cloud = "test_scripts.load_ext_cloud:main"
+load-file-tree = "test_scripts.load_file_tree:main"
+describe-schema-harvest-from-stream = "test_scripts.harvest_describe_entity_schema_from_stream:main"
+drive-describe-entity-schema-e2e = "test_scripts.drive_describe_entity_schema_e2e:main"
+seed-cellfab-current-draw = "test_scripts.seed_cellfab_current_draw:main"
+utilization-service-smoke = "test_scripts.utilization_service_smoke:main"
+utilization-stage-smoke = "test_scripts.run_utilization_stage_smoke:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["test_scripts"]

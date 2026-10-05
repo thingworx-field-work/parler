@@ -1,0 +1,128 @@
+# History overlay chart eval suite (live ThingWorx).
+# Design fixtures: docs/agent/history-overlay-chart.md §11.
+#
+# Run from repo root:
+#   export AGENT_EVAL_HAS_HISTORY_OVERLAY=1
+#   uv run agent-eval --suite docs/agent/evals/history_overlay_v1.yaml --agent-filter gpt_5_5
+#
+# Legacy suites period_over_period_v1.yaml and multi_series_v1.yaml thin-wrap to this tool name.
+
+version: 1
+suite: history-overlay-v1
+
+agentMatrix:
+  gpt_5_5:
+    thingName: SCPA_Demo_Agent
+    defaultEnabled: true
+
+cases:
+  - id: overlay_same_window_cross_thing
+    tags: [overlay, absolute, happy-path, chart]
+    skipUnlessEnv: AGENT_EVAL_HAS_HISTORY_OVERLAY
+    skipReason: history_overlay_dev_assets_not_confirmed
+    turns:
+      - user: >
+          Compare current draw on ORD-Mixer-01 and REF-Mixer-02 for the last hour on one chart.
+        acceptableOutcomes:
+          - name: overlay_tool_emits_chart
+            score: 1.0
+            assertions:
+              - toolCalled: build_history_overlay_chart
+              - finalRegex: "(?i)(chart|current draw|mixer)"
+        rejectIf:
+          - toolCalled: build_period_over_period_chart
+          - toolCalled: build_multi_series_history_chart
+          - toolCalledTimesAtMost: { tool: build_history_overlay_chart, count: 0 }
+
+  - id: overlay_shifted_windows_same_thing
+    tags: [overlay, elapsed, happy-path, chart]
+    skipUnlessEnv: AGENT_EVAL_HAS_HISTORY_OVERLAY
+    skipReason: history_overlay_dev_assets_not_confirmed
+    turns:
+      - user: >
+          For ORD-Mixer-01, plot current draw for the last hour and overlay yesterday's same
+          one-hour window on one chart.
+        acceptableOutcomes:
+          - name: overlay_elapsed
+            score: 1.0
+            assertions:
+              - toolCalled: build_history_overlay_chart
+              - finalRegex: "(?i)(chart|overlay|yesterday|elapsed)"
+        rejectIf:
+          - toolCalled: build_period_over_period_chart
+          - toolCalled: build_multi_series_history_chart
+
+  - id: overlay_mixed_cross_thing_shifted
+    tags: [overlay, elapsed, mixed, chart]
+    skipUnlessEnv: AGENT_EVAL_HAS_HISTORY_OVERLAY
+    skipReason: history_overlay_dev_assets_not_confirmed
+    turns:
+      - user: >
+          Show current draw for ORD-Mixer-01 in the selected window, the same window last week,
+          and REF-Mixer-02 for the same last-week window — all on one chart.
+        acceptableOutcomes:
+          - name: single_overlay_chart
+            score: 1.0
+            assertions:
+              - toolCalled: build_history_overlay_chart
+              - finalRegex: "(?i)(one chart|overlay|last week)"
+        rejectIf:
+          - toolCalledTimesAtMost: { tool: build_history_overlay_chart, count: 0 }
+          - toolCalled: build_period_over_period_chart
+          - toolCalled: build_multi_series_history_chart
+
+  - id: overlay_reference_lines
+    tags: [overlay, limits, chart]
+    skipUnlessEnv: AGENT_EVAL_HAS_HISTORY_OVERLAY
+    skipReason: history_overlay_dev_assets_not_confirmed
+    turns:
+      - user: >
+          Compare current draw on ORD-Mixer-01 and REF-Mixer-02 for the last hour with upper
+          limit 8 amps and lower limit 2 amps on one chart.
+        acceptableOutcomes:
+          - name: overlay_with_limits
+            score: 1.0
+            assertions:
+              - toolCalled: build_history_overlay_chart
+              - finalRegex: "(?i)(limit|8|2|chart)"
+
+  - id: overlay_normalized_shape_different_duration
+    tags: [overlay, normalized, shape, chart]
+    skipUnlessEnv: AGENT_EVAL_HAS_HISTORY_OVERLAY
+    skipReason: history_overlay_dev_assets_not_confirmed
+    turns:
+      - user: >
+          Compare the startup shape of current draw on ORD-Mixer-01 over the first 30 minutes today
+          with ORD-Mixer-02 over the first 45 minutes yesterday on one chart.
+        acceptableOutcomes:
+          - name: normalized_shape_preferred
+            score: 1.0
+            assertions:
+              - toolCalled: build_history_overlay_chart
+              - finalRegex: "(?i)(shape|startup|profile|normalized|chart|30|45)"
+          - name: elapsed_with_duration_prose
+            score: 0.75
+            assertions:
+              - toolCalled: build_history_overlay_chart
+              - finalRegex: "(?i)(different (?:length|duration)|longer|45|30|minute|chart)"
+        rejectIf:
+          - toolCalled: build_period_over_period_chart
+          - toolCalled: build_multi_series_history_chart
+
+  - id: overlay_no_retired_tools
+    tags: [overlay, negative, routing]
+    skipUnlessEnv: AGENT_EVAL_HAS_HISTORY_OVERLAY
+    skipReason: history_overlay_dev_assets_not_confirmed
+    turns:
+      - user: >
+          Overlay current draw for ORD-Mixer-01 and REF-Mixer-02 for the last hour on one chart.
+        acceptableOutcomes:
+          - name: overlay_not_retired_tools
+            score: 1.0
+            assertions:
+              - toolCalled: build_history_overlay_chart
+              - finalRegex: "(?i)(chart|current draw|overlay|mixer)"
+        rejectIf:
+          - toolCalled: build_period_over_period_chart
+          - toolCalled: build_multi_series_history_chart
+          - toolResultRegex: POP_MULTI_SERIES_UNAVAILABLE

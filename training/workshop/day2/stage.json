@@ -1,0 +1,18 @@
+{
+  "schema": "parler-training-stage-v1",
+  "stage": "day2",
+  "phase": "pre-llm-friendly",
+  "uploads": [
+    { "repoPath": "workshop/day2/skills/asset_pair_health/SKILL.md", "target": "/skills/asset_pair_health/SKILL.md" }
+  ],
+  "expectedRuntime": {
+    "extendedTools": [],
+    "skills": ["asset_pair_health"],
+    "playbooks": [],
+    "shadowedSkills": [],
+    "policyRules": []
+  },
+  "tests": {
+    "static": ["parse-payloads", "stage-manifest"]
+  }
+}

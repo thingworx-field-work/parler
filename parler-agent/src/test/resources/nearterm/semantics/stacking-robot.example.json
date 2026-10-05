@@ -1,0 +1,33 @@
+{
+  "schema": "parler-semantic-profile-v1",
+  "profileId": "cell-a-operations",
+  "version": "2026.07.1",
+  "assetTypes": {
+    "StackingRobot": {
+      "propertyRoles": {
+        "operating_temperature": {
+          "aliases": ["robot temperature"],
+          "binding": {
+            "kind": "PROPERTY",
+            "propertyName": "Wrst1"
+          },
+          "unit": "Cel",
+          "dimension": "temperature",
+          "grain": "sample",
+          "expectedCadence": "PT5S"
+        },
+        "energy_per_cycle": {
+          "binding": {
+            "kind": "SERVICE",
+            "thingName": "CellAAnalytics",
+            "serviceName": "GetEnergyPerCycle",
+            "resultField": "value"
+          },
+          "unit": "kWh",
+          "dimension": "energy",
+          "grain": "cycle"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "schema": "parler-host-context-template",
+  "key": "asset_monitoring.query_scope",
+  "description": "Context for Asset Monitoring page query parameters.",
+  "requiredContextFields": ["queryParameters"],
+  "maxRenderedChars": 4000,
+  "promptTemplate": [
+    "Host page context for this turn:",
+    "- Page: {{context.page}}",
+    "",
+    "{{format.jsonFence(context.queryParameters, \"asset-monitoring-query-parameters\")}}",
+    "",
+    "{{format.jsonFence(context.summaryParameters, \"asset-monitoring-status-summary-parameters\")}}",
+    "",
+    "Tool guidance:",
+    "- In this page, Things can be queried via tool `invoke_service` with entityType=Thing, entityName=DemoWrapper, serviceName=queryThings, and parameters = the fenced JSON block named asset-monitoring-query-parameters.",
+    "- For a status summary, use serviceName=queryStatusSummary with parameters = the fenced JSON block named asset-monitoring-status-summary-parameters.",
+    "- Explicit user text wins over host page blocks."
+  ]
+}
