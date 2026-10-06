@@ -49,7 +49,7 @@ the course teaches it.
 
 | Shipped area | Reference | Where this course teaches it |
 | --- | --- | --- |
-| SCPA grounding and Playbook attribution | [`dev_data/scpa_utilization`](../../dev_data/scpa_utilization), Agent 0.1.222 changelog | Chapters 8, 12, 15; Appendices H, J |
+| SCPA grounding and Playbook attribution | [`dev_data/sample_scpa_utilization_agent_configuration`](../../dev_data/sample_scpa_utilization_agent_configuration), Agent 0.1.222 changelog | Chapters 8, 12, 15; Appendices H, J |
 | Final-answer runtime boundary | Agent 0.1.224 changelog; [`docs/agent/evidence-grounded.md`](../../docs/agent/evidence-grounded.md) | Appendix O |
 | Artifact Cache and cache-backed tools | Agent 0.1.211–0.1.213 and 0.1.219 changelog; [`docs/operations/file-artifact-cache-retention.md`](../../docs/operations/file-artifact-cache-retention.md) | Chapters 4–5; Appendices E, G, O |
 | Semantic/evidence foundation | Agent 0.1.214 changelog; [`docs/agent/evidence-grounded.md`](../../docs/agent/evidence-grounded.md) | Chapter 15; Appendix J (reference exercise) |

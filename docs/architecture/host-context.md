@@ -274,7 +274,7 @@ What this shows:
   register that wrapper as an extended tool.
 
 A real template of this kind ships as sample data in
-`dev_data/scpa_utilization/host-contexts/PTCTS.AssetMonitoring.ContainedAssetListParler_MU.json`.
+`dev_data/sample_scpa_utilization_agent_configuration/host-contexts/PTCTS.AssetMonitoring.ContainedAssetListParler_MU.json`.
 
 ## 8. Formatters
 

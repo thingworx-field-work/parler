@@ -53,7 +53,7 @@ Interpretation:
 
 ### 1.2 Utilization prompt coverage
 
-`dev_data/scpa_utilization/utilization_prompts.txt` shows that the utilization use case is not only "show me a page".
+`dev_data/sample_scpa_utilization_design/utilization_prompts.txt` shows that the utilization use case is not only "show me a page".
 It includes several distinct families:
 
 | Prompt family | Examples | Covered by this topic? | Notes |
@@ -351,7 +351,7 @@ Eval / manual:
 - follow-up asking for a page to display
 - follow-up asking for a full-table count/summary
 - the four §1.1 baseline prompts
-- representative prompts from `dev_data/scpa_utilization/utilization_prompts.txt`:
+- representative prompts from `dev_data/sample_scpa_utilization_design/utilization_prompts.txt`:
   - threshold (`below 30%`, `above 60%`)
   - ranking (`top 3`, `lowest utilization`)
   - large display (`show all ... in a table`)

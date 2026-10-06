@@ -933,7 +933,7 @@ Outputs:
 | `utilization_summary` | Secondary — utilization-style extended-tool path | May land in `notConverted` or `partiallyConverted` when extended tools are not `playbookSafe` on target runtime |
 | `bad_skill` (optional negative) | Adversarial / malformed source | Report must label **draft** and list validator failures — not pretend runnable |
 
-Example Skill roots (user-maintained): `dev_data/scpa_utilization/skills/<id>/SKILL.md`.
+Example Skill roots (user-maintained): `dev_data/sample_scpa_utilization_agent_configuration/skills/<id>/SKILL.md`.
 
 #### 10.6.3 Conversion report schema (normative)
 

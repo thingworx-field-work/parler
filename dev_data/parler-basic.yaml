@@ -1,0 +1,35 @@
+# Import plan for load.py: the two Parler extensions and ParlerAgentBasic.xml from the latest release.
+#   uv run load.py -c dev_data/parler-basic.yaml            # dry run
+#   uv run load.py -c dev_data/parler-basic.yaml --apply
+# load.py reads .env (TWX_URL, TWX_APPKEY) and resolves local paths from the directory it runs in.
+import_order:
+# - action: import_file
+#   files:
+#   - ../../github/parler/dev_data/ApplicationKeys_dev_key.xml
+
+- action: import_extension
+  files:
+  # - SCPA/ALL_DATASETS_DEV_0001_Platform.zip
+  # - SCPA/ALL_DATASETS_DEV_1001_SCPA_Core.zip
+  # - SCPA/ALL_DATASETS_DEV_2001_SCPA.zip
+  - https://github.com/thingworx-field-work/parler/releases/latest/download/parler-agent-*.zip
+  - https://github.com/thingworx-field-work/parler/releases/latest/download/parler-ui-widget-*.zip
+  
+  # - ../../github/parler/parler-agent/build/parler-agent.zip
+  # - ../../github/parler/parler-ui-widget/dist/parler-ui-widget.zip
+
+
+
+#parler agent specific
+#
+- action: import_file
+  files:
+  # mashups: Parler-embedded, Parler, 
+  # projects: ParlerAgentBasic
+  # DataShapes: Parler_Widget_Connect_Datashape,ParlerDefaultAgentThingConfigurationDataShape
+  # Things: Parler_helper, AgentLlmUsageHelper
+
+  - https://github.com/thingworx-field-work/parler/releases/latest/download/ParlerAgentBasic.xml
+
+
+

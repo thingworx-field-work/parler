@@ -739,7 +739,7 @@ def _normalize_item(raw: Any, index: int, repo_root: Path) -> dict[str, Any]:
     return out
 
 
-PUBLIC_EXAMPLE_CONTROL = "import_scpa_utilization"
+PUBLIC_EXAMPLE_PLAN = "dev_data/parler-basic.yaml"
 
 
 def load_import_plan(
@@ -749,8 +749,8 @@ def load_import_plan(
         hint = ""
         if control_path == DEFAULT_CONTROL_PATH:
             hint = (
-                "\nThe default control file is a local working file. Name a shipped one instead, "
-                f"for example: uv run import-dev --import_control {PUBLIC_EXAMPLE_CONTROL}"
+                "\nThe default control file is a local working file. The shipped import plans run with "
+                f"load.py, for example: uv run load.py -c {PUBLIC_EXAMPLE_PLAN}"
             )
         raise FileNotFoundError(f"Missing import control file: {control_path}{hint}")
     if control_path in _including:

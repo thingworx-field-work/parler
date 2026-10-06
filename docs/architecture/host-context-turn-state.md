@@ -470,7 +470,7 @@ use the ids. For an Asset Monitoring template:
 - Do not call resolve_asset_type for selectedEntityTypes from host context.
 ```
 
-Sample templates with this guidance are in `dev_data/scpa_utilization/host-contexts/` (for example
+Sample templates with this guidance are in `dev_data/sample_scpa_utilization_agent_configuration/host-contexts/` (for example
 `PTCTS.AssetMonitoring.ContainedAssetListParler_MU.json`).
 
 ## 6. Implementation map

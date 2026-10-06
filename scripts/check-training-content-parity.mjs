@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Drift guard between the final sample application (`dev_data/scpa_utilization`) and the training course
+ * Drift guard between the final sample application (`dev_data/sample_scpa_utilization_agent_configuration`) and the training course
  * (`training/`): the Day 4 course files must equal the final sample byte for byte, every training payload must parse,
  * post-final course material must not use the retired utilization tool names, and the utilization eval suites must
  * use the final four-tool surface. See docs/agent/training-content-parity.md.
@@ -17,7 +17,7 @@ const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const parlerRoot = path.resolve(path.join(scriptDir, ".."));
 const trainingRoot = path.join(parlerRoot, "training");
 
-const canonicalUtil = path.join(parlerRoot, "dev_data/scpa_utilization");
+const canonicalUtil = path.join(parlerRoot, "dev_data/sample_scpa_utilization_agent_configuration");
 const canonicalManifest = path.join(canonicalUtil, "tools/extended_tools.json");
 
 const DAY4_MIRROR_REL = [
@@ -326,7 +326,7 @@ function main() {
   }
 
   // 2. Every training payload parses
-  parseAllTrainingPayloads(parlerRoot, "dev_data/scpa_utilization", "");
+  parseAllTrainingPayloads(parlerRoot, "dev_data/sample_scpa_utilization_agent_configuration", "");
   parseAllTrainingPayloads(trainingRoot, "workshop", "training/");
 
   // 3. Stale version-handshake examples

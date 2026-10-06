@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Four-tool utilization playbooks declare nested {@code result.*} evidence paths; frozen fixtures must stay aligned
- * with {@code dev_data/scpa_utilization/playbooks/*}.
+ * with {@code dev_data/sample_scpa_utilization_agent_configuration/playbooks/*}.
  */
 class Bug004UtilizationPlaybookEvidenceColumnsTest {
 

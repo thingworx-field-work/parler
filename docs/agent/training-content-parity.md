@@ -1,7 +1,7 @@
 # Training content parity
 
 The training course in [`training/`](../../training/) and the final SCPA utilization sample in
-[`dev_data/scpa_utilization/`](../../dev_data/scpa_utilization/) describe the same application. This document states
+[`dev_data/sample_scpa_utilization_agent_configuration/`](../../dev_data/sample_scpa_utilization_agent_configuration/) describe the same application. This document states
 which of them is authoritative for what and how drift between them is caught. The stage contracts are in
 [`training-stage-configuration-contracts.md`](./training-stage-configuration-contracts.md).
 
@@ -9,7 +9,7 @@ which of them is authoritative for what and how drift between them is caught. Th
 
 | Source | Authoritative for |
 | --- | --- |
-| `dev_data/scpa_utilization/` | The final configuration: the four utilization tools, skills, Playbooks, policies, taxonomies and host contexts. |
+| `dev_data/sample_scpa_utilization_agent_configuration/` | The final configuration: the four utilization tools, skills, Playbooks, policies, taxonomies and host contexts. |
 | `training/workshop/day4/` | Nothing of its own for utilization: its tools, skills and Playbooks are copies of the final sample. |
 | `training/workshop/day1`–`day3` | The intermediate stages the course teaches before the LLM-friendly interface. |
 | `training/src/` | Course prose. Chapter 16 owns the derivation of the four tools and the upgraded skill, Playbook and eval examples. |
@@ -41,7 +41,7 @@ Rules:
 `node scripts/check-training-content-parity.mjs` (also run by `node scripts/check-training-stage-contracts.mjs`) fails
 when:
 
-- a Day 4 utilization tool, skill or Playbook file differs from its `dev_data/scpa_utilization/` counterpart;
+- a Day 4 utilization tool, skill or Playbook file differs from its `dev_data/sample_scpa_utilization_agent_configuration/` counterpart;
 - any training or final-sample `extended_tools.json`, `playbook.json` or `SKILL.md` checklist fence does not parse;
 - a retired service-aligned tool name (`utilization_records`, `utilization_aggregate_by_state`,
   `utilization_stats_for_aggregate`, …) appears in post-final course material outside the labelled first-pass files;

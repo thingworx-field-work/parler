@@ -8,10 +8,10 @@ workshop day uploads a different configuration-repository payload, and each payl
 
 | Path | Role |
 | --- | --- |
-| `dev_data/scpa_utilization/` | The **final** sample configuration: tools, policies, skills, Playbooks, taxonomies and host-context examples, kept mutually consistent and importable as current best practice. It does not hold stage history. |
+| `dev_data/sample_scpa_utilization_agent_configuration/` | The **final** sample configuration-repository content: tools, policies, skills, Playbooks, taxonomies and host-context examples, kept mutually consistent and importable as current best practice. It does not hold stage history. |
 | `training/workshop/dayN/` | The payload for one course stage. A stage may intentionally differ from the final configuration when it teaches an intermediate step; such stages are labelled `pre-llm-friendly`. |
 | `training/workshop/dayN/stage.json` | The stage contract (§5). |
-| `training/dev_data/` | ThingWorx exports used by the course (`uv run import-dev --apply --import_control import_training`). |
+| `training/dev_data/` | ThingWorx exports used by the course, imported in Composer when a chapter asks for them. |
 
 Day 4 is the final stage: its utilization tools, skills and Playbooks are byte-for-byte copies of the final sample
 (§6.1). Add a new `dayN` folder when the course needs another stage instead of folding distinct stages into one.
@@ -72,8 +72,8 @@ It validates every `stage.json` (upload paths exist; declared tools, skills, Pla
 of that stage; phase rules above), then runs `scripts/check-training-content-parity.mjs`, which:
 
 - parses every `extended_tools.json`, `playbook.json` and the `parler-task-checklist-v1` fences in every `SKILL.md`
-  under `training/workshop/` and `dev_data/scpa_utilization/`;
-- compares the Day 4 utilization tools, skills and Playbooks byte-for-byte with `dev_data/scpa_utilization/`;
+  under `training/workshop/` and `dev_data/sample_scpa_utilization_agent_configuration/`;
+- compares the Day 4 utilization tools, skills and Playbooks byte-for-byte with `dev_data/sample_scpa_utilization_agent_configuration/`;
 - rejects the retired service-aligned tool names in post-final course material;
 - checks that the utilization eval suites (`docs/agent/evals/utilization_v1.yaml` and the course's
   `customer-evals/extended-tools.yaml`) use only the four final tools.

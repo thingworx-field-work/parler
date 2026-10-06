@@ -328,7 +328,7 @@ Per-tool evidence:
 
 ## 10. Reference Playbook
 
-The reference `cross_asset_pair_health` Playbook (`dev_data/scpa_utilization/playbooks/`) uses
+The reference `cross_asset_pair_health` Playbook (`dev_data/sample_scpa_utilization_agent_configuration/playbooks/`) uses
 `query_alert_history` for durable alert history and keeps the current-summary node as separate
 current-state evidence. CI also pins a minimal static Playbook,
 `parler-agent/src/test/resources/playbook-builtin-capability-expansion/minimal_alert_history.playbook.json`,

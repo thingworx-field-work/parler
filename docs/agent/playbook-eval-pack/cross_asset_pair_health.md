@@ -1,6 +1,6 @@
 # Eval pack: `cross_asset_pair_health`
 
-Source Skill: **`asset_pair_health`** (`dev_data/scpa_utilization/skills/asset_pair_health/SKILL.md` — user-maintained).
+Source Skill: **`asset_pair_health`** (`dev_data/sample_scpa_utilization_agent_configuration/skills/asset_pair_health/SKILL.md` — user-maintained).
 
 Generated Playbook: **`cross_asset_pair_health`** — golden converter output at
 [`../playbook-converter/examples/asset_pair_health/`](../playbook-converter/examples/asset_pair_health/).

@@ -6,16 +6,16 @@ This document defines how static Playbooks execute application-defined, read-onl
 
 The motivating case is the Utilization example application:
 
-- service notes: `dev_data/scpa_utilization/utilization_service.md`
-- extended tools: `dev_data/scpa_utilization/tools/extended_tools.json`
+- service notes: `dev_data/sample_scpa_utilization_design/utilization_service.md`
+- extended tools: `dev_data/sample_scpa_utilization_agent_configuration/tools/extended_tools.json`
 - validated skill baselines:
-  - `dev_data/scpa_utilization/skills/utilization_summary/SKILL.md`
-  - `dev_data/scpa_utilization/skills/machine_utilization_summary/SKILL.md`
-  - `dev_data/scpa_utilization/skills/utilization_overview/SKILL.md`
+  - `dev_data/sample_scpa_utilization_agent_configuration/skills/utilization_summary/SKILL.md`
+  - `dev_data/sample_scpa_utilization_agent_configuration/skills/machine_utilization_summary/SKILL.md`
+  - `dev_data/sample_scpa_utilization_agent_configuration/skills/utilization_overview/SKILL.md`
 - playbook samples:
-  - `dev_data/scpa_utilization/playbooks/utilization_summary/playbook.json`
-  - `dev_data/scpa_utilization/playbooks/machine_utilization_summary/playbook.json`
-  - `dev_data/scpa_utilization/playbooks/utilization_overview/playbook.json`
+  - `dev_data/sample_scpa_utilization_agent_configuration/playbooks/utilization_summary/playbook.json`
+  - `dev_data/sample_scpa_utilization_agent_configuration/playbooks/machine_utilization_summary/playbook.json`
+  - `dev_data/sample_scpa_utilization_agent_configuration/playbooks/utilization_overview/playbook.json`
 
 The intended onboarding order is skill first: the skill route proves the application workflow, tool schemas, time bounds, and `INFOTABLE` handoff before the same path is promoted to a deterministic Playbook.
 
@@ -52,14 +52,14 @@ This is still not a planner. Playbooks are registered workflows. They do not syn
 
 ## 2. Motivating Workflows
 
-The design was driven by these multi-step Utilization skill routes. (The example data in `dev_data/scpa_utilization/` has since moved some routes to a single state-summary service; the chain shapes below remain the pattern `$table` serves.)
+The design was driven by these multi-step Utilization skill routes. (The example data in `dev_data/sample_scpa_utilization_agent_configuration/` has since moved some routes to a single state-summary service; the chain shapes below remain the pattern `$table` serves.)
 
 ### `utilization_summary`
 
 Reference file:
 
 ```text
-dev_data/scpa_utilization/skills/utilization_summary/SKILL.md
+dev_data/sample_scpa_utilization_agent_configuration/skills/utilization_summary/SKILL.md
 ```
 
 Validated route:
@@ -81,7 +81,7 @@ Meaning:
 Reference file:
 
 ```text
-dev_data/scpa_utilization/skills/machine_utilization_summary/SKILL.md
+dev_data/sample_scpa_utilization_agent_configuration/skills/machine_utilization_summary/SKILL.md
 ```
 
 Validated route:
@@ -105,7 +105,7 @@ Playbooks assume the `machine` input is already a usable machine identifier. Fuz
 Reference file:
 
 ```text
-dev_data/scpa_utilization/skills/utilization_overview/SKILL.md
+dev_data/sample_scpa_utilization_agent_configuration/skills/utilization_overview/SKILL.md
 ```
 
 Validated route:
@@ -448,7 +448,7 @@ utilization_overview
 
 If these collide with skills in the same repository, the namespace rule applies: playbook wins and the same-name skill is ignored. For A/B testing, load skills and playbooks separately or use separate AgentThing / configurationRepository snapshots.
 
-The Java runtime does not depend on the contents of `dev_data/scpa_utilization/*`.
+The Java runtime does not depend on the contents of `dev_data/sample_scpa_utilization_agent_configuration/*`.
 
 ## 5. Testing
 

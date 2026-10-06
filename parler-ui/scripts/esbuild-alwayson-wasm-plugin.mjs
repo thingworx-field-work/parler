@@ -61,6 +61,7 @@ export function alwaysonCodecWasmPlugin() {
   return {
     name: "alwayson-codec-wasm-sync-instantiate",
     setup(build) {
+      const workingDir = build.initialOptions.absWorkingDir ?? process.cwd();
       build.onResolve({ filter: /\.wasm$/ }, (args) => {
         const resolved = path.isAbsolute(args.path)
           ? args.path
@@ -68,14 +69,16 @@ export function alwaysonCodecWasmPlugin() {
         if (!isCodecWasmPath(resolved)) {
           return null;
         }
+        // esbuild prints a namespaced path verbatim into the bundle, so keep it relative to the build directory.
         return {
-          path: resolved,
+          path: path.relative(workingDir, resolved).split(path.sep).join("/"),
           namespace: "alwayson-wasm-sync",
+          pluginData: { absolutePath: resolved },
         };
       });
 
       build.onLoad({ filter: /.*/, namespace: "alwayson-wasm-sync" }, (args) => {
-        const wasmPath = args.path;
+        const wasmPath = args.pluginData.absolutePath;
         const resolveDir = path.dirname(wasmPath);
         const bytes = fs.readFileSync(wasmPath);
         let exportNames;

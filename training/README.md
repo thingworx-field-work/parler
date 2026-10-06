@@ -14,9 +14,9 @@ workshop assets keep the baseline they were written for.
 | `src/` | Book chapters and appendices (`src/SUMMARY.md` is the table of contents) |
 | `slides/` | Slide outlines for the four workshop days, and a preflight presentation |
 | `workshop/day1` … `workshop/day4` | Staged configuration-repository content for each day (taxonomies, policies, skills, Playbooks, extended tools) and the Day 4 eval pack |
-| `dev_data/` | ThingWorx exports used by the course; import them with `uv run import-dev --apply --import_control import_training` from the repository root |
+| `dev_data/` | ThingWorx exports used by the course; import them in Composer when a chapter asks for them (see [`dev_data/README.md`](./dev_data/README.md)) |
 
-The final, complete sample application is [`../dev_data/scpa_utilization`](../dev_data/scpa_utilization). The course
+The final, complete sample application is in [`../dev_data/`](../dev_data/): the entities export `sample_scpa_utilization_entities.xml` and the configuration repository content in `sample_scpa_utilization_agent_configuration/` (see [Import the complete SCPA utilization sample](./src/R-import-sample-application.md)). The course
 stages intentionally differ from it where a day teaches an intermediate step.
 
 ## Installing mdBook

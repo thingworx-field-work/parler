@@ -41,7 +41,7 @@ Observed incident (development server, 2026-08-25 00:38–00:39 UTC, `claude-son
 `cacheCreate=0`, per-round uncached input 14,990 → 22,912, then HTTP 429 on
 `UserByModelByMinuteUncachedInputTokens` (50,000/60 s, `retry-after=18`). The enforce-mode local gate admitted every
 request against its 200k total-token budget; it does not model the uncached-input dimension, and this design is
-mitigation, not gate coverage. Reproduction prompts: `dev_data/scpa_utilization/429_prompts.txt`.
+mitigation, not gate coverage. Reproduction prompts: `dev_data/sample_scpa_utilization_design/429_prompts.txt`.
 
 The reset 0.1.222 replay exposed a second, independent prefix-instability class after the suffix fix: routine
 post-turn Tier B promotion changed tool-result bodies that earlier requests had already sent and cached. A

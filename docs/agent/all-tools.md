@@ -12,7 +12,7 @@ Different figures in this file measure **different surfaces**. Do not compare th
 | --- | ---: | --- | --- |
 | **(a) Built-in registry `registerAll`** | **28** | All first-party tools registered by **`BuiltInTools.registerAll`**, including **`get_agent_skill`** — **excludes** executor-only tools (listed after the rank table). The rank table and the built-in payload sections below measure this inventory. | Per-tool wire objects via **`ToolSchemaSizer`** + **`BuiltInToolMergedDefinitionFootprintTest`** (`anthropic-messages-v1`) |
 | **(b) Conditional / meta merge additions** | varies | **`start_playbook`** (when playbook catalog loaded), document-knowledge tools when host context enables them, **`load_tool_schemas`** in `lazy` admission mode — added at runtime merge, **not** counted in the (a) rank table. **`get_agent_skill`** is **in (a)** but may be **omitted** from the merged model-facing list when no skills are loaded (`ModelFacingSkillAdmission.hasModelFacingSkills(...)` in **`AgentThing.getMergedToolDefinitions()`**). | Runtime merge + admission policy |
-| **(c) Repository extended tools** | **manifest-dependent** | Entries from deployment **`/tools/extended_tools.json`** (sample: **4** post-LLM-friendly utilization tools in **`dev_data/scpa_utilization/tools/extended_tools.json`**) | Reconstructed from manifest + target service schemas at deploy time |
+| **(c) Repository extended tools** | **manifest-dependent** | Entries from deployment **`/tools/extended_tools.json`** (sample: **4** post-LLM-friendly utilization tools in **`dev_data/sample_scpa_utilization_agent_configuration/tools/extended_tools.json`**) | Reconstructed from manifest + target service schemas at deploy time |
 | **(d) Historical incident full surface** | **34** @ **`toolSchemaChars=68049`** | **2026-06-28** live run: (a)-like built-ins **plus** seven **pre-LLM-friendly** utilization extended tools **plus** **`start_playbook`** when playbooks loaded — **not** comparable to (a) alone | Live **`LLM_CONTEXT_PLAN_FAIL`** log (below) |
 
 Training note — **utilization extended tools:** early workshop stages taught a **seven-tool** `utilization_*` surface (**pre-LLM-friendly**); the **post-LLM-friendly** / Day 4 training manifest consolidates to **four** tools (`list_utilization_machines`, `get_utilization_records`, `get_utilization_state_summary`, `get_utilization_overview`). See **`training-stage-configuration-contracts.md`** and §Repository Extended Tool Payloads below. The **2026-06-28** incident row (d) used the **seven-tool** generation.
@@ -214,7 +214,7 @@ Utilization manifests differ by **training stage** (see counting table above):
 | Stage | Tool count | Sample manifest | Notes |
 | --- | ---: | --- | --- |
 | **Pre-LLM-friendly** (early workshop) | **7** | legacy `utilization_*` names in §Historical utilization payloads | Population **(d)** / 2026-06-28 incident; ~**9.7K** chars combined |
-| **Post-LLM-friendly** (Day 4 / current sample) | **4** | `dev_data/scpa_utilization/tools/extended_tools.json` | Population **(c)** for the shipped training bundle |
+| **Post-LLM-friendly** (Day 4 / current sample) | **4** | `dev_data/sample_scpa_utilization_agent_configuration/tools/extended_tools.json` | Population **(c)** for the shipped training bundle |
 
 Extended-tool sizes come from manifest `whenToUse` text, target service parameter definitions, INFOTABLE DataShape expansion, and synthetic natural-time fields. They are acceptable on utilization turns but wasteful when unrelated tools are co-advertised (population **(d)** lesson).
 
@@ -2142,7 +2142,7 @@ Per-playbook `inputSchema` validation happens at execution time; the advertised 
 
 ## Repository Extended Tool Payloads
 
-Canonical manifest for the **current** utilization training bundle: **`dev_data/scpa_utilization/tools/extended_tools.json`** (**4** tools, post-LLM-friendly / Day 4). Reconstruct per-tool wire objects at deploy time (sizes are not fixed in this doc).
+Canonical manifest for the **current** utilization training bundle: **`dev_data/sample_scpa_utilization_agent_configuration/tools/extended_tools.json`** (**4** tools, post-LLM-friendly / Day 4). Reconstruct per-tool wire objects at deploy time (sizes are not fixed in this doc).
 
 ### Current utilization tools (4 — post-LLM-friendly)
 
@@ -2157,7 +2157,7 @@ Stage contracts: **`training-stage-configuration-contracts.md`**. Training-mater
 
 ### Historical utilization tools (7 — pre-LLM-friendly training)
 
-**Historical evidence only** — these names powered population **(d)** / the 2026-06-28 incident measurement. Early workshop stages used the seven-tool surface before the LLM-friendly consolidation to the four-tool manifest above. Payload sections below are **frozen incident snapshots**, not the current **`dev_data/scpa_utilization`** SoT.
+**Historical evidence only** — these names powered population **(d)** / the 2026-06-28 incident measurement. Early workshop stages used the seven-tool surface before the LLM-friendly consolidation to the four-tool manifest above. Payload sections below are **frozen incident snapshots**, not the current **`dev_data/sample_scpa_utilization_agent_configuration`** SoT.
 
 ### utilization_records
 

@@ -492,7 +492,7 @@ Those names are meaningful to developers, but they do not help the model choose 
 
 Register the four LLM-friendly tools below on your **`configurationRepository`** at **`/tools/extended_tools.json`**. This is the **post-Ch16 final** manifest for SCPA utilization—not the minimal shape example from Chapter **13** and not the service-aligned catalog assumed in the Chapter **15** first-pass skill.
 
-Canonical reference in the **`parler`** tree: **`dev_data/scpa_utilization/tools/extended_tools.json`**.
+Canonical reference in the **`parler`** tree: **`dev_data/sample_scpa_utilization_agent_configuration/tools/extended_tools.json`**.
 
 ```json
 {
@@ -552,7 +552,7 @@ After upload, run **`RefreshPromptContextCache`** (Chapter **13**) so the runtim
 
 ## Upgraded utilization skills (post-Ch16)
 
-Replace the Chapter **15** first-pass `utilization_overview` skill with the four-tool routes below. The same pattern applies to **`utilization_summary`** and **`machine_utilization_summary`** in the `parler` reference tree—see **`dev_data/scpa_utilization/skills/`** for full **`SKILL.md`** files and checklist fences.
+Replace the Chapter **15** first-pass `utilization_overview` skill with the four-tool routes below. The same pattern applies to **`utilization_summary`** and **`machine_utilization_summary`** in the `parler` reference tree—see **`dev_data/sample_scpa_utilization_agent_configuration/skills/`** for full **`SKILL.md`** files and checklist fences.
 
 ### `utilization_overview` (final)
 

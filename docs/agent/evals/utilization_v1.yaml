@@ -1,5 +1,5 @@
 # Utilization playbook + skill eval (live ThingWorx).
-# Final four-tool surface — see dev_data/scpa_utilization/tools/extended_tools.json.
+# Final four-tool surface — see dev_data/sample_scpa_utilization_agent_configuration/tools/extended_tools.json.
 # Playbook cases assert start_playbook + final evidence only (internal DAG tool calls are not
 # guaranteed in AgentMessageStream assistant toolCalls). Skill cases assert model-facing routes.
 #   uv run agent-eval --suite docs/agent/evals/utilization_v1.yaml --agent-matrix env

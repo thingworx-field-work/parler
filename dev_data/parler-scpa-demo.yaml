@@ -1,0 +1,113 @@
+# Import plan for load.py: the SCPA datasets and the complete SCPA utilization sample.
+#   uv run load.py -c parler-scpa-demo.yaml [--apply]
+# load.py reads .env and resolves local paths from the directory it runs in: that directory needs an SCPA/ folder
+# with the three ALL_DATASETS_DEV_*.zip files, and .env with TWX_URL, TWX_APPKEY and the LLM_API_SERVER, LLM_API_KEY,
+# LLM_MODEL and LLM_API_VERSION values that replace the {{{env:...}}} placeholders in the entities export.
+import_order:
+
+- action: import_extension
+  files:
+  - https://github.com/thingworx-field-work/parler/releases/download/Sample_SCPA_Extension/ALL_DATASETS_DEV_0001_Platform.zip
+  - https://github.com/thingworx-field-work/parler/releases/download/Sample_SCPA_Extension/ALL_DATASETS_DEV_1001_SCPA_Core.zip
+  - https://github.com/thingworx-field-work/parler/releases/download/Sample_SCPA_Extension/ALL_DATASETS_DEV_2001_SCPA.zip
+
+
+- action: rest_call
+  service: /Thingworx/Things/PTCTDD.SimulatorFleetTracking.Timer.30Mins/Services/DisableTimer
+  payload: |
+    {}
+
+- action: rest_call
+  service: /Thingworx/Things/PTCTDD.SimulateDataGenerator.Timer_TI/Services/DisableTimer
+  payload: |
+    {}
+
+# ThingShape PTCSC.Utilization.ModelLogic_TS subscribes to this timer.
+- action: rest_call
+  service: /Thingworx/Things/PTCSC.Utilization.Simulation_TM/Services/DisableTimer
+  payload: |
+    {}
+
+- action: rest_call
+  service: /Thingworx/Things/PTCTDD.SimulatorFleetTracking.5MinTimer/Services/DisableTimer
+  payload: |
+    {}
+
+- action: rest_call
+  service: /Thingworx/Things/PTCSC.Utilization.RecordPurge_TM/Services/DisableTimer
+  payload: |
+    {}
+
+
+- action: rest_call
+  service: /Thingworx/Things/PTC.Base.Manager/services/InitializeSolution
+  timeout: 600
+  payload: |
+    {"deploymentConfig":{}}
+
+- action: rest_call
+  service: /Thingworx/Logs/ApplicationLog/Services/SetLogLevel
+  timeout: 60
+  payload: |
+    {"level":"INFO"}
+
+- action: rest_call
+  service: /Thingworx/Things/PTC.Base.Manager/services/InitializeSolution
+  timeout: 600
+  payload: |
+    {"deploymentConfig":{}}
+
+
+#parler agent specific
+#
+- action: import_file
+  files:
+  - https://github.com/thingworx-field-work/parler/releases/latest/download/sample_scpa_utilization_entities.xml
+
+
+- action: upload_file_tree
+  source: https://github.com/thingworx-field-work/parler/releases/latest/download/sample_scpa_utilization_agent_configuration*.zip
+  target: ConfigurationRepository/
+
+
+- action: import_data
+  timeout: 1200
+  files_zipped: https://github.com/thingworx-field-work/parler/releases/latest/download/sample_scpa_utilization_data*.zip
+  # files:
+  # - ../../github/parler/dev_data/thread_datatable_lazy_off.twx
+
+
+# # disable demoMode and set DaysToKeepWhenPurging to 1000
+# - action: rest_call
+#   service: /Thingworx/Things/PTCSC.UtilizationTWImpl.Manager
+#   method: PUT
+#   payload_file: ../../github/parler/dev_data/scpa_utilization_design/PTCSC.UtilizationTWImpl.Manager.json
+- action: rest_call
+  service: /Thingworx/Things/SCPA_Demo_Agent/services/RestartThing
+
+# enable timers
+- action: rest_call
+  service: /Thingworx/Things/PTCTDD.SimulatorFleetTracking.Timer.30Mins/Services/EnableTimer
+  payload: |
+    {}
+
+- action: rest_call
+  service: /Thingworx/Things/PTCTDD.SimulateDataGenerator.Timer_TI/Services/EnableTimer
+  payload: |
+    {}
+
+# ThingShape PTCSC.Utilization.ModelLogic_TS subscribes to this timer.
+- action: rest_call
+  service: /Thingworx/Things/PTCSC.Utilization.Simulation_TM/Services/EnableTimer
+  payload: |
+    {}
+
+- action: rest_call
+  service: /Thingworx/Things/PTCTDD.SimulatorFleetTracking.5MinTimer/Services/EnableTimer
+  payload: |
+    {}
+
+- action: rest_call
+  service: /Thingworx/Things/PTCSC.Utilization.RecordPurge_TM/Services/EnableTimer
+  payload: |
+    {}

@@ -12,7 +12,7 @@ including all variant forms and exactly what the loader rejects. The source of t
 (`ExtendedToolsManifest`, `InvokeServiceAllowPolicy`) and `docs/agent/configuration-repository.md`.
 
 For the **post-Ch16 final** SCPA utilization manifest (four LLM-facing tools), see Chapter **16** and the canonical
-**`parler`** reference at **`dev_data/scpa_utilization/tools/extended_tools.json`**. The syntax example below uses a
+**`parler`** reference at **`dev_data/sample_scpa_utilization_agent_configuration/tools/extended_tools.json`**. The syntax example below uses a
 generic lab-readings tool shape (same pattern as Chapters **13** and **14**).
 
 After editing either file, refresh the AgentThing prompt-context cache and start a fresh conversation. Use

@@ -16,7 +16,8 @@ Please see [**`parler-introduction.md`**](./parler-introduction.md).
 | **`CONTRACTS/`** | Normative wire / UI contracts |
 | **`docs/`** | Design and reference documentation (agent, UI, architecture, operations) |
 | **`training/`** | Training course (mdBook) and staged workshop material for the SCPA utilization sample: **`training/README.md`** |
-| **`dev_data/`** | Sample ThingWorx exports and configuration; **`dev_data/scpa_utilization/`** is the complete sample application |
+| **`dev_data/`** | **`ParlerAgentBasic.xml`** (base entities) and the complete SCPA utilization sample: **`sample_scpa_utilization_entities.xml`**, **`sample_scpa_utilization_agent_configuration/`**, **`sample_scpa_utilization_data/`** and **`sample_scpa_utilization_design/`**; import plans for **`load.py`** (`parler-*.yaml`) |
+| **`load.py`** | Standalone import tool for the **`dev_data/parler-*.yaml`** plans (see training chapter 4) |
 | **`test_scripts/`** | Dev helpers: **`uv run reset-dev`**, **`uv run import-dev`**, **`uv run agent-eval`**, **`uv run parler-collect-live`** (see root **`pyproject.toml`**) |
 | **`scripts/`** | Repository checks and the release-pair build script |
 | **`twx-wc-sdk-utility/`** | Velotic Web Component SDK utility (**mub**) used by local widget builds |

@@ -354,7 +354,7 @@ Do **not** treat the first-pass `utilization_overview` skill above as the produc
 Chapter **16** publishes:
 
 - the **final** four-tool **`extended_tools.json`** manifest (`list_utilization_machines`, `get_utilization_records`, `get_utilization_state_summary`, `get_utilization_overview`);
-- **upgraded** utilization **`SKILL.md`** examples aligned with the `parler` reference tree (`dev_data/scpa_utilization/skills/`).
+- **upgraded** utilization **`SKILL.md`** examples aligned with the `parler` reference tree (`dev_data/sample_scpa_utilization_agent_configuration/skills/`).
 
 ---
 

@@ -94,7 +94,7 @@ The important design rule is the same as for utilization services: expose the bu
 
 ## Case study: SCPA utilization—seven services, design shape, and “orthogonality”
 
-The SCPA utilization slice is documented for maintainers in the **`parler`** tree as **`dev_data/scpa_utilization/utilization_service.md`** (service catalog, workflows, and test-window notes). That `dev_data` path is not a workshop artifact. This chapter shows the **service inventory** (prose) and a **minimal `extended_tools.json` shape example**; the **final** four-tool utilization manifest is in **Chapter 16**.
+The SCPA utilization slice is documented for maintainers in the **`parler`** tree as **`dev_data/sample_scpa_utilization_design/utilization_service.md`** (service catalog, workflows, and test-window notes). That `dev_data` path is not a workshop artifact. This chapter shows the **service inventory** (prose) and a **minimal `extended_tools.json` shape example**; the **final** four-tool utilization manifest is in **Chapter 16**.
 
 ### Service inventory (conceptual roles)
 
@@ -145,7 +145,7 @@ For **Day 3 / Chapter 13**, the goal is to understand **wrapper patterns** and w
 
 - The **seven ThingWorx services** in the inventory table above are the **underlying application surface** (prose inventory only).
 - A historical workshop pattern registered **one extended tool per service** (seven model-facing tool names). That layout is useful as a **classification exercise** and for the failure demos below—it is **not** the final upload target students carry into production.
-- **Chapter 16** derives four **LLM-friendly** tools and publishes the **final** `extended_tools.json` students should upload for utilization (`list_utilization_machines`, `get_utilization_records`, `get_utilization_state_summary`, `get_utilization_overview`). The canonical manifest lives in the **`parler`** reference tree at `dev_data/scpa_utilization/tools/extended_tools.json`.
+- **Chapter 16** derives four **LLM-friendly** tools and publishes the **final** `extended_tools.json` students should upload for utilization (`list_utilization_machines`, `get_utilization_records`, `get_utilization_state_summary`, `get_utilization_overview`). The canonical manifest lives in the **`parler`** reference tree at `dev_data/sample_scpa_utilization_agent_configuration/tools/extended_tools.json`.
 
 The subsections below on direct vs wrapper wiring and the sample prompts assume a **service-aligned** tool catalog for classroom trace reading. When you implement for real, skip the seven-tool upload and use Chapter 16.
 

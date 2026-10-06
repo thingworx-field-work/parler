@@ -67,7 +67,7 @@ writeBundledLicenses(result.metafile, path.join(root, "THIRD_PARTY_LICENSES.txt"
 function writeBundledLicenses(metafile, outFile) {
   const packageDirs = new Set();
   for (const key of Object.keys(metafile.inputs)) {
-    const input = key.replace(/^[\w-]+:(?=\/)/, "");
+    const input = key.replace(/^[\w-]{2,}:/, "");
     const m = input.match(/^(.*node_modules\/(?:@[^/]+\/)?[^/]+)\//);
     if (m) packageDirs.add(path.resolve(root, m[1]));
   }

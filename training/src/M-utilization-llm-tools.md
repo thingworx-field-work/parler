@@ -1,6 +1,6 @@
 # Utilization LLM-friendly tools — maintainer implementation notes
 
-> **Upload target:** Chapter **16** owns the **final four-tool** `extended_tools.json` narrative and manifest. Canonical JSON lives in the **`parler`** tree at **`dev_data/scpa_utilization/tools/extended_tools.json`**. This appendix is **maintainer-only** — helper-service rationale, parameter contracts, and Composer JavaScript sketches. Do not treat it as a second upload snippet.
+> **Upload target:** Chapter **16** owns the **final four-tool** `extended_tools.json` narrative and manifest. Canonical JSON lives in the **`parler`** tree at **`dev_data/sample_scpa_utilization_agent_configuration/tools/extended_tools.json`**. This appendix is **maintainer-only** — helper-service rationale, parameter contracts, and Composer JavaScript sketches. Do not treat it as a second upload snippet.
 
 This appendix complements the Chapter **16** design discussion with concrete wrapper-service implementation notes for maintainers.
 
@@ -65,7 +65,7 @@ flowchart LR
 
 ## Recommended four-tool surface
 
-Use the existing helper Thing `SCPA_Utilization_helper`. Do **not** create a second Thing only for the LLM-facing wrapper surface. Register the four tools from the Chapter **16** manifest (or the canonical **`parler`** `dev_data/scpa_utilization/tools/extended_tools.json` copy) through `/tools/extended_tools.json`.
+Use the existing helper Thing `SCPA_Utilization_helper`. Do **not** create a second Thing only for the LLM-facing wrapper surface. Register the four tools from the Chapter **16** manifest (or the canonical **`parler`** `dev_data/sample_scpa_utilization_agent_configuration/tools/extended_tools.json` copy) through `/tools/extended_tools.json`.
 
 ### 1. `list_utilization_machines`
 
@@ -264,7 +264,7 @@ Result contract:
 
 ## `extended_tools.json` registration
 
-Do **not** duplicate the final manifest here. Copy the four-tool JSON from Chapter **16** or from **`parler`** `dev_data/scpa_utilization/tools/extended_tools.json`, then upload it to `/tools/extended_tools.json` on your configuration repository.
+Do **not** duplicate the final manifest here. Copy the four-tool JSON from Chapter **16** or from **`parler`** `dev_data/sample_scpa_utilization_agent_configuration/tools/extended_tools.json`, then upload it to `/tools/extended_tools.json` on your configuration repository.
 
 ## JavaScript maintainer sketches
 

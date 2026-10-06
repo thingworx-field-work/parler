@@ -3,7 +3,7 @@
   "stage": "day4",
   "phase": "post-llm-friendly",
   "sourceOfTruth": {
-    "finalBundle": "parler/dev_data/scpa_utilization"
+    "finalBundle": "parler/dev_data/sample_scpa_utilization_agent_configuration"
   },
   "uploads": [
     { "repoPath": "workshop/day4/tools/extended_tools.json", "target": "/tools/extended_tools.json" },

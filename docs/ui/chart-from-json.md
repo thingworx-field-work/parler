@@ -62,7 +62,7 @@ For proportions over large detail sets, return an aggregated single table instea
 
 ## 3. Worked example: the utilization sample tools
 
-The sample configuration in `dev_data/scpa_utilization/tools/extended_tools.json` maps four model-visible
+The sample configuration in `dev_data/sample_scpa_utilization_agent_configuration/tools/extended_tools.json` maps four model-visible
 tools to services on the Thing `SCPA_Utilization_helper` (implementation in
 `dev_data/Parler_SCPA_Guidance.xml`). All four are `READ_ONLY`, not approval-gated, playbook-safe, and
 return JSON.

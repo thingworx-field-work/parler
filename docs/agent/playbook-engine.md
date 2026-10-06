@@ -939,7 +939,7 @@ The actual JSON must include full `dependsOn`, tool names, argument refs, eviden
 
 ### 10.2 `cross_asset_pair_health` (V1b surface)
 
-Playbook id **`cross_asset_pair_health`** (skill baseline **`asset_pair_health`** keeps the short id). Runtime file: `dev_data/playbooks/cross_asset_pair_health/playbook.json` (taxonomy candidate-list variant below). The resolver-first variant (`resolve_thing` → `normalize_resolved_thing` → `flatten_pair_assets`, `assetType` optional) is in `dev_data/scpa_utilization/playbooks/cross_asset_pair_health/` and the packaging fixture; see `playbook-input-resolution.md`.
+Playbook id **`cross_asset_pair_health`** (skill baseline **`asset_pair_health`** keeps the short id). Runtime file: `dev_data/playbooks/cross_asset_pair_health/playbook.json` (taxonomy candidate-list variant below). The resolver-first variant (`resolve_thing` → `normalize_resolved_thing` → `flatten_pair_assets`, `assetType` optional) is in `dev_data/sample_scpa_utilization_agent_configuration/playbooks/cross_asset_pair_health/` and the packaging fixture; see `playbook-input-resolution.md`.
 
 Candidate-list shape:
 

@@ -129,7 +129,7 @@ Input resolution does not:
 Reference locations:
 
 - `parler-agent/src/test/resources/playbook-packaging-fixture/cross_asset_pair_health/playbook.json` (resolver-first)
-- `dev_data/scpa_utilization/playbooks/cross_asset_pair_health/playbook.json` (resolver-first)
+- `dev_data/sample_scpa_utilization_agent_configuration/playbooks/cross_asset_pair_health/playbook.json` (resolver-first)
 - `dev_data/playbooks/cross_asset_pair_health/playbook.json` (older taxonomy candidate-list variant; `assetType` required)
 
 Behavior:
@@ -162,7 +162,7 @@ The taxonomy candidate-list path remains available for other Playbooks.
 
 Reference location:
 
-- `dev_data/scpa_utilization/playbooks/machine_utilization_summary/playbook.json`
+- `dev_data/sample_scpa_utilization_agent_configuration/playbooks/machine_utilization_summary/playbook.json`
 
 Behavior:
 
@@ -188,8 +188,8 @@ explainable.
 
 Reference locations:
 
-- `dev_data/scpa_utilization/playbooks/utilization_overview/playbook.json`
-- `dev_data/scpa_utilization/playbooks/utilization_summary/playbook.json`
+- `dev_data/sample_scpa_utilization_agent_configuration/playbooks/utilization_overview/playbook.json`
+- `dev_data/sample_scpa_utilization_agent_configuration/playbooks/utilization_summary/playbook.json`
 
 These workflows do not take a single user-supplied machine identifier, so they need no
 input normalization. A variant that accepts a subset of machines should reuse the same
@@ -199,7 +199,7 @@ row-matching operation rather than passing raw labels into extended tools.
 
 Reference location:
 
-- `dev_data/scpa_utilization/playbooks/cross_region_health/playbook.json`
+- `dev_data/sample_scpa_utilization_agent_configuration/playbooks/cross_region_health/playbook.json`
 
 No input normalization. Cross-region health is naturally an asset-type-scoped
 workflow: "compare regions for this asset type." Keeping `assetType` required there is
@@ -402,7 +402,7 @@ can see what was actually queried.
 
 The training course under `training/` tells the same story in three steps: a natural multi-turn prompt, a Skill with
 resolver-first instructions, and a Playbook with equivalent resolver-first inputs. The Day 4 utilization Playbooks under
-`training/workshop/day4/` are copies of the final `dev_data/scpa_utilization/` sample; drift is caught as described in
+`training/workshop/day4/` are copies of the final `dev_data/sample_scpa_utilization_agent_configuration/` sample; drift is caught as described in
 [`training-content-parity.md`](./training-content-parity.md).
 
 ## 9. Tests

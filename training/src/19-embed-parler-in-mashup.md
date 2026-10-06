@@ -41,7 +41,7 @@ The **`Parler-embedded`** mashup exposes **four parameters** the parent mashup c
 
 ## SCPA demo project
 
-Download **`Parler_SCPA_Demo.xml`** from the release download page and import it into ThingWorx. Open project **`Parler_SCPA_Demo`** and confirm it includes at least the entities below.
+The demo project ships in **`sample_scpa_utilization_entities.xml`** (in `dev_data/` and on the release download page). If you have not imported it yet, follow [Import the complete SCPA utilization sample](./R-import-sample-application.md). Open project **`Parler_SCPA_Demo`** and confirm it includes at least the entities below.
 
 <img src="./__images__//image-20260629014132929.png" alt="image-20260629014132929" style="zoom:50%;" />
 

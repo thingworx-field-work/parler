@@ -4,7 +4,7 @@ Upload or download a directory tree to/from a ThingWorx FileRepository on DEV_SE
 Uses the same ``.env`` credentials as ``import-dev`` (``DEV_SERVER``, ``DEV_KEY``).
 
   uv sync
-  uv run load-file-tree -i dev_data/scpa_utilization/skills -t ConfigurationRepository
+  uv run load-file-tree -i dev_data/sample_scpa_utilization_agent_configuration/skills -t ConfigurationRepository
   uv run load-file-tree -i ./my-tree -t ConfigurationRepository/demo --clean
   uv run load-file-tree -d -i ./backup -t ConfigurationRepository/demo
   uv run load-file-tree -d -i ./backup -t ConfigurationRepository/demo --clean

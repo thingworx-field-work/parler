@@ -565,8 +565,8 @@ The system prompt and tool descriptions teach these compact rules:
 v3 taxonomy files in this repository:
 
 ```text
-dev_data/scpa_utilization/taxonomies/identity-types.json
-dev_data/scpa_utilization/taxonomies/asset-types.json
+dev_data/sample_scpa_utilization_agent_configuration/taxonomies/identity-types.json
+dev_data/sample_scpa_utilization_agent_configuration/taxonomies/asset-types.json
 parler-agent/src/test/resources/taxonomy/cellfab-v3/identity-types.json
 parler-agent/src/test/resources/taxonomy/cellfab-v3/asset-types.json
 training/dev_data/taxonomies/  (training copies)

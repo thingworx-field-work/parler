@@ -51,3 +51,4 @@
 - [Preflight gates](./O-preflight-gates.md)
 - [What's new: Agent 0.1.210 → 0.1.224 and widget 0.1.89 → 0.1.92](./P-whats-new-210-224.md)
 - [Widget API reference](./Q-widget-api.md)
+- [Import the complete SCPA utilization sample](./R-import-sample-application.md)

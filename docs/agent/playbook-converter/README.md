@@ -15,7 +15,7 @@ Refresh: **`RefreshPromptContextCache`**, then invoke **`/skill_to_playbook_conv
 
 ## Workflow
 
-1. Load source **`SKILL.md`** (e.g. `dev_data/scpa_utilization/skills/asset_pair_health/SKILL.md` — user-maintained).
+1. Load source **`SKILL.md`** (e.g. `dev_data/sample_scpa_utilization_agent_configuration/skills/asset_pair_health/SKILL.md` — user-maintained).
 2. Call **`GetAgentRuntimeSnapshot`** with `includePlaybooks: true`.
 3. Draft `playbook.json` using only ops/tools present in the snapshot.
 4. Call **`ValidatePlaybookDocument`** with the draft JSON.
