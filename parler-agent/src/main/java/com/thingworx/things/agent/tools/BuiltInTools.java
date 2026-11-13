@@ -98,7 +98,7 @@ public final class BuiltInTools {
 
     /**
      * @param documentKnowledgeBuiltinsEnabled when {@code true}, register {@code search_document_chunks},
-     *          {@code get_document_chunk}, and {@code resolve_document_set}; when {@code false}, skip them
+     *          {@code get_document_chunk}, {@code load_topic}, and {@code resolve_document_set}; when {@code false}, skip them
      *          entirely (no executor-only reservation).
      */
     public static void registerAll(ToolRegistry registry, boolean advertiseLegacyServiceDiscoveryTools,
@@ -164,6 +164,7 @@ public final class BuiltInTools {
         registry.register(setPropertyValueDef(), BuiltInTools::executeSetPropertyValue);
         registry.register(spotlightSearchDef(), SpotlightSearchExecutor::executeSpotlightSearch);
         if (documentKnowledgeBuiltinsEnabled) {
+            registry.register(DocumentKnowledgeToolSchemas.loadTopicDef(), DocumentKnowledgeToolsExecutor::executeLoadTopic);
             registry.register(DocumentKnowledgeToolSchemas.searchDocumentChunksDef(),
                     DocumentKnowledgeToolsExecutor::executeSearchDocumentChunks);
             registry.register(DocumentKnowledgeToolSchemas.getDocumentChunkDef(),

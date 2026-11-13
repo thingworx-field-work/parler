@@ -2,6 +2,7 @@ package com.thingworx.things.agent.taskstate;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -51,6 +52,40 @@ public final class AgentTaskState {
      * {@code docs/agent/task-state.md}).
      */
     private final List<String> dynamicSkillShortNamesInOrder = new ArrayList<>();
+    /** Method recognition is independent of checklist parsing and never rendered on task-progress wire. */
+    private final LinkedHashSet<String> activeMethodIds = new LinkedHashSet<>();
+    /** A search offered a topic this turn; weaker than an active method and never carried over a pause. */
+    private boolean methodOffered;
+
+    public void recordMethodOffered() {
+        methodOffered = true;
+    }
+
+    public boolean isMethodOffered() {
+        return methodOffered;
+    }
+
+    public void recordActiveMethod(String id) {
+        if (id != null && !id.isBlank()) {
+            activeMethodIds.add(id);
+        }
+    }
+
+    public List<String> getActiveMethodIds() {
+        return List.copyOf(activeMethodIds);
+    }
+
+    public List<String> snapshotActiveMethodIdsForPending() {
+        return getActiveMethodIds();
+    }
+
+    /** Rebuild recognition in a fresh logical-turn continuation; never seed it from transcript text. */
+    public void restoreActiveMethodIds(List<String> snapshot) {
+        activeMethodIds.clear();
+        if (snapshot != null) {
+            snapshot.forEach(this::recordActiveMethod);
+        }
+    }
 
     public AgentTaskState(String requestId, String conversationId, String goalCleanedText) {
         this.requestId = requestId != null ? requestId : "";

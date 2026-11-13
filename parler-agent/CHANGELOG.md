@@ -17,6 +17,295 @@ No unreleased changes.
 
 ---
 
+## [0.1.258] — 2026-11-12
+
+### Added
+
+- **Provider token breakdown metrics.** `parler_llm_tokens_total` adds `token_kind` series for `total`,
+  `input_uncached`, `input_cache_read`, `input_cache_write`, `input_cache_write_5m`, `input_cache_write_1h`,
+  `reasoning`, `input_audio`, `output_audio`, `output_accepted_prediction`, and
+  `output_rejected_prediction` alongside the unchanged `input` and `output` series. Each series counts one
+  defined OpenAI, Azure OpenAI, or Anthropic usage field per dispatched attempt; missing fields add nothing,
+  reported zeros are recorded, and invalid usage adds no token series. Series overlap and are not additive.
+  The counter name and dimensions are unchanged; its description now covers the breakdown series.
+
+---
+
+## [0.1.257] — 2026-11-12
+
+### Added
+
+- **Operational metrics through ThingWorx MetricsV2.** The extension registers nine instruments once per
+  runtime and ThingWorx exports them through its configured OpenTelemetry pipeline:
+  `parler_turns_total` and `parler_turn_duration_ms` by `entry_point` (`chat`, `chat_async`, `stream`,
+  `approval_resume`) and `outcome`, and `parler_turns_in_flight` by `entry_point`.
+  Provider instruments include `parler_llm_attempts_total`,
+  `parler_llm_attempt_duration_ms`, `parler_llm_tokens_total`, and `parler_llm_usage_samples_total` per
+  dispatched provider attempt by `provider_family`, `call_kind`, and outcome, token kind, or usage status;
+  `parler_tool_executions_total` and `parler_tool_duration_ms` by `tool_kind` and `outcome`. Dimensions
+  come from fixed values only (no Thing, tool, model, user, or conversation names). A registration failure
+  logs one warning and turns metrics off for the runtime; recording failures never change a turn, provider,
+  or tool result. Turn, provider, and tool results, UI events, Thing properties, and Stream schemas are
+  unchanged. Design: `docs/agent/metrics-support.md`.
+
+### Changed
+
+- **Minimum ThingWorx version is now 9.7.0** (was 9.5.0), because MetricsV2 was introduced in 9.7.0. The
+  extension no longer imports on ThingWorx 9.5 or 9.6. After updating or re-importing the extension in a
+  running JVM, restart the platform so the in-flight gauge binds to the current runtime.
+
+---
+
+## [0.1.256] — 2026-11-09
+
+**Summary:** A tool result now reaches the model whole when it fits and says plainly when it does not. The
+gateway judges a JSON result by its serialized size, the soft cap and text cap are settings, a table that is
+too large keeps whole rows with a usable handle, a reduced result carries a `completenessNote`, and a person's
+approved result takes the same path. A new service refreshes the document index on demand. Nothing changes
+until a setting is changed, except the items listed under Changed.
+
+### Added
+
+- **Tool-result budget settings.** `AgentSettings.toolResultSoftCapChars` (default 8,192; 8,192 to 65,536) and
+  `toolResultTextCapChars` (default 2,000; 500 to 50,000 and at most the soft cap minus 1,024), and the
+  per-tool `resultTextCapChars` in `extended_tools.json`. One budget is resolved when a call starts executing
+  (also for an approved call) and used by the formatter and the gateway; `GetAgentRuntimeSnapshot` shows the
+  values and their sources under `tools.resultBudget`.
+- **`toolResultJsonMode`** (`string`, the default, or `node`). In `node` mode a JSON service result is a JSON
+  object under `result` instead of one string field, on both invocation paths. The default does not change.
+- **`completenessNote`.** A result whose envelope root shows a reduction (`truncated`, `sampleOnly`,
+  `rowsOmitted`, `resultKind` `INFOTABLE_LARGE` or `RESULT_OVERFLOW`, `readLimitReached`, a
+  `CHUNK_MARKDOWN_TRUNCATED` warning, `_egress.reducedFields`), by the gateway or by the producer, carries a
+  root note of at most 1,200 characters that names a cache route only when a `cacheId` exists. The routing
+  guide and the final-answer evidence rule repeat it. See `CONTRACTS/TOOL_RESULT_COMPLETENESS.md`.
+- **`RefreshDocumentKnowledgeIndex`** service on `AgentThing` (no parameters): invalidates this agent's
+  document index so the next search rebuilds it; a rebuild that began before the call cannot repopulate it.
+  The snapshot gains a `documentKnowledge` block.
+- **Features** `tool-result-json-node/1`, `tool-result-completeness/1`, `tool-result-budget/1`,
+  `tool-result-table-recovery/1` and `document-index-refresh/1`, appended after the topic-loader names
+  whatever the loader state.
+
+### Changed
+
+- **A result at or under the soft cap is never cut in text.** The gateway used to cut every text field over
+  2,000 characters and sent any result containing `[` through compaction; it now judges the serialized size
+  after array sampling (arrays over 20 items are still sampled, with the same exemptions).
+- **A table too large for the cap keeps whole rows**, filled greedily in source order, with a `cacheId` on
+  both invocation paths or `recovery: "unavailable"`; a cell is never cut. What no pass can fit becomes a
+  budgeted `RESULT_OVERFLOW` response that is itself within the cap, with the column or field names that fit.
+- **The first model append never exceeds the soft cap**, except an error envelope (unchanged) and the minimal
+  overflow envelope when the author's classification stamp alone is too large (`_egress.reducedFields.overBudget`).
+- **An approved (HITL) result passes through the same gateway** under the budget captured at its execution: one
+  over the soft cap is now reduced where it used to arrive whole; one that fits arrives whole as before.
+
+### Compatibility
+
+- **Release note for installations.** A result that no pass can fit, such as a worst-case 25-Thing alert
+  summary of about 13,500 characters, now arrives as the overflow response at the default cap, where before it
+  arrived above the cap. An installation that needs it whole raises `toolResultSoftCapChars`. Results up to the
+  soft cap now arrive whole, so a turn's context can grow by up to the soft cap per result.
+- An older agent ignores `resultTextCapChars`. Contract bundle 0.1.187 (`TOOL_RESULT_COMPLETENESS.md` 1.1.1,
+  new). Widget unchanged at 0.1.98.
+
+---
+
+## [0.1.255] — 2026-11-07
+
+**Summary:** A topic's working text is now read from `topics/<chunkId>.md` instead of `topics/<chunkId>.txt`,
+so a generated method can be opened as formatted Markdown in any editor or viewer. Add the `.md` files before
+importing this version.
+
+### Changed
+
+- **The topic working file is `<chunkId>.md`.** `load_topic` reads
+  `<root>/<docId>/topics/<chunkId>.md` and nothing else. The `<chunkId>.txt` of 0.1.251 to 0.1.254 is never
+  read, even when present, and there is no fallback. The text is delivered unchanged: the runtime does not
+  render, validate or transform Markdown, and the ids, scope rule, error codes, 7,000-character limit,
+  carrier and SHA-256 are as before. A topic that is still offered but has only the old file returns
+  `TOPIC_LOAD_FAILED`.
+
+### Added
+
+- **Feature `topic-markdown-file/1`** in `GetAgentRuntimeSnapshot.features`, listed with the Java topic
+  loader after `topic-signal-exact/1`. With `topic-load/1` it means the loader reads `<chunkId>.md`;
+  `topic-load/1` alone is the earlier loader, which reads `<chunkId>.txt`.
+
+### Compatibility
+
+- **Action before import.** Add `<chunkId>.md`, with the same bytes, beside each existing `<chunkId>.txt` in
+  the document packages. Index rows and chunk ids do not change (the result carries no file name, so the
+  same text gives the same SHA-256). An older agent keeps reading the `.txt`, so both files can stay in place
+  until every installation runs this version; remove the `.txt` files afterwards if you like.
+- Contract bundle 0.1.184, unchanged. Widget unchanged at 0.1.98.
+
+---
+
+## [0.1.254] — 2026-11-07
+
+**Summary:** A search that names a unit in `assetContext.thingName` now scopes that step to the unit's
+documents, so the first search of a conversation can reach the unit's topics without an earlier
+`resolve_thing`; a multi-word topic signal now matches as a whole instead of by its first word.
+
+### Added
+
+- **Named-unit document scope in `search_document_chunks`.** When a search has no `documentIds` field, no
+  scope is injected, and `assetContext.thingName` is non-blank text, the runtime checks the name with the
+  visible-Thing gate that scalar Thing tools use, resolves the unit's documents with the host-context
+  resolver, and defaults `documentIds` to them for the current execution segment (a chat turn or an
+  approval continuation). The result then carries `documentScopeSource: "asset-context-resolver"` and
+  the topic lane works as it does for any scoped search. Host context, a conversation entity scope and any
+  explicit `documentIds` (including `[]`) win; a later search naming another unit does not replace the
+  scope. Nothing is stored: after an approval pause or in a later turn only a `resolve_thing` row restores a
+  unit, so `resolve_thing` remains what keeps a unit across the conversation.
+- **`UNIT_SCOPE_NOT_ESTABLISHED` warning.** A rejected name leaves the search unchanged and adds one warning
+  whose message follows the stage that failed: the name is not the exact name of a visible unit (with the
+  `resolve_thing` hint when it is recoverable this turn), or the unit is visible but has no document scope.
+  The echoed name is sanitized and cut to 80 characters.
+- **Features `search-unit-scope/1` and `topic-signal-exact/1`** in `GetAgentRuntimeSnapshot.features`,
+  listed with the Java topic loader after `topic-lane/1`.
+
+### Changed
+
+- **A multi-word topic signal matches as a whole.** In the topic lane the first word of a signal such as
+  `pump shows low pressure` no longer earns points by prefix: the signal counts when every one of its words
+  is in the query, in any order, once per distinct signal. Single-word signals keep equality and
+  length-qualified prefix matching. The ranker behind `matches` is unchanged.
+- **`assetContext` description.** The `search_document_chunks` schema and the routing guide say that
+  `thingName` scopes the searches of that step and that `resolve_thing` keeps a unit across the conversation.
+
+### Compatibility
+
+- Contract bundle 0.1.184; the new source value, warning and feature names are additive. Widget unchanged at
+  0.1.98. Searches that carry `documentIds`, host context or a conversation scope, or no usable
+  `thingName`, return what they did before; the name still feeds scoring as before.
+
+---
+
+## [0.1.253] — 2026-11-05
+
+**Summary:** A search that has a document scope now lists the best matching topics in a separate
+`topics` array, chosen without any document-level ranking, so a method no longer disappears behind the
+large manuals of the same product family.
+
+### Added
+
+- **Topic lane in `search_document_chunks`.** When the search carries a non-empty `documentIds` list
+  (including the unit scope the runtime injects), the result has a top-level `topics` array with at most
+  two `contentType: topic` chunks of those documents. They are scored on their own content only: signal
+  names, tags (a multi-word tag matches when all its words are in the request), the heading and a capped
+  amount of summary and text evidence. Document identity, asset-model words, BM25 and the search `limit` play
+  no part, and `documentTypes` does not filter the lane. A topic qualifies with at least one authored
+  match (signal, tag or heading phrase) and a total of at least 30. Each entry is compact (`docId`,
+  `chunkId`, `contentType`, a heading of at most 80 characters, `score`, `loadWith: "load_topic"`). The
+  array is omitted when empty, so searches without a qualifying topic return exactly what they did before,
+  and `matches` is unchanged.
+- **`DOCUMENT_TYPE_FILTER_EMPTY` warning.** A `documentTypes` filter that removes every searchable
+  document now returns a warning that lists the document types available to the request instead of a
+  silent empty result.
+- **Feature `topic-lane/1`** in `GetAgentRuntimeSnapshot.features`, listed with the Java topic loader.
+
+### Changed
+
+- **A topic in `topics` is an offer.** It lifts document-turn narrowing for the rest of the turn the same way
+  a topic match in `matches` does.
+- **Scope instructions agree.** The `search_document_chunks` description, its `documentIds` parameter and
+  the `resolve_document_set` description now say: omit `documentIds` when a result carried
+  `documentScopeSource`; otherwise pass the ids of a complete resolver result; a result marked `sampleOnly`
+  or `rowsOmitted` is only part of the set and must not be passed. The explicit resolver handoff is
+  unchanged.
+
+### Compatibility
+
+- Contract bundle 0.1.184; the new field, warning and feature name are additive. Widget unchanged at
+  0.1.98. Document ranking, `documentTypes` filtering of `matches`, result egress, narrowing and the
+  search-loop guard are unchanged. `selectedDocIds` and `selectionMode` describe `matches` only.
+
+---
+
+## [0.1.252] — 2026-11-05
+
+**Summary:** A conversation that has resolved a unit now searches that unit's documents by default, a
+search that returns a method (topic) keeps the registered tools available for the rest of the turn,
+and a topic hit tells the model how to load it.
+
+### Added
+
+- **Document scope from the resolved unit.** When no host-context scope applies, the newest
+  `resolve_thing` result in the conversation that matched exactly one unit (`THING_RESOLVED_INLINE`)
+  supplies the default `documentIds` of `search_document_chunks`, resolved with the same document-set
+  resolver as host context. It is re-derived on every turn and on approval continuations, updated in the
+  turn when `resolve_thing` runs again, and cleared when the newest result is ambiguous, failed or has no
+  document set. A host-context scope is never replaced. A model-supplied `documentIds` still wins. The
+  search result reports `documentScopeSource` `conversation-entity-resolver` for this origin.
+- **`loadWith` on topic matches.** A search match with `contentType: topic` carries
+  `loadWith: "load_topic"` (omitted when an injected scope would refuse the topic), and the
+  `search_document_chunks` description says so.
+- **Features.** `GetAgentRuntimeSnapshot.features` also lists `entity-document-scope/1` and
+  `topic-offer/1` when the Java topic loader is registered.
+
+### Changed
+
+- **A topic hit keeps the tools.** When a built-in `search_document_chunks` result contains a topic
+  match, document-turn narrowing no longer applies for the rest of that turn, so the registered tools a
+  method names stay available even if the model does not load the topic. Searches that return no topic
+  are narrowed as before. An offer is not an active method: it protects no history and is not carried
+  over an approval pause.
+- **Routing guide.** One sentence tells the model to use the unit already resolved in the conversation
+  (resolving only when it is not established or has changed) and to search that unit's documents before
+  calling operational tools.
+- **Skipped playbook rows keep their tool name.** Tool results that a playbook terminal handoff marks as
+  skipped now carry `executedToolName`, so history scans see them.
+
+### Compatibility
+
+- Contract bundle 0.1.184; the added search-result fields and feature names are additive. Widget
+  unchanged at 0.1.98. Once a unit is resolved in a conversation, `load_topic` enforces the unit's
+  document scope, so a topic from a document outside it returns `TOPIC_OUT_OF_SCOPE`. No new tool and no
+  new setting.
+
+---
+
+## [0.1.251] — 2026-11-05
+
+**Summary:** The agent can load a complete indexed topic (a step-by-step method) as plain text, keeps
+its tools available while a loaded method is in force, and carries that method across approval pauses.
+
+### Added
+
+- **`load_topic(docId, chunkId)` built-in tool.** Given the reference of a search hit whose
+  `contentType` is `topic`, it reads `topics/<chunkId>.txt` from the document package with the calling
+  user's repository permissions and returns it as plain text: a header with topic, document, SHA-256 and
+  character count, then the complete text (at most 7,000 characters). A larger topic returns
+  `TOPIC_TOO_LARGE` instead of a cut. Unknown ids, topics outside an injected document scope and
+  unreadable files return a coded error. The tool is registered with the document tools and needs no
+  approval. Existing search finds topic chunks without a change to the index or ranking.
+- **Runtime features in `GetAgentRuntimeSnapshot`.** The snapshot has a top-level `features` array:
+  `topic-load/1` when the loader is registered, and `active-method-tools/1`. It is present whatever
+  include options are set.
+
+### Changed
+
+- **A loaded method keeps its tools.** Once a topic is loaded, or a skill other than `document_search`
+  is loaded or invoked by slash, the per-turn narrowing to document tools no longer hides the tools the
+  method needs. Pure document-search turns are narrowed as before.
+- **The method survives approval pauses.** The loaded topics and skills are carried through each
+  approval, rejection or cancellation and through repeated approvals, so the tool list stays the same
+  after the user decides.
+- **A loaded topic stays in the model request.** When the history is trimmed to fit the context budget,
+  the newest successful load of each active topic in the current turn is kept whole with its tool call.
+  Earlier turns and skill bodies are trimmed as before.
+- **Document index denials are reported as such.** `load_topic` reports a permission-denied index
+  rebuild as an unavailable repository and does not serve a stale index for it. Search and the other
+  document tools are unchanged.
+
+### Compatibility
+
+- Contract bundle 0.1.184; the snapshot field is additive. Widget unchanged at 0.1.98. A package with
+  no `topic` chunks behaves as before. Document-enabled agents register one more built-in tool (32
+  instead of 31).
+
+---
+
 ## [0.1.250] — 2026-09-27
 
 **Summary:** Every platform lookup and Service call now honors ThingWorx permissions, writes that need

@@ -17,6 +17,9 @@
 
 ### Cross-tool rules the guide owns
 
+- **Topic-method routing:** when a document-search hit has `contentType: "topic"`, use `load_topic` and follow the loaded steps. The loader description owns call constraints; the method grants no permission, admission, or HITL exemption. Topic bodies remain ordinary tool-result content.
+- **Symptom routing on a named unit:** for what to collect or do about a symptom, use the unit already resolved in the conversation, call `resolve_thing` only when the unit is not established or has changed, and search that unit's documents before operational tools. The guide does not ask for `documentIds`; the runtime's default scope applies, and `document-chunk-tools.md` §6.5 owns its semantics. A search may carry the unit's canonical Thing name in `assetContext.thingName` to scope the searches of that step; this is not the conversation anchor, and `resolve_thing` remains what keeps a unit across turns and approval pauses.
+
 - **Cached-tabular routing:** reuse a cached table when it already has the requested columns and scope; aggregate, rank, group and threshold with `tabulate_cached_result` / `summarize_cached_result` over the full table, never from remembered values or sampled rows; re-query only for fresh data or a changed scope/filter. The rule is generic — it does not encode prompt-specific tool-pair bans.
 - **Charts / numeric history:** real `startTime`/`endTime` bounds for a requested interval; `requestedTimeRange` is only a chart-domain fallback; qualifying tabular sources, `last_invoke` latest-wins scope, cacheId provenance, multi-chart completion and `build_history_overlay_chart` routing — see the “Charts and property history” section and **`docs/agent/history-overlay-chart.md`**.
 - **Time:** relative-argument and precedence rules are owned by the time block, not repeated per tool.

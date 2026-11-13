@@ -2,6 +2,8 @@
 
 Status: **implemented** (`ContextBudgetPlanner`, Tier B promotion, storage trim, compact fetch rehydrate, always-on replay gate). §16 lists each component under the slice label (A–G) that code comments cite.
 
+**Active topic retention:** In addition to the protected rows described in §16 Slice C, the planner protects the newest successful `load_topic` batch per active topic id in the current logical user turn. The `TOOL` row must have `executedToolName=load_topic`, a complete bounded identity/hash/count header matching the executed call's arguments, and the same call id as its containing assistant call. Failed reloads cannot replace successful text; repeated successful loads permit older duplicates to drop; different active topics each retain their latest complete body. Protection covers the entire paired assistant/tool batch, including sibling results. Earlier-turn topics and dynamic `get_agent_skill` bodies gain no special protection. Approval snapshots carry topic batches and restored recognition into continuation planning. If protected content cannot fit, existing `CANNOT_FIT_AFTER_TRIM` / `OVERHEAD_EXCEEDS_CAP` failures still occur before the provider call; no topic is excerpted, silently omitted, or used to override request caps. See `task-state.md` for recognition lifecycle and `document-chunk-tools.md` for the complete-text carrier.
+
 Scope: Parler Java agent LLM context assembly, in-memory conversation replay, Stream rehydration, tool-result evidence lanes, and provider request budgeting.
 
 ## 1. Problem

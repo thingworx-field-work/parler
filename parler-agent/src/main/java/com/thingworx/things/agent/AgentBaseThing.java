@@ -208,7 +208,25 @@ import com.thingworx.system.ContextType;
                         description = "Required dedicated FileRepository Thing for the production Artifact Cache. Empty or unavailable rejects user turns (no in-memory fallback). See docs/agent/nearterm/cache-correctness-foundation.md.",
                         baseType = "THINGNAME",
                         aspects = { "thingTemplate:FileRepository", "friendlyName:Artifact Cache File Repository" },
-                        ordinal = 29) })),
+                        ordinal = 29),
+                    @ThingworxFieldDefinition(
+                        name = "toolResultJsonMode",
+                        description = "How a JSON service result reaches the model: string (default; the JSON value as one string field) or node (the JSON value as an object under result). Any other value resets to string with CONFIG_VALUE_CLAMPED. Read live. See docs/agent/configuration-repository.md.",
+                        baseType = "STRING",
+                        aspects = { "defaultValue:string" },
+                        ordinal = 30),
+                    @ThingworxFieldDefinition(
+                        name = "toolResultSoftCapChars",
+                        description = "Serialized size (UTF-16 units, escaping, markers and note included) above which a tool result is reduced before the model reads it, and which the first model append never exceeds. 8192..65536; default 8192. Below the minimum resets to the default; above the maximum clamps. Read live.",
+                        baseType = "INTEGER",
+                        aspects = { "defaultValue:8192" },
+                        ordinal = 31),
+                    @ThingworxFieldDefinition(
+                        name = "toolResultTextCapChars",
+                        description = "Size above which one text field of a reduced tool result is cut. 500..50000, and at most toolResultSoftCapChars minus 1024; default 2000. A tool may declare its own resultTextCapChars in extended_tools.json. Read live.",
+                        baseType = "INTEGER",
+                        aspects = { "defaultValue:2000" },
+                        ordinal = 32) })),
     }
 )
 public abstract class AgentBaseThing extends Thing {
@@ -249,6 +267,9 @@ public abstract class AgentBaseThing extends Thing {
         public static final String DocumentTurnToolNarrowingDisabled = "documentTurnToolNarrowingDisabled";
         public static final String ToolAdmissionMode = "toolAdmissionMode";
         public static final String ArtifactCacheFileRepository = "artifactCacheFileRepository";
+        public static final String ToolResultJsonMode = "toolResultJsonMode";
+        public static final String ToolResultSoftCapChars = "toolResultSoftCapChars";
+        public static final String ToolResultTextCapChars = "toolResultTextCapChars";
     }
 
     protected double _temperature = 0.1;
@@ -504,6 +525,26 @@ public abstract class AgentBaseThing extends Thing {
 
     public int getDocumentKnowledgeChunkMaxChars() {
         return getIntFromConfig(Config.AgentSettings, Config.DocumentKnowledgeChunkMaxChars, 6_000);
+    }
+
+    /** @return raw {@code toolResultJsonMode}, read live; normalized by {@link ToolResultSettings}. */
+    public String getToolResultJsonModeRaw() {
+        return trimConfigString(Config.ToolResultJsonMode);
+    }
+
+    /** @return configured {@code toolResultSoftCapChars}, read live, or {@code null} when unset. */
+    public Integer getToolResultSoftCapCharsRaw() {
+        return getOptionalIntFromConfig(Config.ToolResultSoftCapChars);
+    }
+
+    /** @return configured {@code toolResultTextCapChars}, read live, or {@code null} when unset. */
+    public Integer getToolResultTextCapCharsRaw() {
+        return getOptionalIntFromConfig(Config.ToolResultTextCapChars);
+    }
+
+    private Integer getOptionalIntFromConfig(String fieldName) {
+        Object val = getConfigurationData().getValue(Config.AgentSettings, fieldName);
+        return val instanceof Number ? ((Number) val).intValue() : null;
     }
 
     private String trimConfigString(String fieldName) {

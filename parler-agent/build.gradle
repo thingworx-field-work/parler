@@ -72,12 +72,12 @@ project.ext {
     // Table-view topic (2026-04): see **parler-agent/CHANGELOG.md** for dated cuts (**`[0.1.17]`**, **`[0.1.18]`**, …).
     majorVersion = 0
     minorVersion = 1
-    revisionVersion = 250
+    revisionVersion = 258
     useBuildNumber = true
 
     artifact_version = majorVersion + "." + minorVersion + "." + revisionVersion
 
-    minimumThingWorxVersion = "9.5.0"
+    minimumThingWorxVersion = "9.7.0"
 
     forceSnapshot = true
     releaseBranches = ['main', ~/release-.*/]

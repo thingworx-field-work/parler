@@ -39,6 +39,7 @@ import com.thingworx.things.agent.llm.ParlerSuffixFraming;
 import com.thingworx.things.agent.llm.usage.LlmCallRecorder;
 import com.thingworx.things.agent.llm.ToolCall;
 import com.thingworx.things.agent.llm.ToolDefinition;
+import com.thingworx.things.agent.support.RecordingLlmClient;
 import com.thingworx.things.agent.source.SourceDescriptor.CompletenessStatus;
 import com.thingworx.things.agent.taskstate.AgentTaskState;
 import com.thingworx.things.agent.taskstate.TaskStateLlmInjector;
@@ -1545,44 +1546,6 @@ class AgentLoopTest {
             LlmResponse r = scripted.poll();
             if (r == null) {
                 throw new IllegalStateException("no scripted response");
-            }
-            return r;
-        }
-
-        @Override
-        public LlmUsageWireIds usageWireIds() {
-            return ids;
-        }
-
-        @Override
-        public boolean healthCheck() {
-            return true;
-        }
-    }
-
-    private static final class RecordingLlmClient implements LlmClient {
-        private final List<LlmChatRequest> requests = new ArrayList<>();
-        private final Queue<LlmResponse> scripted = new ArrayDeque<>();
-        private final LlmUsageWireIds ids = new LlmUsageWireIds("pt", "tpl", "openai-chat-completions-v1", "mdl");
-        private Runnable beforeChatReturn;
-
-        void enqueue(LlmResponse r) {
-            scripted.add(r);
-        }
-
-        void setBeforeChatReturn(Runnable r) {
-            this.beforeChatReturn = r;
-        }
-
-        @Override
-        public LlmResponse chat(LlmChatRequest request) throws Exception {
-            requests.add(request);
-            LlmResponse r = scripted.poll();
-            if (r == null) {
-                throw new IllegalStateException("no scripted response");
-            }
-            if (beforeChatReturn != null) {
-                beforeChatReturn.run();
             }
             return r;
         }

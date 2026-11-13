@@ -140,7 +140,7 @@ class DocumentTurnToolNarrowingTest {
                 "resolve_asset_type", "resolve_thing", "list_entities_by_type", "get_property_values",
                 "query_property_history", "query_stream_data", "query_alert_summary", "query_alert_history",
                 "acknowledge_alerts", "set_property_value", "spotlight_search",
-                "get_agent_skill", "search_document_chunks", "get_document_chunk", "resolve_document_set",
+                "get_agent_skill", "search_document_chunks", "get_document_chunk", "resolve_document_set", "load_topic",
                 "start_playbook"
         };
         List<ToolDefinition> list = new ArrayList<>();

@@ -88,7 +88,8 @@ public final class ParlerHitlStreamScopedEnqueue {
                 dynamicSnap,
                 extendedToolTargetEntityName,
                 extendedToolTargetServiceName,
-                AgentToolContext.tabularChartRoundState().snapshot());
+                AgentToolContext.tabularChartRoundState().snapshot(),
+                taskSt != null ? taskSt.snapshotActiveMethodIdsForPending() : List.of());
         PendingApprovalStore.put(rec);
         ParlerHitlAuditLog.pendingEnqueued(rec, agentThingName);
         throw new ApprovalPendingException(pendingId);

@@ -11,7 +11,7 @@ Different figures in this file measure **different surfaces**. Do not compare th
 | Population | Count (baseline) | What it includes | How measured |
 | --- | ---: | --- | --- |
 | **(a) Built-in registry `registerAll`** | **28** | All first-party tools registered by **`BuiltInTools.registerAll`**, including **`get_agent_skill`** — **excludes** executor-only tools (listed after the rank table). The rank table and the built-in payload sections below measure this inventory. | Per-tool wire objects via **`ToolSchemaSizer`** + **`BuiltInToolMergedDefinitionFootprintTest`** (`anthropic-messages-v1`) |
-| **(b) Conditional / meta merge additions** | varies | **`start_playbook`** (when playbook catalog loaded), document-knowledge tools when host context enables them, **`load_tool_schemas`** in `lazy` admission mode — added at runtime merge, **not** counted in the (a) rank table. **`get_agent_skill`** is **in (a)** but may be **omitted** from the merged model-facing list when no skills are loaded (`ModelFacingSkillAdmission.hasModelFacingSkills(...)` in **`AgentThing.getMergedToolDefinitions()`**). | Runtime merge + admission policy |
+| **(b) Conditional / meta merge additions** | varies | **`start_playbook`** (when playbook catalog loaded), four document-knowledge tools when `documentKnowledgeBuiltinsEnabled` enables registration, **`load_tool_schemas`** in `lazy` admission mode — added at runtime merge, **not** counted in the (a) rank table. **`get_agent_skill`** is **in (a)** but may be **omitted** from the merged model-facing list when no skills are loaded (`ModelFacingSkillAdmission.hasModelFacingSkills(...)` in **`AgentThing.getMergedToolDefinitions()`**). | Runtime merge + admission policy |
 | **(c) Repository extended tools** | **manifest-dependent** | Entries from deployment **`/tools/extended_tools.json`** (sample: **4** post-LLM-friendly utilization tools in **`dev_data/sample_scpa_utilization_agent_configuration/tools/extended_tools.json`**) | Reconstructed from manifest + target service schemas at deploy time |
 | **(d) Historical incident full surface** | **34** @ **`toolSchemaChars=68049`** | **2026-06-28** live run: (a)-like built-ins **plus** seven **pre-LLM-friendly** utilization extended tools **plus** **`start_playbook`** when playbooks loaded — **not** comparable to (a) alone | Live **`LLM_CONTEXT_PLAN_FAIL`** log (below) |
 
@@ -225,6 +225,7 @@ The document tools are individually small, but they should still be conditional:
 - `resolve_document_set`
 - `search_document_chunks`
 - `get_document_chunk`
+- `load_topic`
 
 They are not useful for normal ThingWorx operational questions unless document knowledge is in play.
 
@@ -246,7 +247,7 @@ The narrowing unit is the tool bucket:
 | Current values / trends | `get_property_values`, `query_property_history`, `query_stream_data`, chart/table tools |
 | Alerts | `query_alert_summary`, `query_alert_history`, `acknowledge_alerts` |
 | Metadata exploration | `describe_entity_schema`, `discover_thing_members`, `invoke_service` |
-| Documents | `resolve_document_set`, `search_document_chunks`, `get_document_chunk` |
+| Documents | `resolve_document_set`, `search_document_chunks`, `get_document_chunk`, `load_topic` |
 | Skills / playbooks | `get_agent_skill`, `start_playbook` |
 | Utilization extension (manifest-dependent) | **4** current (`get_utilization_*`, `list_utilization_machines`) or **7** historical (`utilization_*`) — see §Repository Extended Tool Payloads |
 
@@ -265,7 +266,7 @@ The key issue is that utilization tools, document tools, broad entity tools, met
 
 This appendix lists model-facing JSON content. It is intentionally verbose: the goal is to inspect exactly which descriptions, enums, and parameter schemas consume context.
 
-The built-in payloads are the current Java `ToolDefinition` objects, serialized as in population **(a)** (same measurement), followed by the three document-knowledge tools (registered when document knowledge is enabled) and an example `start_playbook`. The extended-tool payloads are reconstructed from a deployment's `/tools/extended_tools.json` plus the target service definitions and DataShape expansion; the seven-tool generation below is historical.
+The built-in payloads are the current Java `ToolDefinition` objects, serialized as in population **(a)** (same measurement), followed by the four document-knowledge tools (registered when document knowledge is enabled) and an example `start_playbook`. The extended-tool payloads are reconstructed from a deployment's `/tools/extended_tools.json` plus the target service definitions and DataShape expansion; the seven-tool generation below is historical.
 
 ### Reading Guide
 
@@ -1986,6 +1987,25 @@ Size chars: `542`
 }
 ```
 
+### load_topic
+
+The conditional document-tool registration adds four definitions to the 28-tool flag-off baseline, giving 32 definitions with `registerAll(registry, false, true)`. `load_topic` is model-facing, read-only, in the `DOCUMENTS` bucket, and not playbook-safe. Its name is reserved only when the Java document built-ins are registered; the flag-off census and default-surface measurements above stay unchanged.
+
+Parameter schema:
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "docId": {"type": "string", "minLength": 1, "maxLength": 256},
+    "chunkId": {"type": "string", "minLength": 1, "maxLength": 256}
+  },
+  "required": ["docId", "chunkId"]
+}
+```
+
+The advertised description routes topic search hits to complete method text and documents exact-id/path restrictions, the 7,000 UTF-16-body-code-unit limit, ordinary tool-result authority, and unchanged tool admission/approval. Complete result/error and package semantics are in `document-chunk-tools.md` §6.6. This tool's schema does not extend the search-result or UI wire shapes.
+
 ### search_document_chunks
 
 Size chars: `1516`
@@ -2019,18 +2039,18 @@ Size chars: `1516`
       },
       "assetContext" : {
         "type" : "object",
-        "description" : "Optional asset context such as asset model, component, or document type hints."
+        "description" : "Optional asset context such as asset model, component, or document type hints. To scope searches in this step to one unit's documents, put that unit's canonical Thing name in thingName; it is used only if it names a visible unit that has documents. To keep a unit across the conversation, call resolve_thing."
       },
       "documentTypes" : {
         "type" : "array",
-        "description" : "Optional document type filters such as operations_manual or troubleshooting_guide.",
+        "description" : "Optional document type filters such as operations_manual or troubleshooting_guide. Applies to matches, not to topics.",
         "items" : {
           "type" : "string"
         }
       },
       "documentIds" : {
         "type" : "array",
-        "description" : "Optional explicit document id filter. When resolve_document_set returns a non-empty documents[], pass those documents[].documentId values here to scope this search to the resolved set (selectionMode documentIds-filter).",
+        "description" : "Optional explicit document id filter. Omit it when a search result carried documentScopeSource. Otherwise pass the documents[].documentId values of a complete resolve_document_set result to scope this search to that set (selectionMode documentIds-filter); a result marked sampleOnly or rowsOmitted is not complete. Any value here, including an empty array, replaces the runtime scope.",
         "items" : {
           "type" : "string"
         }
@@ -2043,7 +2063,7 @@ Size chars: `1516`
     "required" : [ ]
   },
   "name" : "search_document_chunks",
-  "description" : "Find document chunks relevant to a health issue, alarm, component, or user question. Use after live status is known when the user needs manual/troubleshooting guidance. When resolve_document_set returned a non-empty documents[], pass those ids as documentIds to scope this search to the resolved set. Returns ranked metadata and snippets; call get_document_chunk for full markdown to cite."
+  "description" : "Find document chunks relevant to a health issue, alarm, component, or user question. Use after live status is known when the user needs manual/troubleshooting guidance. When a search result carries documentScopeSource, the runtime already scoped the search to the unit: omit documentIds. Otherwise pass the ids of a complete resolve_document_set result as documentIds. A resolve_document_set result marked sampleOnly or rowsOmitted lists only part of the set: do not pass it; omit documentIds, which uses the runtime scope when there is one and otherwise searches all documents. Returns ranked metadata and snippets; call get_document_chunk for full markdown to cite. A match with loadWith is a method: load it with that tool, because its text is not in the snippet. A non-empty topics array lists methods that match the request whatever the document ranking: load the first relevant one with load_topic."
 }
 ```
 
@@ -2087,7 +2107,7 @@ Size chars: `759`
     "required" : [ "key" ]
   },
   "name" : "resolve_document_set",
-  "description" : "Resolve the bounded set of documents that apply to a given asset, to scope document search before search_document_chunks. Pass the asset model or Thing name as key. Returns documents[] (the in-scope document ids) and a resolverSource diagnostic. When documents is non-empty, pass documents[].documentId as the documentIds argument to search_document_chunks to scope retrieval. If documents is empty (resolverSource default-empty), no confident scope was found; proceed with a normal search_document_chunks call."
+  "description" : "Resolve the bounded set of documents that apply to a given asset, to scope document search before search_document_chunks. Pass the asset model or Thing name as key. Returns documents[] (the in-scope document ids) and a resolverSource diagnostic. When a search result already carried documentScopeSource, the runtime has scoped search to the unit and this call is not needed for scope. When documents is non-empty and the result is not marked sampleOnly or rowsOmitted, pass documents[].documentId as the documentIds argument to search_document_chunks. A marked result lists only part of the set: do not pass it; omit documentIds. If documents is empty (resolverSource default-empty), no confident scope was found; proceed with a normal search_document_chunks call."
 }
 ```
 

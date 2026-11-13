@@ -88,7 +88,7 @@ class ArtifactCachePublicBoundarySourceTest {
         assertFalse(cacheBranch.contains("wireDone("));
         assertFalse(cacheBranch.contains("ChatMessage.assistant("));
 
-        String postHitl = between(source, "private void runParlerPostToolAgentLoop(",
+        String postHitl = between(source, "private TurnOutcome runParlerPostToolAgentLoop(",
                 "private void runParlerApprovalContinuation(");
         assertBefore(postHitl, "if (isArtifactCacheTerminal(result))", "ChatMessage finalAssistant");
     }

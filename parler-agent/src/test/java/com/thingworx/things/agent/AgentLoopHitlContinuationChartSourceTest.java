@@ -211,7 +211,8 @@ class AgentLoopHitlContinuationChartSourceTest {
     @Test
     void compactedStringHistory_doesNotLoseLatestExactSource() throws Exception {
         ObjectNode business = (ObjectNode) MAPPER.readTree(SUMMARY_BUSINESS);
-        business.put("notes", "x".repeat(3000));
+        // Large enough to exceed the round-6 soft cap: a short result is no longer cut because it contains '['.
+        business.put("notes", "x".repeat(12_000));
         String earlier = SUMMARY_BUSINESS.replace("51368", "1");
         PendingApprovalRecord pending = pauseWithResults("hitl-long-string",
                 List.of(jsonEnvelope(earlier, true), jsonEnvelope(business.toString(), true)));

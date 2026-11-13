@@ -30,6 +30,15 @@ public final class AgentToolContext {
 
     private static final ThreadLocal<String> CONVERSATION_ID = new ThreadLocal<>();
     private static final ThreadLocal<AgentThing> AGENT_THING = new ThreadLocal<>();
+    /** Round 6 R24: the budget captured when each tool call started executing, by tool call id. */
+    private static final ThreadLocal<Map<String, com.thingworx.things.agent.ResultBudget>> RESULT_BUDGETS =
+            ThreadLocal.withInitial(java.util.HashMap::new);
+    /** The resolver of the running loop (or approve continuation), asked by a consumer that finds no stored budget. */
+    private static final ThreadLocal<com.thingworx.things.agent.ResultBudgetResolver> RESULT_BUDGET_RESOLVER =
+            new ThreadLocal<>();
+    /** Explicit JSON-result mode for this thread; when unset the bound agent's live setting applies. */
+    private static final ThreadLocal<com.thingworx.things.agent.ToolResultSettings.JsonMode> TOOL_RESULT_JSON_MODE =
+            new ThreadLocal<>();
     private static final ThreadLocal<com.thingworx.things.agent.execution.RunInvocationContext> RUN_INVOCATION =
             new ThreadLocal<>();
     /** Parler AlwaysOn stream: assistant turn {@code request_id} (wire). */
@@ -96,14 +105,14 @@ public final class AgentToolContext {
      */
     private static final ThreadLocal<String> HOST_CONTEXT_JSON = new ThreadLocal<>();
     /**
-     * Turn-scoped document scope server-resolved from host-context at turn start
-     * (knowledge-retrieval-pipeline §3.2): the document ids and the resolver source
-     * (`custom` / `default-match`). {@code search_document_chunks} auto-defaults its
-     * {@code documentIds} to this set when the model omits the field. Cleared in
-     * {@link #clear()}.
+     * Turn-scoped document scope, server-resolved from host context or from the unit the conversation resolved:
+     * the document ids, the resolver source (`custom` / `default-match`) and the origin that supplied them.
+     * {@code search_document_chunks} auto-defaults its {@code documentIds} to this set when the model omits the
+     * field. Cleared in {@link #clear()}.
      */
     private static final ThreadLocal<List<String>> INJECTED_DOCUMENT_SCOPE_IDS = new ThreadLocal<>();
     private static final ThreadLocal<String> INJECTED_DOCUMENT_SCOPE_SOURCE = new ThreadLocal<>();
+    private static final ThreadLocal<DocumentScopeOrigin> INJECTED_DOCUMENT_SCOPE_ORIGIN = new ThreadLocal<>();
     /**
      * Chat(sync/async): nonce per user message so {@link FetchCachedReplayGuard} can scope paging counts without a
      * Parler {@code request_id}. Cleared in {@link #clear()}.
@@ -241,6 +250,84 @@ public final class AgentToolContext {
             }
         }
         return conv;
+    }
+
+    /**
+     * Sets the JSON-result mode for this thread, overriding the bound agent's setting (a caller with no agent, such
+     * as a test or a direct formatter call, states the mode it wants). {@code null} returns to the agent's setting.
+     */
+    public static void setToolResultJsonMode(com.thingworx.things.agent.ToolResultSettings.JsonMode mode) {
+        if (mode == null) {
+            TOOL_RESULT_JSON_MODE.remove();
+        RESULT_BUDGETS.remove();
+        RESULT_BUDGET_RESOLVER.remove();
+        } else {
+            TOOL_RESULT_JSON_MODE.set(mode);
+        }
+    }
+
+    /** The JSON-result mode in effect: this thread's explicit mode, else the bound agent's live setting, else string. */
+    public static com.thingworx.things.agent.ToolResultSettings.JsonMode toolResultJsonMode() {
+        com.thingworx.things.agent.ToolResultSettings.JsonMode explicit = TOOL_RESULT_JSON_MODE.get();
+        if (explicit != null) {
+            return explicit;
+        }
+        AgentThing agent = AGENT_THING.get();
+        return com.thingworx.things.agent.ToolResultSettings.fromAgent(agent).jsonMode();
+    }
+
+    /** Stores the budget resolved when the call {@code toolCallId} started executing. */
+    public static void putResultBudget(String toolCallId, com.thingworx.things.agent.ResultBudget budget) {
+        if (toolCallId != null && !toolCallId.isEmpty() && budget != null) {
+            RESULT_BUDGETS.get().put(toolCallId, budget);
+        }
+    }
+
+    /** The budget stored for {@code toolCallId}, or {@code null}. */
+    public static com.thingworx.things.agent.ResultBudget peekResultBudget(String toolCallId) {
+        return toolCallId != null ? RESULT_BUDGETS.get().get(toolCallId) : null;
+    }
+
+    /** Removes the stored budget after the first (or approved) append. */
+    public static void removeResultBudget(String toolCallId) {
+        if (toolCallId != null) {
+            RESULT_BUDGETS.get().remove(toolCallId);
+        }
+    }
+
+    /**
+     * Sets the resolver of the running loop or approve continuation; returns the previous one so the caller can
+     * restore it. {@code null} clears it.
+     */
+    public static com.thingworx.things.agent.ResultBudgetResolver setResultBudgetResolver(
+            com.thingworx.things.agent.ResultBudgetResolver resolver) {
+        com.thingworx.things.agent.ResultBudgetResolver previous = RESULT_BUDGET_RESOLVER.get();
+        if (resolver == null) {
+            RESULT_BUDGET_RESOLVER.remove();
+        } else {
+            RESULT_BUDGET_RESOLVER.set(resolver);
+        }
+        return previous;
+    }
+
+    /**
+     * The budget a consumer uses for one call: the one stored when the call started executing; else the resolver of
+     * the running loop, asked once; else the bound agent's live settings; else the defaults.
+     */
+    public static com.thingworx.things.agent.ResultBudget resultBudgetFor(String toolCallId, String toolName) {
+        com.thingworx.things.agent.ResultBudget stored = peekResultBudget(toolCallId);
+        if (stored != null) {
+            return stored;
+        }
+        com.thingworx.things.agent.ResultBudgetResolver resolver = RESULT_BUDGET_RESOLVER.get();
+        if (resolver != null) {
+            com.thingworx.things.agent.ResultBudget resolved = resolver.resolve(toolName);
+            if (resolved != null) {
+                return resolved;
+            }
+        }
+        AgentThing agent = AGENT_THING.get();
+        return agent != null ? agent.resolveResultBudget(toolName) : com.thingworx.things.agent.ResultBudget.defaults();
     }
 
     public static void setAgentThing(AgentThing thing) {
@@ -650,14 +737,25 @@ public final class AgentToolContext {
         return HOST_CONTEXT_JSON.get();
     }
 
+    /** Who supplied the injected document scope; the resolver source cannot tell them apart. */
+    public enum DocumentScopeOrigin { HOST_CONTEXT, CONVERSATION, SEARCH_ASSET_CONTEXT }
+
     /** Stores the host-context-resolved document scope for this turn; null/empty clears it. */
     public static void setInjectedDocumentScope(List<String> documentIds, String resolverSource) {
+        setInjectedDocumentScope(documentIds, resolverSource, DocumentScopeOrigin.HOST_CONTEXT);
+    }
+
+    /** Stores the document scope for this turn with its origin; null/empty ids clear the scope and its origin. */
+    public static void setInjectedDocumentScope(List<String> documentIds, String resolverSource,
+            DocumentScopeOrigin origin) {
         if (documentIds == null || documentIds.isEmpty()) {
             INJECTED_DOCUMENT_SCOPE_IDS.remove();
             INJECTED_DOCUMENT_SCOPE_SOURCE.remove();
+            INJECTED_DOCUMENT_SCOPE_ORIGIN.remove();
             return;
         }
         INJECTED_DOCUMENT_SCOPE_IDS.set(new ArrayList<>(documentIds));
+        INJECTED_DOCUMENT_SCOPE_ORIGIN.set(origin);
         if (resolverSource != null && !resolverSource.isEmpty()) {
             INJECTED_DOCUMENT_SCOPE_SOURCE.set(resolverSource);
         } else {
@@ -665,7 +763,7 @@ public final class AgentToolContext {
         }
     }
 
-    /** @return the host-context-resolved document scope ids for this turn, or null */
+    /** @return the injected document scope ids for this turn, or null */
     public static List<String> getInjectedDocumentScopeIds() {
         List<String> ids = INJECTED_DOCUMENT_SCOPE_IDS.get();
         return ids != null ? List.copyOf(ids) : null;
@@ -674,6 +772,11 @@ public final class AgentToolContext {
     /** @return the resolver source (`custom` / `default-match`) of the injected scope, or null */
     public static String getInjectedDocumentScopeSource() {
         return INJECTED_DOCUMENT_SCOPE_SOURCE.get();
+    }
+
+    /** @return who supplied the injected scope, or null when none is injected */
+    public static DocumentScopeOrigin getInjectedDocumentScopeOrigin() {
+        return INJECTED_DOCUMENT_SCOPE_ORIGIN.get();
     }
 
     public static void setFetchCachedChatTurnNonce(String uuidOrNull) {
@@ -1070,6 +1173,9 @@ public final class AgentToolContext {
         InvokeServicePolicyBatchCache.clear();
         CONVERSATION_ID.remove();
         AGENT_THING.remove();
+        TOOL_RESULT_JSON_MODE.remove();
+        RESULT_BUDGETS.remove();
+        RESULT_BUDGET_RESOLVER.remove();
         RUN_INVOCATION.remove();
         PARLER_REQUEST_ID.remove();
         PARLER_REMOTE_THING_NAME.remove();
@@ -1086,6 +1192,7 @@ public final class AgentToolContext {
         HOST_CONTEXT_JSON.remove();
         INJECTED_DOCUMENT_SCOPE_IDS.remove();
         INJECTED_DOCUMENT_SCOPE_SOURCE.remove();
+        INJECTED_DOCUMENT_SCOPE_ORIGIN.remove();
         PARLER_EPHEMERAL_SYSTEM_INDICES.remove();
         AGENT_TASK_STATE.remove();
         PARLER_REMOTE_CONVERSATION.remove();

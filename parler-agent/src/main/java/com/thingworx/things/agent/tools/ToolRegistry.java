@@ -151,6 +151,11 @@ public class ToolRegistry {
         return definitions.containsKey(name);
     }
 
+    /** Whether {@link #executeTool(ToolCall)} has an executor for {@code name}, including executor-only aliases. */
+    public boolean hasExecutor(String name) {
+        return name != null && executors.containsKey(name);
+    }
+
     public int size() {
         return definitions.size();
     }

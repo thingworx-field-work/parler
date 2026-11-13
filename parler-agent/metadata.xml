@@ -16,9 +16,9 @@
 		<ExtensionPackage name="parler-agent"
 						  description="Parler Java agent extension for ThingWorx"
 						  vendor="ThingWorx"
-					  packageVersion="0.1.250"
+					  packageVersion="0.1.258"
 						  buildNumber="0"
-						  minimumThingWorxVersion="9.5.0"
+						  minimumThingWorxVersion="9.7.0"
 						  haCompatible="true">
 			<!-- Shadow JAR FileResource(s) injected on assemble into ExtensionPackage only (ThingWorx: shared JAR must not be duplicated per ThingPackage). -->
 			<JarResources>

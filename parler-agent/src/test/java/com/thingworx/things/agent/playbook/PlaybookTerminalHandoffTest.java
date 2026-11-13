@@ -38,11 +38,13 @@ class PlaybookTerminalHandoffTest {
         ChatMessage synthetic = messages.get(3);
         assertEquals(ChatMessage.Role.TOOL, synthetic.getRole());
         assertEquals("tc-2", synthetic.getToolCallId());
+        assertEquals("query_alert_summary", synthetic.getExecutedToolName());
         assertTrue(synthetic.getContent().contains("PLAYBOOK_TERMINAL_HANDOFF"), synthetic.getContent());
         assertTrue(streamRows.get(0).getContent().contains("PLAYBOOK_TERMINAL_HANDOFF"));
 
         assertEquals(1, streamRows.size());
         assertEquals("tc-2", streamRows.get(0).getToolCallId());
+        assertEquals("query_alert_summary", streamRows.get(0).getExecutedToolName());
 
         assertAllToolCallsHaveMatchingToolResults(messages);
     }

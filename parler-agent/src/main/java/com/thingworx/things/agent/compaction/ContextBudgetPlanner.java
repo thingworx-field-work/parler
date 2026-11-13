@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.OptionalInt;
 
 import org.slf4j.Logger;
@@ -19,6 +21,8 @@ import com.thingworx.things.agent.llm.ToolDefinition;
 import com.thingworx.things.agent.llm.ToolSchemaSizer;
 import com.thingworx.things.agent.taskstate.TaskStateLlmInjector;
 import com.thingworx.things.agent.tools.AgentToolContext;
+import com.thingworx.things.agent.tools.TopicMethodText;
+import com.thingworx.things.agent.taskstate.AgentTaskState;
 
 /**
  * Slice A/C: deterministic context budget telemetry and Slice C drop-only outbound trimming before each provider call.
@@ -516,6 +520,7 @@ public final class ContextBudgetPlanner {
     private static boolean[] buildProtectedMask(int n, List<ChatMessage> messages, int[] activeRange, int lastUser,
             int taskIdx, int utcIdx) {
         boolean[] p = new boolean[n];
+        protectActiveTopics(p, messages, lastUser);
         if (LeadingSystemRow.isStableFirstSystemRow(messages)) {
             p[0] = true;
         }
@@ -550,6 +555,46 @@ public final class ContextBudgetPlanner {
             markProtectedIndex(p, bundle.taskStateIdx(), n);
         }
         return p;
+    }
+
+    /** Protect the newest complete successful batch per active topic, only within this logical user turn. */
+    private static void protectActiveTopics(boolean[] protect, List<ChatMessage> messages, int lastUser) {
+        AgentTaskState state = AgentToolContext.getAgentTaskState();
+        if (state == null || lastUser < 0) {
+            return;
+        }
+        Set<String> remaining = new HashSet<>(state.getActiveMethodIds());
+        for (int i = messages.size() - 1; i > lastUser && !remaining.isEmpty(); i--) {
+            ChatMessage assistant = messages.get(i);
+            if (assistant.getRole() != ChatMessage.Role.ASSISTANT || !assistant.hasToolCalls()) {
+                continue;
+            }
+            int end = i + 1;
+            while (end < messages.size() && messages.get(end).getRole() == ChatMessage.Role.TOOL) {
+                end++;
+            }
+            boolean matched = false;
+            for (var call : assistant.getToolCalls()) {
+                if (call.getId() == null) {
+                    continue;
+                }
+                for (int t = end - 1; t > i; t--) {
+                    ChatMessage tool = messages.get(t);
+                    if (!"load_topic".equals(tool.getExecutedToolName()) || !call.getId().equals(tool.getToolCallId())) {
+                        continue;
+                    }
+                    var ref = TopicMethodText.successfulReference(call, tool.getContent());
+                    if (ref.isPresent() && remaining.remove(ref.get().methodId())) {
+                        matched = true;
+                    }
+                }
+            }
+            if (matched) {
+                for (int t = i; t < end; t++) {
+                    protect[t] = true;
+                }
+            }
+        }
     }
 
     private static void markProtectedIndex(boolean[] p, int idx, int n) {

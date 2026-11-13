@@ -17,6 +17,45 @@ public final class LlmUsageCapture {
 
     private LlmUsageCapture() {}
 
+    /**
+     * OpenAI-shaped usage detail counts that the parser validates but keeps only in raw usage. This is the fixed
+     * allowlist exposed to metrics; arbitrary raw keys are never read.
+     */
+    public enum OpenAiRawDetail {
+        PROMPT_AUDIO_TOKENS("prompt_tokens_details", "audio_tokens"),
+        COMPLETION_AUDIO_TOKENS("completion_tokens_details", "audio_tokens"),
+        COMPLETION_ACCEPTED_PREDICTION_TOKENS("completion_tokens_details", "accepted_prediction_tokens"),
+        COMPLETION_REJECTED_PREDICTION_TOKENS("completion_tokens_details", "rejected_prediction_tokens");
+
+        private final String container;
+        private final String field;
+
+        OpenAiRawDetail(String container, String field) {
+            this.container = container;
+            this.field = field;
+        }
+
+        JsonNode read(JsonNode raw) {
+            return raw.path(container).path(field);
+        }
+    }
+
+    /**
+     * Reads one allowlisted OpenAI-shaped raw detail count from a snapshot, or {@code null} when the snapshot's API
+     * shape uses the Anthropic branch, raw usage is absent, or the value is missing or not a non-negative integer
+     * fitting {@code long}. Branch selection matches {@link #captureFromRoot}. Snapshot status is the caller's check.
+     */
+    public static Long openAiRawDetail(LlmUsageSnapshot snapshot, String apiShapeId, OpenAiRawDetail detail) {
+        if (snapshot == null || detail == null || isAnthropicShape(apiShapeId)) {
+            return null;
+        }
+        JsonNode raw = snapshot.getRawUsage();
+        if (raw == null || !raw.isObject()) {
+            return null;
+        }
+        return nonNegativeLong(detail.read(raw));
+    }
+
     public static LlmUsageSnapshot captureFromResponseBody(String responseBody, LlmUsageWireIds wireIds) {
         if (responseBody == null || responseBody.isBlank()) {
             return LlmUsageSnapshot.unavailable();
@@ -63,14 +102,14 @@ public final class LlmUsageCapture {
     }
 
     private static String providerFamily(LlmUsageWireIds wireIds) {
-        if (wireIds == null) {
-            return "openai";
-        }
-        String shape = wireIds.getApiShapeId() != null ? wireIds.getApiShapeId().toLowerCase() : "";
-        if (shape.startsWith("anthropic-")) {
+        if (wireIds != null && isAnthropicShape(wireIds.getApiShapeId())) {
             return "anthropic";
         }
         return "openai";
+    }
+
+    private static boolean isAnthropicShape(String apiShapeId) {
+        return apiShapeId != null && apiShapeId.toLowerCase().startsWith("anthropic-");
     }
 
     private static String usageTypeError(JsonNode usage) {
@@ -108,11 +147,10 @@ public final class LlmUsageCapture {
                 || hasInvalidNumber(raw.path("completion_tokens"))
                 || hasInvalidNumber(raw.path("total_tokens"))
                 || hasInvalidNumber(raw.path("prompt_tokens_details").path("cached_tokens"))
-                || hasInvalidNumber(raw.path("prompt_tokens_details").path("audio_tokens"))
-                || hasInvalidNumber(raw.path("completion_tokens_details").path("reasoning_tokens"))
-                || hasInvalidNumber(raw.path("completion_tokens_details").path("audio_tokens"))
-                || hasInvalidNumber(raw.path("completion_tokens_details").path("accepted_prediction_tokens"))
-                || hasInvalidNumber(raw.path("completion_tokens_details").path("rejected_prediction_tokens"));
+                || hasInvalidNumber(raw.path("completion_tokens_details").path("reasoning_tokens"));
+        for (OpenAiRawDetail detail : OpenAiRawDetail.values()) {
+            invalid = invalid || hasInvalidNumber(detail.read(raw));
+        }
 
         put(builder, "inputTokensTotal", prompt, reportedOrAbsent(prompt));
         put(builder, "outputTokensTotal", completion, reportedOrAbsent(completion));

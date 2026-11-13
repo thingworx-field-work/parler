@@ -72,6 +72,7 @@ Registers your own tools, each backed by a ThingWorx service. The root is a **JS
 | `hitl` | boolean | no | `true` | Approval requirement. **Omitted ⇒ approval required.** See §1.2. |
 | `playbookSafe` | boolean | no | `false` | Whether deterministic playbooks may call it. **Only effective when `hitl` is `false`.** See §1.3. |
 | `executorOnly` | boolean | no | `false` | When `true`, register the tool for execution but hide it from the model-facing tool list. See §1.4. |
+| `resultTextCapChars` | integer | no | the installation's `toolResultTextCapChars` | Text cap of this tool's result once it must be reduced. Clamped to 500–50000 and to `toolResultSoftCapChars` minus 1,024; never raises the soft cap. A non-integer or non-positive value skips the entry. Not a capability field: it does not make `risk` required. |
 | `risk` | string | no for legacy entries; **required when any capability field is present** | — | `READ_ONLY`, `MUTATING`, `DESTRUCTIVE`, or `ADMIN`. See §1.5. |
 | `purpose` | string | no | — | Operator-facing business purpose for the governed capability. |
 | `dryRun` | object | no | unsupported | `{ "supported": false }`, or `supported:true` plus the real BOOLEAN Service parameter name. |
@@ -152,17 +153,18 @@ unsupported dry-run or caller-key parameters.
 
 ### 1.6 What is rejected vs. what is skipped
 
-**Whole file rejected (nothing registers, logged ERROR):** root not an object; `version != 1`; `tools` not an array;
-a tool that is not an object; missing/invalid `name` (bad pattern); duplicate `name` or collision with a built-in;
-missing/empty `whenToUse`; missing `target` / `entityName` / `serviceName`; a non-boolean `hitl`, `playbookSafe`, or
-`executorOnly`.
+**Whole file rejected (nothing registers, logged ERROR):** malformed JSON; root not an object; `version != 1`;
+`tools` not an array.
 
-**Single tool skipped (the rest of the file still loads, logged WARN):** invalid capability metadata;
+**Single tool skipped (the rest of the file still loads, logged WARN):** a tool that is not an object; missing/invalid
+`name` (bad pattern); duplicate `name` or collision with a built-in; missing/empty `whenToUse`; missing `target` /
+`entityName` / `serviceName`; a non-boolean `hitl`, `playbookSafe`, or `executorOnly`; an invalid
+`resultTextCapChars`; invalid capability metadata;
 `target.entityName` does not resolve; the
 resolved entity is not a Thing; `serviceName` not found on the Thing (including inherited); the service is
 PASSWORD-protected; the tool's JSON schema cannot be generated from the service definition.
 
-### 1.6 All boolean variant forms at a glance
+### 1.7 All boolean variant forms at a glance
 
 ```json
 { "name": "minimal", "whenToUse": "…", "target": { "entityName": "T", "serviceName": "S" } }

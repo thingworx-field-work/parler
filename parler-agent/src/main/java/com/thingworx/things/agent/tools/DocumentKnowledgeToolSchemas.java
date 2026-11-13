@@ -8,12 +8,29 @@ import com.thingworx.things.agent.llm.ToolDefinition;
 
 /**
  * OpenAI / Azure tool parameter schemas for {@code search_document_chunks},
- * {@code get_document_chunk}, and {@code resolve_document_set}. Normative contract:
+ * {@code get_document_chunk}, {@code load_topic}, and {@code resolve_document_set}. Normative contract:
  * {@code docs/agent/document-chunk-tools.md}.
  */
 public final class DocumentKnowledgeToolSchemas {
 
     private DocumentKnowledgeToolSchemas() {}
+
+    public static ToolDefinition loadTopicDef() {
+        Map<String, Object> props = new LinkedHashMap<>();
+        props.put("docId", Map.of("type", "string", "minLength", 1, "maxLength", 256));
+        props.put("chunkId", Map.of("type", "string", "minLength", 1, "maxLength", 256));
+        Map<String, Object> schema = new LinkedHashMap<>();
+        schema.put("type", "object");
+        schema.put("properties", props);
+        schema.put("required", List.of("docId", "chunkId"));
+        return new ToolDefinition("load_topic",
+                "Load the complete method text of a search hit whose contentType is topic, using its exact docId and chunkId. "
+                + "Ids must be 1–256 UTF-16 code units, without surrounding whitespace, control/line separators, .., /, or backslash, and cannot be a single dot. "
+                + "Returns plain text with identity, SHA-256 of delivered UTF-8 text, character count and complete: true; "
+                + "a body over 7000 UTF-16 code units is an error, never an excerpt. Loading grants no tool permission or approval; "
+                + "follow the method using tools already admitted by the deployment. A non-empty injected document scope restricts loading.",
+                schema, false);
+    }
 
     public static ToolDefinition searchDocumentChunksDef() {
         Map<String, Object> signalProps = new LinkedHashMap<>();
@@ -33,19 +50,25 @@ public final class DocumentKnowledgeToolSchemas {
         signalsArr.put("items", signalItem);
         props.put("signals", signalsArr);
         props.put("assetContext", Map.of("type", "object",
-                "description", "Optional asset context such as asset model, component, or document type hints."));
+                "description", "Optional asset context such as asset model, component, or document type hints. "
+                        + "To scope searches in this step to one unit's documents, put that unit's canonical Thing name "
+                        + "in thingName; it is used only if it names a visible unit that has documents. "
+                        + "To keep a unit across the conversation, call resolve_thing."));
         Map<String, Object> documentTypesArr = new LinkedHashMap<>();
         documentTypesArr.put("type", "array");
         documentTypesArr.put("description",
-                "Optional document type filters such as operations_manual or troubleshooting_guide.");
+                "Optional document type filters such as operations_manual or troubleshooting_guide. "
+                        + "Applies to matches, not to topics.");
         documentTypesArr.put("items", Map.of("type", "string"));
         props.put("documentTypes", documentTypesArr);
         Map<String, Object> documentIdsArr = new LinkedHashMap<>();
         documentIdsArr.put("type", "array");
         documentIdsArr.put("description",
-                "Optional explicit document id filter. When resolve_document_set returns a non-empty "
-                        + "documents[], pass those documents[].documentId values here to scope this search to "
-                        + "the resolved set (selectionMode documentIds-filter).");
+                "Optional explicit document id filter. Omit it when a search result carried documentScopeSource. "
+                        + "Otherwise pass the documents[].documentId values of a complete resolve_document_set "
+                        + "result to scope this search to that set (selectionMode documentIds-filter); a result "
+                        + "marked sampleOnly or rowsOmitted is not complete. Any value here, including an empty "
+                        + "array, replaces the runtime scope.");
         documentIdsArr.put("items", Map.of("type", "string"));
         props.put("documentIds", documentIdsArr);
         props.put("limit", Map.of("type", "integer",
@@ -59,9 +82,15 @@ public final class DocumentKnowledgeToolSchemas {
         return new ToolDefinition("search_document_chunks",
                 "Find document chunks relevant to a health issue, alarm, component, or user question. "
                         + "Use after live status is known when the user needs manual/troubleshooting guidance. "
-                        + "When resolve_document_set returned a non-empty documents[], pass those ids as "
-                        + "documentIds to scope this search to the resolved set. "
-                        + "Returns ranked metadata and snippets; call get_document_chunk for full markdown to cite.",
+                        + "When a search result carries documentScopeSource, the runtime already scoped the search "
+                        + "to the unit: omit documentIds. Otherwise pass the ids of a complete resolve_document_set "
+                        + "result as documentIds. A resolve_document_set result marked sampleOnly or rowsOmitted "
+                        + "lists only part of the set: do not pass it; omit documentIds, which uses the runtime "
+                        + "scope when there is one and otherwise searches all documents. "
+                        + "Returns ranked metadata and snippets; call get_document_chunk for full markdown to cite. "
+                        + "A match with loadWith is a method: load it with that tool, because its text is not in the snippet. "
+                        + "A non-empty topics array lists methods that match the request whatever the document "
+                        + "ranking: load the first relevant one with load_topic.",
                 schema, true);
     }
 
@@ -97,9 +126,12 @@ public final class DocumentKnowledgeToolSchemas {
         return new ToolDefinition("resolve_document_set",
                 "Resolve the bounded set of documents that apply to a given asset, to scope document search "
                         + "before search_document_chunks. Pass the asset model or Thing name as key. Returns "
-                        + "documents[] (the in-scope document ids) and a resolverSource diagnostic. When documents "
-                        + "is non-empty, pass documents[].documentId as the documentIds argument to "
-                        + "search_document_chunks to scope retrieval. If documents is empty (resolverSource "
+                        + "documents[] (the in-scope document ids) and a resolverSource diagnostic. When a search "
+                        + "result already carried documentScopeSource, the runtime has scoped search to the unit and "
+                        + "this call is not needed for scope. When documents is non-empty and the result is not "
+                        + "marked sampleOnly or rowsOmitted, pass documents[].documentId as the documentIds argument "
+                        + "to search_document_chunks. A marked result lists only part of the set: do not pass it; "
+                        + "omit documentIds. If documents is empty (resolverSource "
                         + "default-empty), no confident scope was found; proceed with a normal "
                         + "search_document_chunks call.",
                 schema, true);

@@ -1,8 +1,9 @@
 # Import plan for load.py: the SCPA datasets and the complete SCPA utilization sample.
-#   uv run load.py -c parler-scpa-demo.yaml [--apply]
-# load.py reads .env and resolves local paths from the directory it runs in: that directory needs an SCPA/ folder
-# with the three ALL_DATASETS_DEV_*.zip files, and .env with TWX_URL, TWX_APPKEY and the LLM_API_SERVER, LLM_API_KEY,
-# LLM_MODEL and LLM_API_VERSION values that replace the {{{env:...}}} placeholders in the entities export.
+#   uv run load.py -c dev_data/parler-scpa-demo.yaml            # dry run
+#   uv run load.py -c dev_data/parler-scpa-demo.yaml --apply
+# Every file is downloaded from a GitHub release: the SCPA dataset ZIPs from Sample_SCPA_Extension, the sample from
+# the latest release. load.py reads .env from the directory it runs in: TWX_URL, TWX_APPKEY and the LLM_API_SERVER,
+# LLM_API_KEY, LLM_MODEL and LLM_API_VERSION values that replace the {{{env:...}}} placeholders in the entities export.
 import_order:
 
 - action: import_extension

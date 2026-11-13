@@ -23,6 +23,13 @@ class DocumentKnowledgeRoutingGuideTest {
             assertTrue(s.contains("no matching manual section"));
             assertTrue(s.contains("sourceLinks[].href"));
             assertTrue(s.contains("#page="));
+            assertTrue(s.contains("load it with load_topic and follow its steps"));
+            assertTrue(s.contains("use the unit already resolved in the conversation"));
+            assertTrue(s.contains("call resolve_thing only when the unit is not yet established or has changed"));
+            assertTrue(s.contains("search that unit's documents before calling operational tools"));
+            assertTrue(s.contains("A search may carry the unit's canonical Thing name in assetContext.thingName to scope the "
+                    + "searches of that step; this is not the conversation anchor, and resolve_thing remains what keeps "
+                    + "a unit across turns and approval pauses."));
         }
     }
 }

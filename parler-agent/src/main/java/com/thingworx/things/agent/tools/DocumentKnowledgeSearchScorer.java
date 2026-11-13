@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.function.Function;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -48,6 +49,15 @@ public final class DocumentKnowledgeSearchScorer {
     private static final int SCORE_DOMAIN_TERM = 10;
     private static final int SCORE_DOCUMENT_TYPE_ENUM = 5;
     private static final int SCORE_ASSET_CONTEXT_VALUE = 15;
+
+    private static final String TOPIC_CONTENT_TYPE = "topic";
+    /** Most entries in the top-level {@code topics} array; independent of the search {@code limit}. */
+    private static final int TOPIC_LANE_MAX = 2;
+    private static final int TOPIC_LANE_FLOOR = 30;
+    private static final int TOPIC_LANE_MIN_STRUCTURED = 25;
+    private static final int TOPIC_LANE_WEAK_CAP = 20;
+    private static final int TOPIC_LANE_MIN_PHRASE_TOKENS = 2;
+    private static final int MAX_AVAILABLE_DOCUMENT_TYPES = 10;
 
     private static final int T_HIGH = 80;
     private static final int T_MARGIN = 30;
@@ -349,6 +359,172 @@ public final class DocumentKnowledgeSearchScorer {
                 .toList();
 
         return new RankResult(ranked, diagnosticScores, List.copyOf(plan.selectedDocIds), plan.selectionMode);
+    }
+
+    /**
+     * The best topics of the searched documents, scored without any document-level evidence so that a large manual
+     * sharing the request's identity cannot hide them. Empty without an explicit document list: the lane never widens
+     * to the whole index, and {@code documentTypes}, the selection plan and {@code limit} do not apply to it.
+     */
+    public static List<ScoredMatch> topicLane(
+            List<DocumentKnowledgeChunk> chunks,
+            Function<String, Optional<DocumentKnowledgePackageManifest>> manifestFor,
+            SearchRequest request,
+            List<String> injectedScopeIds) {
+        if (request.documentIds().isEmpty()) {
+            return List.of();
+        }
+        Set<String> queryTokens = new LinkedHashSet<>(request.queryTokens());
+        Set<String> requestTokens = new LinkedHashSet<>(queryTokens);
+        for (String signal : request.signalNames()) {
+            requestTokens.addAll(tokenize(signal));
+        }
+        List<ScoredMatch> qualified = new ArrayList<>();
+        for (DocumentKnowledgeChunk chunk : chunks) {
+            if (!isLaneCandidate(chunk, request.documentIds(), injectedScopeIds)) {
+                continue;
+            }
+            Set<String> assetTokens = assetTokens(manifestFor.apply(chunk.docId()).orElse(null));
+            int structured = structuredTopicEvidence(chunk, request, queryTokens, requestTokens, assetTokens);
+            int score = structured + weakTopicEvidence(chunk, queryTokens);
+            if (structured >= TOPIC_LANE_MIN_STRUCTURED && score >= TOPIC_LANE_FLOOR) {
+                qualified.add(new ScoredMatch(chunk, score));
+            }
+        }
+        return qualified.stream()
+                .sorted(Comparator.comparingInt(ScoredMatch::score).reversed()
+                        .thenComparing(m -> m.chunk().chunkId())
+                        .thenComparing(m -> m.chunk().docId()))
+                .limit(TOPIC_LANE_MAX)
+                .toList();
+    }
+
+    private static boolean isLaneCandidate(
+            DocumentKnowledgeChunk chunk, List<String> documentIds, List<String> injectedScopeIds) {
+        return TOPIC_CONTENT_TYPE.equals(chunk.contentType())
+                && documentIds.contains(chunk.docId())
+                && (injectedScopeIds == null || injectedScopeIds.isEmpty() || injectedScopeIds.contains(chunk.docId()))
+                && TopicMethodText.validId(chunk.docId())
+                && TopicMethodText.validId(chunk.chunkId());
+    }
+
+    /** Authored evidence of a task match. Asset identity earns nothing in any branch: every topic of a unit shares it. */
+    private static int structuredTopicEvidence(
+            DocumentKnowledgeChunk chunk,
+            SearchRequest request,
+            Set<String> queryTokens,
+            Set<String> requestTokens,
+            Set<String> assetTokens) {
+        List<String> chunkSignals = chunk.signals().stream()
+                .map(DocumentKnowledgeChunk.SignalEntry::name)
+                .filter(name -> name != null && !isIdentityOnly(name, assetTokens))
+                .toList();
+        int score = 0;
+        Set<String> requestSignals = new LinkedHashSet<>();
+        for (String signal : request.signalNames()) {
+            requestSignals.add(signal.toLowerCase(Locale.ROOT));
+        }
+        for (String signal : requestSignals) {
+            if (chunkSignals.stream().anyMatch(signal::equalsIgnoreCase)) {
+                score += 50;
+            }
+        }
+        for (String token : queryTokens) {
+            if (!assetTokens.contains(token)
+                    && chunkSignals.stream().anyMatch(name -> laneTokenMatchesSignalName(token, name))) {
+                score += 25;
+            }
+        }
+        score += 25 * (int) chunkSignals.stream()
+                .map(DocumentKnowledgeSearchScorer::tokenize)
+                .filter(tokens -> tokens.size() >= 2 && queryTokens.containsAll(tokens))
+                .distinct()
+                .count();
+        if (headingContainsTaskPhrase(chunk, request, queryTokens, assetTokens)) {
+            score += 35;
+        }
+        for (String tag : chunk.tags()) {
+            List<String> tagTokens = tokenize(tag);
+            if (!tagTokens.isEmpty() && requestTokens.containsAll(tagTokens) && !assetTokens.containsAll(tagTokens)) {
+                score += 25;
+            }
+        }
+        return score;
+    }
+
+    /** The first word of a multi-word signal says nothing about it: such a signal matches as a whole or not at all. */
+    private static boolean laneTokenMatchesSignalName(String token, String signalName) {
+        return tokenize(signalName).size() == 1 && queryTokenMatchesSignalName(token, signalName);
+    }
+
+    /** One word is a heading token, not a phrase, and an identity-only query says nothing about the task. */
+    private static boolean headingContainsTaskPhrase(
+            DocumentKnowledgeChunk chunk, SearchRequest request, Set<String> queryTokens, Set<String> assetTokens) {
+        return queryTokens.size() >= TOPIC_LANE_MIN_PHRASE_TOKENS
+                && !assetTokens.containsAll(queryTokens)
+                && containsToken(chunk.heading(), request.query().trim());
+    }
+
+    private static int weakTopicEvidence(DocumentKnowledgeChunk chunk, Set<String> queryTokens) {
+        int weak = 0;
+        for (String token : queryTokens) {
+            weak += containsToken(chunk.heading(), token) ? 8 : 0;
+            weak += containsToken(chunk.summary(), token) ? 5 : 0;
+            weak += containsToken(chunk.markdown(), token) ? 1 : 0;
+        }
+        return Math.min(weak, TOPIC_LANE_WEAK_CAP);
+    }
+
+    private static Set<String> assetTokens(DocumentKnowledgePackageManifest manifest) {
+        if (manifest == null) {
+            return Set.of();
+        }
+        Set<String> tokens = new LinkedHashSet<>();
+        for (String model : manifest.assetModels()) {
+            tokens.addAll(tokenize(model));
+        }
+        for (String model : manifest.documentProfile().assetModels()) {
+            tokens.addAll(tokenize(model));
+        }
+        return tokens;
+    }
+
+    private static boolean isIdentityOnly(String text, Set<String> assetTokens) {
+        List<String> tokens = tokenize(text);
+        return !tokens.isEmpty() && assetTokens.containsAll(tokens);
+    }
+
+    /**
+     * The sorted document types a request could have searched, when its {@code documentTypes} filter removed all of
+     * those documents; empty when the filter did not cause an empty search. Ids that do not exist are not the filter's
+     * fault, so a list with none in the index reports nothing.
+     */
+    public static Optional<List<String>> typesAvailableToEmptyFilter(
+            List<DocumentKnowledgeChunk> chunks,
+            Function<String, Optional<DocumentKnowledgePackageManifest>> manifestFor,
+            SearchRequest request) {
+        if (request.documentTypes().isEmpty()) {
+            return Optional.empty();
+        }
+        Set<String> searchable = new TreeSet<>();
+        for (DocumentKnowledgeChunk chunk : chunks) {
+            if (request.documentIds().isEmpty() || request.documentIds().contains(chunk.docId())) {
+                searchable.add(chunk.docId());
+            }
+        }
+        Set<String> types = new TreeSet<>();
+        for (String docId : searchable) {
+            DocumentKnowledgePackageManifest manifest = manifestFor.apply(docId).orElse(null);
+            if (passesDocumentTypeFilter(request, manifest)) {
+                return Optional.empty();
+            }
+            if (manifest != null && manifest.documentType() != null && !manifest.documentType().isBlank()) {
+                types.add(manifest.documentType());
+            }
+        }
+        return searchable.isEmpty()
+                ? Optional.empty()
+                : Optional.of(types.stream().limit(MAX_AVAILABLE_DOCUMENT_TYPES).toList());
     }
 
     /** Query side for BM25 (design §4): query tokens + deduped signal-name and asset-context tokens. */

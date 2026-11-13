@@ -108,6 +108,13 @@ public class AgentLoop {
     private final ToolDefinitionsRoundFilter toolDefinitionsRoundFilter;
     /** Canonical user IANA timezone captured at turn construction; never read from thread-local state by the clock. */
     private final String userIanaTimezone;
+    /** Round 6 R24: resolves each call's result budget once, when the call starts executing. */
+    private final ResultBudgetResolver resultBudgetResolver;
+    /** Asks the bound agent's live settings, or uses the defaults when no agent is bound (unit tests). */
+    static final ResultBudgetResolver DEFAULT_RESULT_BUDGET_RESOLVER = toolName -> {
+        AgentThing agent = AgentToolContext.getAgentThing();
+        return agent != null ? agent.resolveResultBudget(toolName) : ResultBudget.defaults();
+    };
     /** Stats from the last completed tool batch seal; applied to the next {@code LLM_USAGE} line. */
     private SealStats pendingReplayStats = SealStats.EMPTY;
 
@@ -154,6 +161,20 @@ public class AgentLoop {
                      RateControlStatusSink rateControlStatusSink, int llmContextMaxChars,
                      ToolDefinitionsRoundFilter toolDefinitionsRoundFilter,
                      String userIanaTimezone) {
+        this(llmClient, toolExecutor, model, temperature, maxTokens, maxIterations, timeoutMs,
+                rateControlStatusSink, llmContextMaxChars, toolDefinitionsRoundFilter, userIanaTimezone,
+                DEFAULT_RESULT_BUDGET_RESOLVER);
+    }
+
+    /** As above, with the resolver that gives each tool call its result budget (round 6, R24). */
+    public AgentLoop(LlmClient llmClient, ToolExecutor toolExecutor,
+                     String model, double temperature, int maxTokens,
+                     int maxIterations, long timeoutMs,
+                     RateControlStatusSink rateControlStatusSink, int llmContextMaxChars,
+                     ToolDefinitionsRoundFilter toolDefinitionsRoundFilter,
+                     String userIanaTimezone, ResultBudgetResolver resultBudgetResolver) {
+        this.resultBudgetResolver = resultBudgetResolver != null ? resultBudgetResolver
+                : DEFAULT_RESULT_BUDGET_RESOLVER;
         this.llmClient = llmClient;
         this.toolExecutor = toolExecutor;
         this.model = model;
@@ -382,10 +403,12 @@ public class AgentLoop {
             BiConsumer<ChatMessage, StreamTokenUsage> streamAppender, PendingApprovalRecord pending,
             String completedGatedResult) throws Exception {
         AtomicBoolean skipFetchGuardEndTurn = new AtomicBoolean(false);
+        ResultBudgetResolver previousResolver = AgentToolContext.setResultBudgetResolver(resultBudgetResolver);
         try {
             return runInner(messages, toolDefinitions, streamAppender, skipFetchGuardEndTurn,
                     pending, completedGatedResult);
         } finally {
+            AgentToolContext.setResultBudgetResolver(previousResolver);
             if (!skipFetchGuardEndTurn.get()) {
                 endFetchCachedReplayGuardTurn();
                 String tk = FetchCachedReplayGuard.resolveCurrentTurnKey();
@@ -476,9 +499,16 @@ public class AgentLoop {
         if (agent != null) {
             classification = agent.capabilityDataClassificationForTool(toolCall.getFunctionName());
         }
-        EgressResult egress = ToolResultEgressGateway.compactForLlmAppend(
-                toolCall.getFunctionName(), toolCall.getId(), result, LOG, classification);
-        if (egress.isCompacted()
+        EgressResult egress;
+        try {
+            // The budget captured when the call started executing; a setting changed since does not apply.
+            ResultBudget budget = AgentToolContext.resultBudgetFor(toolCall.getId(), toolCall.getFunctionName());
+            egress = ToolResultEgressGateway.compactForLlmAppend(
+                    toolCall.getFunctionName(), toolCall.getId(), result, LOG, classification, budget);
+        } finally {
+            AgentToolContext.removeResultBudget(toolCall.getId());
+        }
+        if ((egress.isCompacted() || egress.isAnnotated())
                 && AgentToolContext.peekToolEgressFullJsonForToolCall(toolCall.getId()) == null) {
             AgentToolContext.setToolEgressFullJsonForToolCall(toolCall.getId(), result);
         }
@@ -892,6 +922,9 @@ public class AgentLoop {
                     return AgentResult.userCancelled(iteration, totalPromptTokens, totalCompletionTokens, perfPreTool);
                 }
                 totalToolCallsExecuted++;
+                // R24: one budget per call, resolved when the call starts executing, used by formatter and gateway.
+                AgentToolContext.putResultBudget(toolCall.getId(),
+                        resultBudgetResolver.resolve(toolCall.getFunctionName()));
                 String result;
                 ArtifactCacheException fatalCacheFault = null;
                 long toolT0 = System.currentTimeMillis();

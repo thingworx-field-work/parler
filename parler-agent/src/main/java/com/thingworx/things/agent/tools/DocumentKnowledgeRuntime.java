@@ -5,6 +5,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 
@@ -16,6 +18,9 @@ import com.thingworx.entities.interfaces.IServiceProvider;
 import com.thingworx.logging.LogUtilities;
 import com.thingworx.things.agent.AgentBaseThing;
 import com.thingworx.things.agent.PlatformAccess;
+import com.thingworx.things.agent.FileRepositoryThingResolver;
+import com.thingworx.things.agent.skillregistry.RepositoryReader;
+import com.thingworx.things.agent.skillregistry.FileRepositoryRepositoryReader;
 import com.thingworx.things.agent.llm.ToolCall;
 import com.thingworx.types.InfoTable;
 import com.thingworx.types.collections.ValueCollection;
@@ -29,13 +34,116 @@ public final class DocumentKnowledgeRuntime {
     private static final Logger LOG =
             LogUtilities.getInstance().getApplicationLogger(DocumentKnowledgeRuntime.class);
     private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final int TOPIC_HEADING_MAX_CHARS = 80;
 
     private DocumentKnowledgeRuntime() {}
+
+    @FunctionalInterface
+    interface TopicReaderFactory {
+        RepositoryReader create(DocumentKnowledgeSettings settings, String agentName) throws Exception;
+    }
+
+    public static String executeLoadTopic(ToolCall call, AgentBaseThing agent) throws Exception {
+        return executeLoadTopic(call, DocumentKnowledgeSettings.fromAgent(agent),
+                agent != null ? agent.getName() : "", (settings, name) ->
+                    FileRepositoryThingResolver.resolveForCurrentUser(settings.repository(), LOG, name)
+                        .map(FileRepositoryRepositoryReader::forCurrentUser).orElse(null));
+    }
+
+    /** The reader seam replaces only body I/O; production always resolves a fresh current-user reader. */
+    static String executeLoadTopic(ToolCall call, DocumentKnowledgeSettings settings, String agentName,
+            TopicReaderFactory readers) throws Exception {
+        Optional<TopicMethodText.Reference> reference = TopicMethodText.reference(call);
+        if (reference.isEmpty()) {
+            return MAPPER.writeValueAsString(getError("BAD_REQUEST", "Provide valid docId and chunkId strings.",
+                    null, null));
+        }
+        TopicMethodText.Reference ref = reference.get();
+        String doc = ref.docId();
+        String chunk = ref.chunkId();
+        if (outsideInjectedScope(doc)) {
+            return MAPPER.writeValueAsString(getError("TOPIC_OUT_OF_SCOPE", "Topic is outside the injected document scope.", doc, chunk));
+        }
+        if (!settings.isRepositoryConfigured()) {
+            return MAPPER.writeValueAsString(getError("DOCUMENT_REPOSITORY_NOT_CONFIGURED", "Document knowledge repository is not configured.", doc, chunk));
+        }
+        DocumentKnowledgeIndexCache.LoadResult loaded = resolveIndexForTopic(settings, agentName);
+        if (loaded.index() == null) {
+            boolean unavailable = loaded.failureReason() == DocumentKnowledgeIndexCache.LoadResult.FailureReason.PERMISSION_DENIED
+                    || loaded.failureReason() == DocumentKnowledgeIndexCache.LoadResult.FailureReason.REPOSITORY_UNAVAILABLE;
+            return MAPPER.writeValueAsString(getError(unavailable ? "DOCUMENT_REPOSITORY_UNAVAILABLE" : "DOCUMENT_TOOL_INTERNAL_ERROR",
+                    unavailable ? "Document knowledge repository is unavailable." : "Document index could not be loaded.", doc, chunk));
+        }
+        Optional<DocumentKnowledgeChunk> indexed = loaded.index().findChunk(doc, chunk);
+        if (indexed.isEmpty() || !"topic".equals(indexed.get().contentType())) {
+            return MAPPER.writeValueAsString(getError("TOPIC_NOT_FOUND", "Indexed topic was not found.", doc, chunk));
+        }
+        if (loaded.staleRebuildFailed()) {
+            LOG.warn("[{}] load_topic using stale document index", agentName);
+        }
+        RepositoryReader reader;
+        try {
+            reader = readers.create(settings, agentName);
+        } catch (Exception unavailable) {
+            return MAPPER.writeValueAsString(getError("DOCUMENT_REPOSITORY_UNAVAILABLE", "Document knowledge repository is unavailable.", doc, chunk));
+        }
+        if (reader == null) {
+            return MAPPER.writeValueAsString(getError("DOCUMENT_REPOSITORY_UNAVAILABLE", "Document knowledge repository is unavailable.", doc, chunk));
+        }
+        String body;
+        try {
+            String packagePath = DocumentKnowledgePaths.join(settings.rootPath(), doc);
+            body = DocumentKnowledgeRepositoryReader.loadText(reader,
+                    DocumentKnowledgePaths.join(packagePath, "topics/" + chunk + ".md"));
+        } catch (Exception failure) {
+            return MAPPER.writeValueAsString(getError(PlatformAccess.isPermissionDenial(failure)
+                    ? "DOCUMENT_REPOSITORY_UNAVAILABLE" : "TOPIC_LOAD_FAILED", "Topic text could not be read.", doc, chunk));
+        }
+        if (body == null || body.isBlank()) {
+            return MAPPER.writeValueAsString(getError("TOPIC_LOAD_FAILED", "Topic text is empty.", doc, chunk));
+        }
+        if (body.length() > TopicMethodText.MAX_BODY_CHARS) {
+            return MAPPER.writeValueAsString(getError("TOPIC_TOO_LARGE", "Topic exceeds the complete-text limit.", doc, chunk));
+        }
+        String result = TopicMethodText.format(ref, body);
+        return result.length() < TopicMethodText.MAX_RESULT_CHARS ? result
+                : MAPPER.writeValueAsString(getError("TOPIC_TOO_LARGE", "Topic exceeds the complete-text limit.", doc, chunk));
+    }
+
+    private static boolean outsideInjectedScope(String docId) {
+        List<String> scope = AgentToolContext.getInjectedDocumentScopeIds();
+        return scope != null && !scope.isEmpty() && !scope.contains(docId);
+    }
+
+    static DocumentKnowledgeIndexCache.LoadResult resolveIndexForTopic(DocumentKnowledgeSettings settings, String agentName) {
+        try {
+            return DocumentKnowledgeIndexCache.getOrLoad(settings, agentName != null ? agentName : "", LOG);
+        } catch (Exception failure) {
+            return DocumentKnowledgeIndexCache.LoadResult.failed(PlatformAccess.isPermissionDenial(failure)
+                    ? DocumentKnowledgeIndexCache.LoadResult.FailureReason.PERMISSION_DENIED
+                    : DocumentKnowledgeIndexCache.LoadResult.FailureReason.INTERNAL_ERROR);
+        }
+    }
 
     public static String executeSearchDocumentChunks(ToolCall call, AgentBaseThing agent) throws Exception {
         DocumentKnowledgeSettings settings = DocumentKnowledgeSettings.fromAgent(agent);
         String agentName = agent != null ? agent.getName() : "";
-        return executeSearchDocumentChunks(call, settings, agentName);
+        if (agent == null) {
+            return executeSearchDocumentChunks(call, settings, agentName);
+        }
+        return searchWithUnitScope(call, settings, agentName, SearchUnitScope::visibleCanonicalName,
+                name -> resolveHostContextScope(agent, name));
+    }
+
+    /** A search that names a unit in {@code assetContext.thingName} and has no scope otherwise establishes that unit's. */
+    static String searchWithUnitScope(
+            ToolCall call,
+            DocumentKnowledgeSettings settings,
+            String agentName,
+            Function<String, Optional<String>> canonicalName,
+            Function<String, Optional<ResolvedDocumentSet>> resolver) throws Exception {
+        SearchUnitScope.Outcome outcome = SearchUnitScope.derive(call, canonicalName, resolver);
+        return SearchUnitScope.appendWarning(executeSearchDocumentChunks(call, settings, agentName), outcome);
     }
 
     static String executeSearchDocumentChunks(
@@ -43,8 +151,8 @@ public final class DocumentKnowledgeRuntime {
             DocumentKnowledgeSettings settings,
             String agentName) throws Exception {
         JsonNode rawArgs = parseArgs(call);
-        // Host-context server-injected scope (§3.2): default documentIds to the
-        // pre-resolved set ONLY when the model omitted the field — a default, not a hard
+        // Server-injected scope (host context, conversation entity or a named unit): default documentIds to
+        // the pre-resolved set ONLY when the model omitted the field — a default, not a hard
         // filter, so the model supplying documentIds at all (including []) suppresses it.
         JsonNode args = rawArgs;
         String injectedScopeSource = null;
@@ -491,10 +599,18 @@ public final class DocumentKnowledgeRuntime {
         for (DocumentKnowledgeSearchScorer.ScoredMatch match : ranked.matches()) {
             matches.add(buildSearchMatch(settings, index, match));
         }
+        DocumentKnowledgeSearchScorer.typesAvailableToEmptyFilter(index.searchableChunks(), index::manifestFor, request)
+                .ifPresent(types -> responseWarnings.add("DOCUMENT_TYPE_FILTER_EMPTY", "documentTypes filter "
+                        + request.documentTypes() + " matched no document; available types: " + types));
+        List<Map<String, Object>> topics = buildTopicLane(() -> DocumentKnowledgeSearchScorer.topicLane(
+                index.searchableChunks(), index::manifestFor, request, AgentToolContext.getInjectedDocumentScopeIds()));
 
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("status", "success");
         body.put("degraded", index.degraded() || staleRebuildFailed);
+        if (!topics.isEmpty()) {
+            body.put("topics", topics);
+        }
         body.put("matches", matches);
         body.put("warnings", responseWarnings.toJsonList());
         body.put("searchedDocuments", index.searchedDocuments());
@@ -505,10 +621,51 @@ public final class DocumentKnowledgeRuntime {
         body.put("selectedDocIds", ranked.selectedDocIds());
         body.put("selectionMode", ranked.selectionMode());
         if (injectedScopeResolverSource != null) {
-            body.put("documentScopeSource", "host-context-resolver");
+            body.put("documentScopeSource", documentScopeSource(AgentToolContext.getInjectedDocumentScopeOrigin()));
             body.put("documentScopeResolverSource", injectedScopeResolverSource);
         }
         return body;
+    }
+
+    private static String documentScopeSource(AgentToolContext.DocumentScopeOrigin origin) {
+        if (origin == AgentToolContext.DocumentScopeOrigin.CONVERSATION) {
+            return "conversation-entity-resolver";
+        }
+        return origin == AgentToolContext.DocumentScopeOrigin.SEARCH_ASSET_CONTEXT
+                ? "asset-context-resolver" : "host-context-resolver";
+    }
+
+    /** A lane failure costs the search its {@code topics}, never its {@code matches}. */
+    static List<Map<String, Object>> buildTopicLane(Supplier<List<DocumentKnowledgeSearchScorer.ScoredMatch>> lane) {
+        try {
+            List<Map<String, Object>> topics = new ArrayList<>();
+            for (DocumentKnowledgeSearchScorer.ScoredMatch match : lane.get()) {
+                DocumentKnowledgeChunk chunk = match.chunk();
+                Map<String, Object> row = new LinkedHashMap<>();
+                row.put("docId", chunk.docId());
+                row.put("chunkId", chunk.chunkId());
+                row.put("contentType", chunk.contentType());
+                row.put("heading", compactHeading(chunk.heading()));
+                row.put("score", match.score());
+                row.put("loadWith", "load_topic");
+                topics.add(row);
+            }
+            return topics;
+        } catch (RuntimeException failure) {
+            LOG.warn("Topic lane omitted from search result", failure);
+            return List.of();
+        }
+    }
+
+    private static String compactHeading(String heading) {
+        if (heading == null) {
+            return "";
+        }
+        if (heading.length() <= TOPIC_HEADING_MAX_CHARS) {
+            return heading;
+        }
+        boolean splitsPair = Character.isHighSurrogate(heading.charAt(TOPIC_HEADING_MAX_CHARS - 1));
+        return heading.substring(0, splitsPair ? TOPIC_HEADING_MAX_CHARS - 1 : TOPIC_HEADING_MAX_CHARS);
     }
 
     private static List<Map<String, Object>> serializeDocumentScores(
@@ -537,6 +694,9 @@ public final class DocumentKnowledgeRuntime {
         row.put("heading", chunk.heading());
         row.put("sectionPath", chunk.sectionPath());
         row.put("contentType", chunk.contentType());
+        if ("topic".equals(chunk.contentType()) && !outsideInjectedScope(chunk.docId())) {
+            row.put("loadWith", "load_topic");
+        }
         row.put("pageStart", chunk.pageStart());
         row.put("pageEnd", chunk.pageEnd());
         row.put("score", match.score());

@@ -24,7 +24,34 @@ class ToolResultEgressGatewayAlertSummaryMultiTest {
     void compactForLlmAppend_preservesTwentyFiveThingCeiling() throws Exception {
         String raw = worstCaseMultiRollup(25, "SE.CellFab.Model.Workunit.Asset-");
         assertTrue(raw.length() > 8192, "fixture must exceed LLM evidence soft cap");
-        assertByThingCountSurvivesEgress(25, "SE.CellFab.Model.Workunit.Asset-", raw);
+        // byThing is never sampled; under a soft cap that holds the rollup all 25 Things arrive.
+        com.thingworx.things.agent.tools.AgentToolContext.putResultBudget("call-multi",
+                new ResultBudget(16_384, 2_000, ResultBudget.SOURCE_SETTING));
+        try {
+            assertByThingCountSurvivesEgress(25, "SE.CellFab.Model.Workunit.Asset-", raw);
+        } finally {
+            com.thingworx.things.agent.tools.AgentToolContext.clear();
+        }
+    }
+
+    /**
+     * Round 6 D13: at the default soft cap the worst-case rollup cannot be reduced without sampling byThing, so it
+     * becomes the budgeted overflow response, within the cap, naming byThing; it no longer arrives above the cap.
+     */
+    @Test
+    void worstCaseRollup_atTheDefaultSoftCap_isTheBudgetedOverflowResponse() throws Exception {
+        String raw = worstCaseMultiRollup(25, "SE.CellFab.Model.Workunit.Asset-");
+        String out = ToolResultEgressGateway.compactForLlmAppend("query_alert_summary", "call-multi", raw, null)
+                .getLlmContent();
+        JsonNode root = JSON.readTree(out);
+        assertTrue(out.length() <= 8_192, "within the soft cap: " + out.length());
+        assertEquals("RESULT_OVERFLOW", root.path("resultKind").asText());
+        boolean namesByThing = false;
+        for (JsonNode n : root.path("fieldNames")) {
+            namesByThing |= "byThing".equals(n.asText());
+        }
+        assertTrue(namesByThing, out);
+        assertTrue(root.has("completenessNote"));
     }
 
     @Test

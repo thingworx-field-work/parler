@@ -52,6 +52,7 @@ public final class ToolBuckets {
         m.put("resolve_document_set", ToolBucket.DOCUMENTS);
         m.put("search_document_chunks", ToolBucket.DOCUMENTS);
         m.put("get_document_chunk", ToolBucket.DOCUMENTS);
+        m.put("load_topic", ToolBucket.DOCUMENTS);
         // Skills / playbooks
         m.put("get_agent_skill", ToolBucket.SKILLS_PLAYBOOKS);
         m.put("start_playbook", ToolBucket.SKILLS_PLAYBOOKS);

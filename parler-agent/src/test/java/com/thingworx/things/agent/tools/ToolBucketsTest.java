@@ -17,6 +17,7 @@ class ToolBucketsTest {
         assertEquals(ToolBucket.ALERTS, ToolBuckets.bucketOf("query_alert_summary"));
         assertEquals(ToolBucket.METADATA_EXPLORATION, ToolBuckets.bucketOf("invoke_service"));
         assertEquals(ToolBucket.DOCUMENTS, ToolBuckets.bucketOf("search_document_chunks"));
+        assertEquals(ToolBucket.DOCUMENTS, ToolBuckets.bucketOf("load_topic"));
         assertEquals(ToolBucket.SKILLS_PLAYBOOKS, ToolBuckets.bucketOf("get_agent_skill"));
         assertEquals(ToolBucket.SKILLS_PLAYBOOKS, ToolBuckets.bucketOf("start_playbook"));
     }

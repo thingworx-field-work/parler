@@ -12,7 +12,15 @@ Built-in tools remain implemented in Java (`BuiltInTools`, `ToolRegistry`). The 
 
 ### Optional `executorOnly`
 
-Per entry in **`/tools/extended_tools.json`**, an optional boolean **`executorOnly`** (default **`false`**) means: register the tool for **execution** (same target service and HITL semantics) but **omit** it from the **merged LLM tool list**. When the field is present it **must** be a JSON boolean; any other type **invalidates the entire manifest** (same strictness as **`hitl`** / **`playbookSafe`**). Normative behavior and snapshot reporting: **`./legacy-discovery-executor-only.md`**; repository operator notes: **`./configuration-repository.md`** (`GetAgentRuntimeSnapshot`).
+Per entry in **`/tools/extended_tools.json`**, an optional boolean **`executorOnly`** (default **`false`**) means: register the tool for **execution** (same target service and HITL semantics) but **omit** it from the **merged LLM tool list**. When the field is present it **must** be a JSON boolean; any other type **skips that entry** (logged), and the other entries still register (same rule as **`hitl`** / **`playbookSafe`**). Normative behavior and snapshot reporting: **`./legacy-discovery-executor-only.md`**; repository operator notes: **`./configuration-repository.md`** (`GetAgentRuntimeSnapshot`).
+
+### Optional `resultTextCapChars`
+
+An optional positive integer **`resultTextCapChars`** sets the text cap of this tool's result: the size above which one text field is cut once the result must be reduced. It is clamped to 500..50000 and to `toolResultSoftCapChars` minus 1,024; it never raises the installation's soft cap. A non-integer or non-positive value skips the entry. Check the feature `tool-result-budget/1` first; older agents ignore the key.
+
+### Results the model receives
+
+A result at or under the installation's `toolResultSoftCapChars` (default 8,192 serialized characters) reaches the model whole. A larger one is reduced and says so in `completenessNote`: a table keeps whole rows and a `cacheId` (or `recovery: "unavailable"`), other results are cut at the text cap, and what cannot fit becomes `RESULT_OVERFLOW` with only its field or column names. A tool that may return a large result should accept parameters that ask for less (fewer fields, a narrower request). An approved (HITL) tool's result passes through the same rules: one over the soft cap is now reduced where it used to arrive whole.
 
 ## When INFOTABLE shaping is awkward
 
@@ -28,6 +36,13 @@ Services registered through **`/tools/extended_tools.json`** may return **JSON**
 4. **Declare paging or truncation.** Provide `totalRows` and `returnedRows`, plus `hasMore` or `truncated`; keep `offset` for offset paging. Never describe one page as the whole result.
 5. **Composite results may use named sub-objects** (for example `machineCoverage`, `stateSummary`), each with its own status and `rows`; use `included: false` for parts not requested and a root `status` of `partial`. Composite results are for reading. For a chart, call the tool that returns the needed single table; the agent does not guess the main table or merge sub-tables.
 6. **Use JSON only when needed.** Keep INFOTABLE when a table is all that is required. When changing a return format, check every downstream use: text answers, tables, and charts.
+
+**How a JSON result reaches the model.** A service whose result type is `JSON` is delivered in one of two shapes, chosen by the installation's `AgentSettings.toolResultJsonMode` (see **`./configuration-repository.md`**, "Tool result settings"):
+
+- `string` (default): `{"status":"success","resultKind":"JSON","result":"<the JSON text>"}`, one string field.
+- `node`: `{"status":"success","resultKind":"JSON","result":{...}}`, the JSON value itself.
+
+In `node` mode the value obeys the same egress rules as any object result: arrays longer than 20 items are sampled and marked, so a tool that returns a list should return a table. Check the feature `tool-result-json-node/1` before relying on `node`. Whenever the result the model receives was reduced, it carries a root `completenessNote` (see **`CONTRACTS/TOOL_RESULT_COMPLETENESS.md`**).
 
 Minimal single-table example:
 

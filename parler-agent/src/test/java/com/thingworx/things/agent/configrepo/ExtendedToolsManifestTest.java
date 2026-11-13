@@ -186,4 +186,52 @@ class ExtendedToolsManifestTest {
         assertTrue(merged.stream().anyMatch(d -> "extShown".equals(d.getName())));
         assertTrue(merged.stream().anyMatch(d -> "extHidden".equals(d.getName())));
     }
+
+    private static com.fasterxml.jackson.databind.JsonNode entry(String extra) throws Exception {
+        return new com.fasterxml.jackson.databind.ObjectMapper().readTree("{\"name\":\"demo_evidence_tool\","
+                + "\"whenToUse\":\"x\",\"target\":{\"entityName\":\"me\",\"serviceName\":\"S\"}" + extra + "}");
+    }
+
+    @Test
+    void result_text_cap_chars_valid_skips_and_clamps() throws Exception {
+        assertEquals(null, ExtendedToolsManifest.parseResultTextCap(entry("")).value);
+        ExtendedToolsManifest.ResultTextCap ok = ExtendedToolsManifest.parseResultTextCap(entry(",\"resultTextCapChars\":4000"));
+        assertEquals(Integer.valueOf(4000), ok.value);
+        assertFalse(ok.clamped);
+        assertTrue(ExtendedToolsManifest.parseResultTextCap(entry(",\"resultTextCapChars\":-5")).skipReason != null);
+        assertTrue(ExtendedToolsManifest.parseResultTextCap(entry(",\"resultTextCapChars\":\"x\"")).skipReason != null);
+        assertTrue(ExtendedToolsManifest.parseResultTextCap(entry(",\"resultTextCapChars\":2.5")).skipReason != null);
+        ExtendedToolsManifest.ResultTextCap high = ExtendedToolsManifest.parseResultTextCap(entry(",\"resultTextCapChars\":100000"));
+        assertEquals(Integer.valueOf(50_000), high.value);
+        assertTrue(high.clamped);
+        assertEquals(Integer.valueOf(500), ExtendedToolsManifest.parseResultTextCap(entry(",\"resultTextCapChars\":100")).value);
+    }
+
+    @Test
+    void a_legacy_entry_with_result_text_cap_chars_is_not_a_capability_entry() throws Exception {
+        ServiceCapabilityDescriptorParser.ParseResult parse =
+                ServiceCapabilityDescriptorParser.parse(entry(",\"resultTextCapChars\":4000"), null);
+        assertFalse(parse.shouldSkip(), "risk does not become required");
+        assertFalse(parse.metadata().isPresent());
+    }
+
+    @Test
+    void a_bad_result_text_cap_skips_only_that_entry_not_the_file() {
+        RepositoryReader reader = new RepositoryReader() {
+            @Override
+            public InfoTable getFileListing(String path, String nameMask) {
+                return new InfoTable();
+            }
+
+            @Override
+            public String loadText(String path) {
+                return "{\"version\":1,\"tools\":[{\"name\":\"bad_cap\",\"whenToUse\":\"x\","
+                        + "\"target\":{\"entityName\":\"T\",\"serviceName\":\"S\"},\"resultTextCapChars\":-5}]}";
+            }
+        };
+        ExtendedToolRegistrySnapshot snap =
+                ExtendedToolsManifest.load(reader, "MyAgent", null, Set.of(), NOPLogger.NOP_LOGGER);
+        assertFalse(snap.isFileInvalid());
+        assertTrue(snap.allByName().isEmpty());
+    }
 }

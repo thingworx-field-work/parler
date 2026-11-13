@@ -40,6 +40,38 @@ public final class ExtendedToolsManifest {
         return ExtendedToolRegistrySnapshot.invalid();
     }
 
+    /** Outcome of the optional {@code resultTextCapChars} field of one entry (round 6, R24). */
+    static final class ResultTextCap {
+        final Integer value;
+        final boolean clamped;
+        final String skipReason;
+
+        private ResultTextCap(Integer value, boolean clamped, String skipReason) {
+            this.value = value;
+            this.clamped = clamped;
+            this.skipReason = skipReason;
+        }
+    }
+
+    /**
+     * {@code resultTextCapChars}: absent is fine; a non-integer or non-positive value skips the entry; an integer
+     * outside 500..50000 is clamped ({@code CONFIG_VALUE_CLAMPED}). It is not a capability field, so it never makes
+     * {@code risk} required.
+     */
+    static ResultTextCap parseResultTextCap(JsonNode entry) {
+        if (entry == null || !entry.has("resultTextCapChars")) {
+            return new ResultTextCap(null, false, null);
+        }
+        JsonNode v = entry.get("resultTextCapChars");
+        if (v == null || !v.isIntegralNumber() || !v.canConvertToInt() || v.intValue() <= 0) {
+            return new ResultTextCap(null, false, "resultTextCapChars must be a positive integer when present");
+        }
+        int n = v.intValue();
+        int clampedValue = Math.max(com.thingworx.things.agent.ResultBudget.MIN_TEXT_CAP_CHARS,
+                Math.min(com.thingworx.things.agent.ResultBudget.MAX_TEXT_CAP_CHARS, n));
+        return new ResultTextCap(clampedValue, clampedValue != n, null);
+    }
+
     /** S9: log and skip one bad entry without invalidating the whole file. */
     private static void skipEntry(Logger log, String agentThingName, String toolName, String reason) {
         if (log != null) {
@@ -156,6 +188,16 @@ public final class ExtendedToolsManifest {
                     }
                     executorOnly = tn.get("executorOnly").asBoolean();
                 }
+                ResultTextCap textCap = parseResultTextCap(tn);
+                if (textCap.skipReason != null) {
+                    skipEntry(log, agentThingName, name, textCap.skipReason);
+                    continue;
+                }
+                if (textCap.clamped && log != null) {
+                    log.warn("[{}] configurationRepository: extended tool {} resultTextCapChars {} — {}",
+                            agentThingName, name, textCap.value,
+                            com.thingworx.things.agent.ToolResultSettings.CONFIG_VALUE_CLAMPED);
+                }
                 if (log != null && hitlBypass && !playbookSafeRequested && !tn.has("playbookSafe")) {
                     log.info("[{}] configurationRepository: extended tool {} declares hitl=false but playbookSafe is "
                             + "omitted; tool will not be playbook-eligible unless playbookSafe=true is set",
@@ -208,7 +250,7 @@ public final class ExtendedToolsManifest {
                     continue;
                 }
                 list.add(new ExtendedToolDefinition(name, title, whenToUse, resolvedEntity, serviceName, hitlBypass,
-                        executorOnly, td, capabilityParse.metadata().orElse(null)));
+                        executorOnly, td, capabilityParse.metadata().orElse(null), textCap.value));
             }
             return ExtendedToolRegistrySnapshot.ok(list);
         } catch (Exception e) {

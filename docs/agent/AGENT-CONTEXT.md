@@ -216,6 +216,7 @@ The `mcp-twx` project (Rust MCP Server for ThingWorx) demonstrated that ThingWor
 | `spotlight_search` | Fuzzy metadata search via `SearchFunctions.SpotlightSearchV2` (in-JVM, same as REST) | **Implemented** (`SpotlightSearchExecutor`) |
 | `set_property_value` | Write a Thing property | **Parler AlwaysOn + HITL:** enqueues pending approval; after approve, **`SetPropertyValueExecutor`** writes via **`UpdatePropertyValues`** as the approving user (ServiceInvoke + PropertyWrite checked; read-only properties return **`PROPERTY_READ_ONLY`**). **Non-Parler Chat:** returns `status:blocked`, `code:PROPERTY_WRITE_REQUIRES_PARLER_CONTEXT` (no write); non-bypassed **`invoke_service`** and **`hitl: true`** extended tools likewise return `code:APPROVAL_REQUIRES_PARLER_CONTEXT`. See **`./data-operation-solution.md`**, **`./AGENT-ALWAYSON-TWX.md`**. |
 | `get_agent_skill` | Load full skill body for registered short id **`<id>`** from **`/skills/<id>/SKILL.md`** on **`configurationRepository`**; returns **metadata-free** Markdown for the LLM | **Implemented** (`GetAgentSkillExecutor`, **`SkillRegistryLoader`**); see **./CUSTOMIZED-SKILLS.md**, **./skill-management.md** |
+| `load_topic` | Load complete generated method text by indexed `(docId, chunkId)` from the document repository; plain text, at most 7,000 UTF-16 body code units; current-user read and injected-scope check | **Implemented** (`DocumentKnowledgeRuntime`); registered only with built-ins and document knowledge enabled; not playbook-safe. Active method recognition preserves upstream-admitted tools and topic text across approval; see **./document-chunk-tools.md**, **./task-state.md**, **./context-compaction.md** |
 
 **Extended tools:** Additional LLM tools are registered from **`/tools/extended_tools.json`** on the same FileRepository (**`configurationRepository`**), not from **`_tool_*`** Service name scanning. See **./CUSTOMIZED-TOOLS.md**, **./configuration-repository.md**.
 
@@ -333,6 +334,14 @@ Full CRUD details, entity layout, and Java examples: **./LLM-PERSISTENCE.md**.
 **Import:** Entities ship in the Extension ZIP under **`Entities/`**; the extension must be imported before live writes succeed. Missing Stream → explicit collector gap in reports (no fallback to message Stream or Application Log).
 
 Normative field semantics and acceptance matrix: **`docs/agent/nearterm/context-compaction-adv.md`** CC-7.
+
+### 5.7 Operational metrics (`metrics` package, topic `metrics-support`)
+
+**Purpose:** Aggregate turn, provider, token, and tool telemetry through ThingWorx MetricsV2 (minimum platform 9.7.0). The metrics complement, and never replace, the Streams in §5.5 and §5.6.
+
+**Runtime wiring:** `AgentThing` opens a `ParlerTurnScope` after ready admission on `Chat`, `ChatAsync`, `ParlerStreamToRemoteThing`, and the approval continuation, and closes it in `finally`. It opens a `ParlerToolScope` in `executeToolCall` and around the approved gated dispatch. `LlmRecordedHttpChat` owns one `ProviderAttemptMetrics` per dispatched attempt. Call sites use only the `ParlerMetrics` facade; `MetricsV2Registrar` is the only class that imports `com.thingworx.metrics.v2`. Tests install a fake sink or registrar with `ParlerMetrics.installSinkForTest` / `installRegistrarForTest` and clear it with `resetForTest()`.
+
+See the [supported metrics and dimensions](metrics-support.md) for the operator reference.
 
 ---
 

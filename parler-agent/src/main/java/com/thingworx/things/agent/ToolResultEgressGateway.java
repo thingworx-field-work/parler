@@ -27,8 +27,8 @@ public final class ToolResultEgressGateway {
      * invoke/fetch/cached-tabular compatibility thresholds all derive from this value.
      */
     static final int ARRAY_SAMPLE_LIMIT = 20;
-    private static final int LARGE_TEXT_EXCERPT_CHARS = 2_000;
-    private static final int HARD_TEXT_EXCERPT_CHARS = 512;
+    static final int LARGE_TEXT_EXCERPT_CHARS = 2_000;
+    static final int HARD_TEXT_EXCERPT_CHARS = 512;
     private static final int LAST_RESORT_TARGET_CHARS = 6_000;
 
     private static final List<String> PRIORITY_FIELDS = List.of(
@@ -37,9 +37,11 @@ public final class ToolResultEgressGateway {
             "aggregates", "warnings", "hint", "message", "completeness", "thingsRequested", "thingsSucceeded",
             "thingsFailedIdentity", "thingsFailedService", "byThing", "identityErrors",
             // U3E G18 additive typed error fields — keep through last-resort compaction (EG6 align).
-            "category", "reason", "retryable", "retryBudgetKey", "recoveryActions", "evidenceStillUsable");
+            "category", "reason", "retryable", "retryBudgetKey", "recoveryActions", "evidenceStillUsable",
+            // Round 6 R26b: the completeness note travels with the evidence through every pass.
+            "completenessNote", "recovery");
 
-    private static final ObjectMapper JSON = new ObjectMapper();
+    static final ObjectMapper JSON = new ObjectMapper();
 
     private ToolResultEgressGateway() {}
 
@@ -102,9 +104,8 @@ public final class ToolResultEgressGateway {
     }
 
     /**
-     * Compact tool JSON for LLM replay. When {@code dataClassification} is non-empty (G13 / SPR-5),
-     * stamps {@code _egress.dataClassification} onto object results so classification is consumed at
-     * the egress boundary (not snapshot-only).
+     * As {@link #compactForLlmAppend(String, String, String, Logger, List, ResultBudget)} with the call's stored
+     * budget, else one resolved for {@code toolName}, else the defaults (a direct gateway call).
      */
     public static EgressResult compactForLlmAppend(
             String toolName,
@@ -112,29 +113,85 @@ public final class ToolResultEgressGateway {
             String rawContent,
             Logger log,
             List<String> dataClassification) {
+        return compactForLlmAppend(toolName, toolCallId, rawContent, log, dataClassification,
+                com.thingworx.things.agent.tools.AgentToolContext.resultBudgetFor(toolCallId, toolName));
+    }
+
+    /**
+     * The first model append of a tool result (topic round 6, R23 to R26). A JSON result is judged by its serialized
+     * size after array sampling, with its markers, completeness note and classification stamp: at or under the
+     * effective soft cap it is never cut in text; above it, a table-shaped root keeps whole rows filled greedily and
+     * any other root takes the three passes; what still does not fit becomes the budgeted overflow response. The
+     * result is at most the soft cap, except an error envelope (its entry and single pass are unchanged) and the
+     * minimal overflow envelope when an author's classification stamp alone makes it too large. When
+     * {@code dataClassification} is non-empty (G13 / SPR-5) it is stamped as {@code _egress.dataClassification}.
+     */
+    public static EgressResult compactForLlmAppend(
+            String toolName,
+            String toolCallId,
+            String rawContent,
+            Logger log,
+            List<String> dataClassification,
+            ResultBudget budget) {
         String raw = rawContent != null ? rawContent : "";
+        ResultBudget b = budget != null ? budget : ResultBudget.defaults();
         EgressResult out;
-        if (raw.length() <= LLM_EVIDENCE_CHARS_SOFT_CAP && raw.indexOf('[') < 0) {
-            out = EgressResult.unchanged(raw);
-        } else {
+        JsonNode root = null;
+        if (looksLikeJson(raw)) {
             try {
-                JsonNode root = JSON.readTree(raw);
-                if (isErrorEnvelope(root)) {
-                    out = compactErrorEnvelope(root, raw);
-                } else {
-                    out = compactJson(root, raw);
-                }
+                root = JSON.readTree(raw);
             } catch (Exception parseFailure) {
-                out = raw.length() > LLM_EVIDENCE_CHARS_SOFT_CAP ? compactText(raw) : EgressResult.unchanged(raw);
+                root = null;
             }
         }
-
-        out = stampDataClassification(out, dataClassification);
+        if (root == null || root.isMissingNode()) {
+            // Plain text: the classification stamp is part of the measured candidate (D13).
+            out = raw.length() > b.softCapChars()
+                    ? compactText(raw, b, normalizedClassification(dataClassification))
+                    : EgressResult.unchanged(raw);
+        } else if (isErrorEnvelope(root)) {
+            // The error-envelope rule is unchanged: today's entry and one pass (arrays 5, text 512).
+            try {
+                out = raw.length() <= LLM_EVIDENCE_CHARS_SOFT_CAP && raw.indexOf('[') < 0
+                        ? EgressResult.unchanged(raw)
+                        : compactErrorEnvelope(root, raw);
+            } catch (Exception e) {
+                out = EgressResult.unchanged(raw);
+            }
+            out = stampDataClassification(out, dataClassification);
+        } else {
+            out = BudgetedEgress.compact(root, raw, b, normalizedClassification(dataClassification));
+        }
 
         if (log != null && out.isCompacted()) {
-            log.info("TOOL_RESULT_EGRESS toolName={} callId={} rawReplayChars={} replayChars={} compactRatio={}",
+            log.info("TOOL_RESULT_EGRESS toolName={} callId={} rawReplayChars={} replayChars={} compactRatio={} "
+                            + "softCapChars={} textCapChars={} budgetSource={}",
                     safe(toolName), safe(toolCallId), out.getRawChars(), out.getLlmContent().length(),
-                    String.format(Locale.ROOT, "%.4f", out.getCompactRatio()));
+                    String.format(Locale.ROOT, "%.4f", out.getCompactRatio()), b.softCapChars(), b.textCapChars(),
+                    b.source());
+        }
+        return out;
+    }
+
+    private static boolean looksLikeJson(String raw) {
+        for (int i = 0; i < raw.length(); i++) {
+            char c = raw.charAt(i);
+            if (!Character.isWhitespace(c)) {
+                return c == '{' || c == '[' || c == '"' || c == '-' || Character.isDigit(c) || c == 't' || c == 'f'
+                        || c == 'n';
+            }
+        }
+        return false;
+    }
+
+    static List<String> normalizedClassification(List<String> dataClassification) {
+        List<String> out = new ArrayList<>();
+        if (dataClassification != null) {
+            for (String c : dataClassification) {
+                if (c != null && !c.isBlank()) {
+                    out.add(c.trim());
+                }
+            }
         }
         return out;
     }
@@ -172,47 +229,15 @@ public final class ToolResultEgressGateway {
             egress.set("dataClassification", arr);
             obj.set("_egress", egress);
             String stamped = JSON.writeValueAsString(obj);
-            return out.isCompacted()
-                    ? EgressResult.compacted(stamped, out.getRawChars())
+            if (out.isCompacted()) {
+                return EgressResult.compacted(stamped, out.getRawChars());
+            }
+            return out.isAnnotated()
+                    ? EgressResult.annotated(stamped, out.getRawChars())
                     : EgressResult.classified(stamped, out.getRawChars());
         } catch (Exception ignored) {
             return out;
         }
-    }
-
-    private static EgressResult compactJson(JsonNode root, String raw) throws Exception {
-        ObjectNode markers = JSON.createObjectNode();
-        String rootResultKind = rootResultKind(root);
-        JsonNode compactRoot = compactNode(root, null, ARRAY_SAMPLE_LIMIT, LARGE_TEXT_EXCERPT_CHARS, markers,
-                rootResultKind);
-        String compact = JSON.writeValueAsString(compactRoot);
-        if (compact.length() > LLM_EVIDENCE_CHARS_SOFT_CAP) {
-            markers.removeAll();
-            compactRoot = compactNode(root, null, Math.max(1, ARRAY_SAMPLE_LIMIT / 4), HARD_TEXT_EXCERPT_CHARS,
-                    markers, rootResultKind);
-            compact = JSON.writeValueAsString(compactRoot);
-        }
-        if (compact.length() > LLM_EVIDENCE_CHARS_SOFT_CAP) {
-            markers.removeAll();
-            compactRoot = compactLastResort(root, markers, rootResultKind);
-            compact = JSON.writeValueAsString(compactRoot);
-        }
-        if (compactRoot.isObject() && markers.size() > 0) {
-            ObjectNode obj = (ObjectNode) compactRoot;
-            applyTopLevelMarkers(obj, markers, raw.length());
-            compact = JSON.writeValueAsString(obj);
-        } else if (markers.size() > 0) {
-            ObjectNode wrapper = JSON.createObjectNode();
-            wrapper.put("status", statusText(root));
-            wrapper.put("resultKind", "LARGE_JSON_COMPACT");
-            wrapper.set("sample", compactRoot);
-            applyTopLevelMarkers(wrapper, markers, raw.length());
-            compact = JSON.writeValueAsString(wrapper);
-        }
-        if (compact.length() >= raw.length()) {
-            return EgressResult.unchanged(raw);
-        }
-        return EgressResult.compacted(compact, raw.length());
     }
 
     private static EgressResult compactErrorEnvelope(JsonNode root, String raw) throws Exception {
@@ -228,21 +253,34 @@ public final class ToolResultEgressGateway {
                 : EgressResult.unchanged(raw);
     }
 
-    private static EgressResult compactText(String raw) {
-        ObjectNode root = JSON.createObjectNode();
-        root.put("status", "success");
-        root.put("resultKind", "LARGE_TEXT_COMPACT");
-        root.put("contentExcerpt", excerpt(raw, LARGE_TEXT_EXCERPT_CHARS));
-        root.put("truncated", true);
-        root.put("rawChars", raw.length());
-        try {
-            return EgressResult.compacted(JSON.writeValueAsString(root), raw.length());
-        } catch (Exception e) {
-            return EgressResult.unchanged(raw);
+    private static EgressResult compactText(String raw, ResultBudget budget, List<String> classification) {
+        int excerptChars = Math.min(LARGE_TEXT_EXCERPT_CHARS, budget.textCapChars());
+        while (true) {
+            ObjectNode root = JSON.createObjectNode();
+            root.put("status", "success");
+            root.put("resultKind", "LARGE_TEXT_COMPACT");
+            root.put("contentExcerpt", excerpt(raw, excerptChars));
+            root.put("truncated", true);
+            root.put("rawChars", raw.length());
+            root.put(CompletenessNote.FIELD, CompletenessNote.text(CompletenessNote.Variant.GATEWAY_CUT, root));
+            BudgetedEgress.stamp(root, classification);
+            try {
+                String s = JSON.writeValueAsString(root);
+                if (s.length() <= budget.softCapChars()) {
+                    return EgressResult.compacted(s, raw.length());
+                }
+            } catch (Exception e) {
+                return EgressResult.unchanged(raw);
+            }
+            if (excerptChars == 0) {
+                // Even an empty excerpt does not fit with the stamp: the budgeted overflow response.
+                return BudgetedEgress.overflow(JSON.getNodeFactory().textNode(""), raw, budget, classification);
+            }
+            excerptChars /= 2;
         }
     }
 
-    private static JsonNode compactNode(JsonNode node, String fieldName, int arraySampleLimit, int textLimit,
+    static JsonNode compactNode(JsonNode node, String fieldName, int arraySampleLimit, int textLimit,
             ObjectNode markers, String rootResultKind) {
         if (node == null || node.isNull() || node.isMissingNode() || node.isNumber() || node.isBoolean()) {
             return node;
@@ -286,7 +324,7 @@ public final class ToolResultEgressGateway {
         return node;
     }
 
-    private static boolean shouldSampleArrayField(String fieldName, String rootResultKind) {
+    static boolean shouldSampleArrayField(String fieldName, String rootResultKind) {
         if (RESULT_KIND_ALERT_SUMMARY_MULTI.equals(rootResultKind)
                 && ("byThing".equals(fieldName) || "identityErrors".equals(fieldName))) {
             return false;
@@ -301,7 +339,7 @@ public final class ToolResultEgressGateway {
      * most {@code HISTORY_OVERLAY_MAX_SERIES} text labels (the text cap applies to each). Any other value under
      * these names is ordinary data and takes the ordinary sampling, budget and omission rules.
      */
-    private static boolean isReadLimitEvidence(String fieldName, JsonNode value) {
+    static boolean isReadLimitEvidence(String fieldName, JsonNode value) {
         if (fieldName == null || value == null) {
             return false;
         }
@@ -331,7 +369,7 @@ public final class ToolResultEgressGateway {
         return PRIORITY_FIELDS.contains(fieldName) || isReadLimitEvidence(fieldName, value);
     }
 
-    private static String rootResultKind(JsonNode root) {
+    static String rootResultKind(JsonNode root) {
         if (root != null && root.isObject() && root.has("resultKind")) {
             return root.path("resultKind").asText("");
         }
@@ -347,7 +385,7 @@ public final class ToolResultEgressGateway {
                 || "fieldDefinitions".equals(fieldName);
     }
 
-    private static JsonNode compactLastResort(JsonNode root, ObjectNode markers, String rootResultKind) {
+    static JsonNode compactLastResort(JsonNode root, ObjectNode markers, String rootResultKind) {
         if (root == null || root.isNull()) {
             return root;
         }
@@ -449,7 +487,7 @@ public final class ToolResultEgressGateway {
         markers.set(fieldName, fieldMarker);
     }
 
-    private static int estimatedJsonChars(JsonNode node) {
+    static int estimatedJsonChars(JsonNode node) {
         try {
             return JSON.writeValueAsString(node).length();
         } catch (Exception e) {
@@ -457,7 +495,7 @@ public final class ToolResultEgressGateway {
         }
     }
 
-    private static void applyTopLevelMarkers(ObjectNode obj, ObjectNode reducedFields, int rawChars) {
+    static void applyTopLevelMarkers(ObjectNode obj, ObjectNode reducedFields, int rawChars) {
         if (!obj.has("sampleOnly")) {
             obj.put("sampleOnly", true);
         }
@@ -493,7 +531,7 @@ public final class ToolResultEgressGateway {
         return summary;
     }
 
-    private static boolean isErrorEnvelope(JsonNode root) {
+    static boolean isErrorEnvelope(JsonNode root) {
         if (root == null || !root.isObject()) {
             return false;
         }
@@ -501,14 +539,14 @@ public final class ToolResultEgressGateway {
         return "error".equalsIgnoreCase(status) || root.has("error");
     }
 
-    private static String statusText(JsonNode root) {
+    static String statusText(JsonNode root) {
         if (root != null && root.isObject() && root.has("status")) {
             return root.path("status").asText("success");
         }
         return "success";
     }
 
-    private static String excerpt(String raw, int maxChars) {
+    static String excerpt(String raw, int maxChars) {
         if (raw == null || raw.length() <= maxChars) {
             return raw != null ? raw : "";
         }
@@ -523,6 +561,7 @@ public final class ToolResultEgressGateway {
         private final String llmContent;
         private final int rawChars;
         private final boolean compacted;
+        private boolean annotated;
 
         private EgressResult(String llmContent, int rawChars, boolean compacted) {
             this.llmContent = llmContent != null ? llmContent : "";
@@ -541,6 +580,21 @@ public final class ToolResultEgressGateway {
 
         static EgressResult compacted(String content, int rawChars) {
             return new EgressResult(content, rawChars, true);
+        }
+
+        /** The producer's own result, unchanged except for the completeness note (R26b). */
+        static EgressResult annotated(String content, int rawChars) {
+            EgressResult r = new EgressResult(content, rawChars, false);
+            r.annotated = true;
+            return r;
+        }
+
+        /**
+         * True when the content differs from the raw result only by an added {@code completenessNote}; like a
+         * compaction, the caller keeps the raw result as the full body for the UI lane.
+         */
+        public boolean isAnnotated() {
+            return annotated;
         }
 
         public String getLlmContent() {

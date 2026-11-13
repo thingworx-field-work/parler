@@ -6,6 +6,18 @@ This document defines explicit task state for `parler-agent`.
 
 The goal is to make the agent's intermediate work visible to the next LLM round as compact, server-authored evidence. This is not a planner design. Tool execution remains driven by the existing `AgentLoop`.
 
+## Active methods: recognition separate from checklists
+
+`AgentTaskState.activeMethodIds` is an ordered, unique, turn-local set of `topic:<docId>/<chunkId>` and `skill:<shortId>` identities. Successful Java `load_topic` execution records a topic only after the complete carrier is validated. Successful non-document `get_agent_skill` records a skill independently of checklist parsing, including bodies without a checklist or with an invalid/duplicate checklist. Loading only `document_search` does not activate a method. Resolved non-document slash skills also disable document-turn narrowing through the existing slash-skill context.
+
+Recognition bypasses `DocumentTurnToolNarrowing` while preserving exactly the upstream-admitted list; it does not register tools, override `toolAdmissionMode`, or waive capability/permission/HITL gates. It is not a task-completion guarantee. `dynamicSkillShortNamesInOrder` continues to identify successfully merged checklists only; do not store topics or checklist-less skill ids there.
+
+The active ids have defensive immutable getter/snapshot APIs. Approval enqueue copies them into `PendingApprovalRecord`; all legacy constructors default to an empty snapshot and `withInterruptedBatchSiblings` preserves it. `AgentThing.primeAgentTaskStateFromHistory` restores ids into a fresh state before the first continuation filter/budget plan, so nested approvals preserve recognition. Approve/reject/cancel keep their existing execution policy. Topic text already travels in the message snapshot and is not reloaded during continuation.
+
+**Topic offer.** `AgentTaskState.methodOffered` is a turn-local boolean set when a Java `search_document_chunks` result has a non-empty `topics` array or a `contentType: "topic"` match, read from the built-in JSON before egress. A topic that egress later removes still counts. While it is true, `DocumentTurnToolNarrowing` does not narrow, so upstream-admitted tools stay available for the rest of the uninterrupted turn. An offer is weaker than an active method: it adds no id to `activeMethodIds`, protects no text in the budget planner, is not carried over an approval pause, and is not serialized. A same-named extended tool never sets it. A continuation therefore relies on a method actually loaded before the pause.
+
+A new user turn starts with fresh recognition, even if earlier method calls remain in history. Existing context cleanup prevents thread leakage; recognition is not reconstructed from history and is not persisted in checkpoints, task-progress wire, or durable conversation state. `ContextBudgetPlanner` retains the newest successful batch per active topic within the current user turn; dynamically loaded skill bodies retain ordinary evidence behavior. See `context-compaction.md` and `document-chunk-tools.md`.
+
 ## Layers
 
 Task state has three layers. Each later layer is additive to the one before it.

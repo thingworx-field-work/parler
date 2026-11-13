@@ -72,4 +72,27 @@ class AgentSettingsConfigSurfaceTest {
         assertFalse(d.contains("not yet implemented"), "stale 'not yet implemented' in: " + f.description());
         assertFalse(d.contains("reserved"), "stale 'reserved' qualifier on lazy in: " + f.description());
     }
+
+    @Test
+    void toolResultJsonMode_isDeclaredWithStringDefaultAndNextOrdinal() {
+        ThingworxFieldDefinition f = field("toolResultJsonMode");
+        assertNotNull(f, "toolResultJsonMode must be declared on the AgentSettings DataShape");
+        assertEquals("STRING", f.baseType());
+        assertTrue(Arrays.asList(f.aspects()).contains("defaultValue:string"), Arrays.toString(f.aspects()));
+        assertEquals(30, f.ordinal());
+    }
+
+    @Test
+    void toolResultCaps_areDeclaredAsIntegersWithDefaultsAndOrdinals() {
+        ThingworxFieldDefinition soft = field("toolResultSoftCapChars");
+        ThingworxFieldDefinition text = field("toolResultTextCapChars");
+        assertNotNull(soft);
+        assertNotNull(text);
+        assertEquals("INTEGER", soft.baseType());
+        assertEquals("INTEGER", text.baseType());
+        assertTrue(Arrays.asList(soft.aspects()).contains("defaultValue:8192"));
+        assertTrue(Arrays.asList(text.aspects()).contains("defaultValue:2000"));
+        assertEquals(31, soft.ordinal());
+        assertEquals(32, text.ordinal());
+    }
 }

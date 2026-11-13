@@ -10,6 +10,9 @@ import com.thingworx.things.agent.llm.LlmChatRequest;
 import com.thingworx.things.agent.llm.LlmHttpDiagnostics;
 import com.thingworx.things.agent.llm.LlmResponse;
 import com.thingworx.things.agent.llm.LlmUsageWireIds;
+import com.thingworx.things.agent.metrics.ParlerMetrics;
+import com.thingworx.things.agent.metrics.ProviderAttemptMetrics;
+import com.thingworx.things.agent.metrics.ProviderOutcome;
 
 /**
  * Shared HTTP execute wrapper that records call lifecycle before response parsing (CC-7 M0a).
@@ -29,15 +32,19 @@ public final class LlmRecordedHttpChat {
             HttpExecutor executor) throws Exception {
         LlmCallContext context = resolveContext(request, roundWireIds);
         LlmCallRecorder.LlmCallAttempt attempt = beginAttempt(context, roundWireIds);
+        ProviderAttemptMetrics metrics = null;
         long t0 = System.currentTimeMillis();
         try {
             attempt.markDispatched();
+            metrics = startMetrics(context, roundWireIds);
             HttpResult result = executor.execute();
+            metrics.responseReceived();
             long elapsed = System.currentTimeMillis() - t0;
-            return handleHttpResult(attempt, roundWireIds, providerLabel, apiLabel, timeoutMs, t0, result, elapsed,
+            return handleHttpResult(attempt, metrics, roundWireIds, providerLabel, apiLabel, timeoutMs, t0, result,
+                    elapsed,
                     body -> ChatCompletionsResponseParser.parse(body, LlmHttpDiagnostics.extractProviderRequestId(result.headers)));
         } catch (Exception e) {
-            handleTransportFailure(attempt, roundWireIds, timeoutMs, t0, e);
+            handleTransportFailure(attempt, metrics, roundWireIds, timeoutMs, t0, e);
             throw e;
         }
     }
@@ -50,22 +57,27 @@ public final class LlmRecordedHttpChat {
             HttpExecutor executor) throws Exception {
         LlmCallContext context = resolveContext(request, roundWireIds);
         LlmCallRecorder.LlmCallAttempt attempt = beginAttempt(context, roundWireIds);
+        ProviderAttemptMetrics metrics = null;
         long t0 = System.currentTimeMillis();
         try {
             attempt.markDispatched();
+            metrics = startMetrics(context, roundWireIds);
             HttpResult result = executor.execute();
+            metrics.responseReceived();
             long elapsed = System.currentTimeMillis() - t0;
-            return handleHttpResult(attempt, roundWireIds, "Anthropic", apiLabel, timeoutMs, t0, result, elapsed,
+            return handleHttpResult(attempt, metrics, roundWireIds, "Anthropic", apiLabel, timeoutMs, t0, result,
+                    elapsed,
                     body -> AnthropicMessagesApi.parseResponse(body,
                             LlmHttpDiagnostics.extractProviderRequestId(result.headers)));
         } catch (Exception e) {
-            handleTransportFailure(attempt, roundWireIds, timeoutMs, t0, e);
+            handleTransportFailure(attempt, metrics, roundWireIds, timeoutMs, t0, e);
             throw e;
         }
     }
 
     private static LlmResponse handleHttpResult(
             LlmCallRecorder.LlmCallAttempt attempt,
+            ProviderAttemptMetrics metrics,
             LlmUsageWireIds roundWireIds,
             String providerLabel,
             String apiLabel,
@@ -78,16 +90,19 @@ public final class LlmRecordedHttpChat {
         ResponseIdentity identity = extractResponseIdentity(result.body);
         LlmUsageSnapshot usage = LlmUsageCapture.captureFromResponseBody(result.body, roundWireIds);
         if (result.status < 200 || result.status >= 300) {
+            metrics.finish(ProviderOutcome.HTTP_ERROR, usage);
             attempt.finishError(roundWireIds, usage, result.status, providerRequestId, identity.providerResponseId,
                     identity.responseModel, "http_" + result.status, apiLabel + " http failure", elapsed);
             throw LlmHttpDiagnostics.httpFailureException(providerLabel, result.status, result.body, result.headers);
         }
         try {
             LlmResponse parsed = parser.parse(result.body);
+            metrics.finish(ProviderOutcome.SUCCESS, usage);
             attempt.finishSuccess(roundWireIds, usage, parsed, result.status, providerRequestId,
                     identity.providerResponseId, identity.responseModel, elapsed);
             return parsed;
         } catch (Exception parseError) {
+            metrics.finish(ProviderOutcome.PARSE_ERROR, usage);
             attempt.finishError(roundWireIds, usage, result.status, providerRequestId, identity.providerResponseId,
                     identity.responseModel, "content_parse_error", safeSummary(parseError), elapsed);
             throw parseError;
@@ -96,10 +111,18 @@ public final class LlmRecordedHttpChat {
 
     private static void handleTransportFailure(
             LlmCallRecorder.LlmCallAttempt attempt,
+            ProviderAttemptMetrics metrics,
             LlmUsageWireIds roundWireIds,
             int timeoutMs,
             long t0,
             Exception e) {
+        // Metrics classification is independent of recorder activity and Stream writes; the one-shot guard keeps an
+        // outcome already assigned by the response path (http_error / parse_error / success).
+        if (metrics != null && !metrics.isFinished()) {
+            long metricsElapsed = System.currentTimeMillis() - t0;
+            metrics.finishTransportFailure(
+                    e instanceof java.net.SocketTimeoutException || isTimeout(e, metricsElapsed, timeoutMs));
+        }
         if (attempt.isActive() && !attempt.isFinished() && !isAlreadyFinished(e)) {
             long elapsed = System.currentTimeMillis() - t0;
             if (e instanceof java.net.SocketTimeoutException || isTimeout(e, elapsed, timeoutMs)) {
@@ -122,6 +145,13 @@ public final class LlmRecordedHttpChat {
         } catch (Exception ignored) {
             return ResponseIdentity.EMPTY;
         }
+    }
+
+    /** Starts provider metrics at dispatch; a request that never dispatches records no provider sample. */
+    private static ProviderAttemptMetrics startMetrics(LlmCallContext context, LlmUsageWireIds wireIds) {
+        LlmCallKind kind = context != null && context.getCallKind() != null
+                ? context.getCallKind() : LlmCallKind.AGENT_ROUND;
+        return ParlerMetrics.startProviderAttempt(wireIds != null ? wireIds.getApiShapeId() : null, kind);
     }
 
     private static LlmCallContext resolveContext(LlmChatRequest request, LlmUsageWireIds wireIds) {

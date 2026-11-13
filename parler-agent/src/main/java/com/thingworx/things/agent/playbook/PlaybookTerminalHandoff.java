@@ -35,7 +35,8 @@ public final class PlaybookTerminalHandoff {
         int appended = 0;
         for (int j = fromIndex; j < batch.size(); j++) {
             ToolCall skipped = batch.get(j);
-            ChatMessage skipMsg = ChatMessage.toolResult(skipped.getId(), SKIPPED_TOOL_RESULT_JSON);
+            ChatMessage skipMsg = ChatMessage.toolResult(skipped.getId(), SKIPPED_TOOL_RESULT_JSON,
+                    skipped.getFunctionName());
             messages.add(skipMsg);
             if (streamAppender != null) {
                 streamAppender.accept(skipMsg, StreamTokenUsage.ZERO);

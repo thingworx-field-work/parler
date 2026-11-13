@@ -1,0 +1,18 @@
+{
+  "contractVersion": "0.1",
+  "docId": "demo-guide",
+  "title": "Demo unit evidence guide",
+  "sourcePath": "source/original.pdf",
+  "markdownPath": "markdown/manual.md",
+  "chunksPath": "chunks/chunks.jsonl",
+  "pageCount": 1,
+  "sourceSha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "convertedAt": "2026-11-05T00:00:00Z",
+  "documentType": "operations_manual",
+  "assetModels": [
+    "Demo Unit"
+  ],
+  "sourceRepository": "TestDocs",
+  "sourceRepositoryPath": "/document-knowledge/demo-guide/source/original.pdf",
+  "sourceHref": "/Thingworx/FileRepositories/TestDocs/document-knowledge/demo-guide/source/original.pdf"
+}

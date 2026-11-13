@@ -31,6 +31,7 @@ public final class DocumentTurnToolNarrowing {
             "get_agent_skill",
             "search_document_chunks",
             "get_document_chunk",
+            "load_topic",
             "resolve_document_set");
 
     private static final ThreadLocal<Boolean> NON_DOCUMENT_TOOL_INVOKED =
@@ -116,6 +117,9 @@ public final class DocumentTurnToolNarrowing {
         if (!narrowingEnabled) {
             return false;
         }
+        if (activeMethodPresent() || methodOffered()) {
+            return false;
+        }
         if (nonDocumentToolInvokedThisTurn()) {
             return false;
         }
@@ -128,6 +132,21 @@ public final class DocumentTurnToolNarrowing {
     private static boolean narrowingEnabledFromConfig() {
         AgentThing agent = AgentToolContext.getAgentThing();
         return agent != null && agent.isDocumentTurnToolNarrowingEnabled();
+    }
+
+    static boolean activeMethodPresent() {
+        AgentTaskState state = AgentToolContext.getAgentTaskState();
+        if (state != null && !state.getActiveMethodIds().isEmpty()) {
+            return true;
+        }
+        List<String> slash = AgentToolContext.snapshotSlashSkillShortNamesForPending();
+        return slash != null && slash.stream()
+                .anyMatch(id -> id != null && !id.isBlank() && !DOCUMENT_SKILL_SHORT_ID.equals(id));
+    }
+
+    private static boolean methodOffered() {
+        AgentTaskState state = AgentToolContext.getAgentTaskState();
+        return state != null && state.isMethodOffered();
     }
 
     static boolean isOnlyDocumentSkillActive() {
@@ -159,6 +178,10 @@ public final class DocumentTurnToolNarrowing {
         if (!narrowingEnabled) {
             LOG.info("Document-turn tool narrowing skipped: AgentSettings.documentTurnToolNarrowingDisabled=true{}",
                     cidSuffix);
+            return;
+        }
+        if (activeMethodPresent()) {
+            LOG.info("Document-turn tool narrowing skipped: active method{}", cidSuffix);
             return;
         }
         if (!isOnlyDocumentSkillActive() && !documentToolInvokedThisTurn()) {

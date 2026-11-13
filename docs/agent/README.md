@@ -29,6 +29,12 @@
 - **`entity-set-analysis.md`** — **`analyze_entity_set`**: deterministic cached entity-list set algebra over **`difference`**, **`intersection`**, **`union`**, and **`symmetric_difference`**.
 - **`hierarchy-composite-retirement.md`** — replacement paths for the removed hierarchy composite tools.
 - **`document-chunk-tools.md`** — built-in tools **`search_document_chunks`** and **`get_document_chunk`** for document-grounded recommendations over already-converted PDF/manual packages.
+- **`topic-round1.md`** — generated method loading by indexed reference (`load_topic`), active-method recognition, topic retention, approval continuity, and local acceptance plan.
+- **`topic-round3.md`** — the method must not depend on document-level ranking: the scoped `topics` lane with its topic-local scorer, the lane as an offer source, conditional scope instructions, the empty type-filter warning, the `topic-lane/1` feature, and local acceptance plus the User live checklist.
+- **`topic-round4.md`** — a search that names a unit establishes its document scope for the execution segment, a stage-worded `UNIT_SCOPE_NOT_ESTABLISHED` warning, multi-word lane signals matched as a whole, the `search-unit-scope/1` and `topic-signal-exact/1` features, and local acceptance plus the User live checklist.
+- **`topic-round5.md`** — a topic's working file is `topics/<chunkId>.md`: the hard switch from `.txt` with no fallback, the `topic-markdown-file/1` feature and its three producer states, the producer migration order, and local acceptance plus the User live checklist.
+- **`topic-round6.md`** — a tool result reaches the model whole or says plainly that it did not: the `toolResultJsonMode` setting, the `completenessNote` on any reduced result (also after approval), budgets that are settings and never exceeded, whole-row table reduction with an honest recovery route, the `RefreshDocumentKnowledgeIndex` service, five `features` names, and local acceptance plus the User live checklist.
+- **`topic-round2.md`** — reaching the method: conversation entity document scope, topic offer lifting narrowing, the `loadWith` hint, routing guidance, `features` names, and local and live acceptance.
 
 ## Cached tables, results, and charts
 
@@ -63,6 +69,7 @@
 
 ## Evaluation and diagnostics
 
+- [Parler Agent metrics](metrics-support.md) — supported turn, tool, and LLM provider metrics and their dimensions.
 - **`agent-evaluation-harness.md`** — `uv run agent-eval` (live ThingWorx conversation tests, multi-turn scoring, tool-trace assertions, provider matrix runs, partial reports, `failureKind`, assertion groups). Suites live in **`evals/`**.
 - **`collection-tool.md`** — `uv run parler-collect-live` support bundles (ApplicationLog, AgentMessageStream, AgentThing status).
 - **`live-diagnostics.md`** — live diagnostics recipes.

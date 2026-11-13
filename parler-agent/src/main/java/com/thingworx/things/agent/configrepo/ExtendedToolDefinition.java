@@ -19,6 +19,8 @@ public final class ExtendedToolDefinition {
     private final ToolDefinition toolDefinition;
     /** U7 / G13 capability metadata; null for legacy entries without capability fields. */
     private final ServiceCapabilityMetadata capability;
+    /** Round 6 R24: optional per-tool text cap ({@code resultTextCapChars}); {@code null} when not declared. */
+    private final Integer resultTextCapChars;
 
     public ExtendedToolDefinition(String llmName, String title, String whenToUse, String resolvedTargetThingName,
             String serviceName, boolean hitlBypass, boolean executorOnly, ToolDefinition toolDefinition) {
@@ -29,6 +31,14 @@ public final class ExtendedToolDefinition {
     public ExtendedToolDefinition(String llmName, String title, String whenToUse, String resolvedTargetThingName,
             String serviceName, boolean hitlBypass, boolean executorOnly, ToolDefinition toolDefinition,
             ServiceCapabilityMetadata capability) {
+        this(llmName, title, whenToUse, resolvedTargetThingName, serviceName, hitlBypass, executorOnly, toolDefinition,
+                capability, null);
+    }
+
+    public ExtendedToolDefinition(String llmName, String title, String whenToUse, String resolvedTargetThingName,
+            String serviceName, boolean hitlBypass, boolean executorOnly, ToolDefinition toolDefinition,
+            ServiceCapabilityMetadata capability, Integer resultTextCapChars) {
+        this.resultTextCapChars = resultTextCapChars;
         this.llmName = llmName;
         this.title = title;
         this.whenToUse = whenToUse;
@@ -76,6 +86,11 @@ public final class ExtendedToolDefinition {
         return Optional.ofNullable(capability);
     }
 
+    /** The declared text cap of this tool's result, already clamped to the legal range; empty when not declared. */
+    public Optional<Integer> resultTextCapChars() {
+        return Optional.ofNullable(resultTextCapChars);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -93,12 +108,13 @@ public final class ExtendedToolDefinition {
                 && Objects.equals(resolvedTargetThingName, that.resolvedTargetThingName)
                 && Objects.equals(serviceName, that.serviceName)
                 && Objects.equals(toolDefinition, that.toolDefinition)
-                && Objects.equals(capability, that.capability);
+                && Objects.equals(capability, that.capability)
+                && Objects.equals(resultTextCapChars, that.resultTextCapChars);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(llmName, title, whenToUse, resolvedTargetThingName, serviceName, hitlBypass, executorOnly,
-                toolDefinition, capability);
+                toolDefinition, capability, resultTextCapChars);
     }
 }

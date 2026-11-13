@@ -101,18 +101,17 @@ them if you do not want sample conversations in your own history.
 
 `dev_data/parler-scpa-demo.yaml` performs the whole sample installation with `load.py` (see
 [chapter 4](./04-import-parler-extensions.md), option B). It also installs the SCPA solution dataset ZIPs, pauses and
-resumes the SCPA simulator timers, and initializes the solution. It downloads the entities export, the zipped agent
-configuration and the zipped sample data from the latest release.
-
-`load.py` reads `.env` and resolves local paths from the directory you run it in. Run it from a directory that holds
-`.env` and an `SCPA/` folder with `ALL_DATASETS_DEV_0001_Platform.zip`, `ALL_DATASETS_DEV_1001_SCPA_Core.zip` and
-`ALL_DATASETS_DEV_2001_SCPA.zip` (the SCPA solution datasets are not part of this repository).
+resumes the SCPA simulator timers, and initializes the solution. Every file comes from a release on the repository's
+release download page: the three SCPA dataset ZIPs (`ALL_DATASETS_DEV_*.zip`) from the `Sample_SCPA_Extension`
+release, and the entities export, the zipped agent configuration and the zipped sample data from the latest release.
+No local files are needed besides `.env`, which `load.py` reads from the directory you run it in.
 
 When `load.py` imports the entities export, it replaces each `{{{env:NAME}}}` placeholder with the value of `NAME` from
 `.env`, so set `LLM_API_SERVER`, `LLM_API_KEY`, `LLM_MODEL` and `LLM_API_VERSION` there and step 2 is done for you.
 
+From the repository root:
+
 ```bash
-cd <directory with .env and SCPA/>
-uv run <repository>/load.py -c <repository>/dev_data/parler-scpa-demo.yaml          # dry run
-uv run <repository>/load.py -c <repository>/dev_data/parler-scpa-demo.yaml --apply
+uv run load.py -c dev_data/parler-scpa-demo.yaml          # dry run
+uv run load.py -c dev_data/parler-scpa-demo.yaml --apply
 ```

@@ -181,7 +181,7 @@ class LlmUsageHelperServiceTest {
 
     @Test
     void agentLlmUsageHelperThingMetadata_declaresRequiredDatetimeAndExportDefaults() throws Exception {
-        String source = Files.readString(HELPER_SOURCE);
+        String source = Files.readString(HELPER_SOURCE).replace("\r\n", "\n");
         String getReport = serviceSlice(source, "GetLlmUsageReport", "ExportLlmUsageCsv");
         String exportCsv = serviceSlice(source, "ExportLlmUsageCsv", null);
 

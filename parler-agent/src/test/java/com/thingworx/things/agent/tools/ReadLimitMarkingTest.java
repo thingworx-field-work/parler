@@ -380,8 +380,11 @@ class ReadLimitMarkingTest {
         for (JsonNode marker : seen.path("_egress").path("reducedFields")) {
             omittedSomething |= marker.path("omitted").asBoolean();
         }
-        assertTrue(omittedSomething, tool + ": only last-resort compaction omits whole fields; "
-                + seen.path("_egress"));
+        // Round 6: a wide schema that no pass can fit under the soft cap ends in the budgeted overflow response,
+        // the strongest reduction; read-limit evidence is kept there as through every pass.
+        boolean overflow = "RESULT_OVERFLOW".equals(seen.path("resultKind").asText());
+        assertTrue(omittedSomething || overflow, tool + ": the strongest reduction was reached; " + seen);
+        assertTrue(egress.getLlmContent().length() <= 8_192, tool + ": within the soft cap");
         return seen;
     }
 
@@ -518,8 +521,12 @@ class ReadLimitMarkingTest {
             plain.set(control, value);
             String seen = compacted(marked);
             assertEquals(compacted(plain).replace(control, name), seen, name + " / " + value.getNodeType());
-            assertTrue(seen.length() < marked.toString().length() / 4,
-                    name + ": " + seen.length() + " of " + marked.toString().length());
+            // The round-6 completenessNote is a fixed addition to any reduced result; the ratio is about the data.
+            ObjectNode seenData = (ObjectNode) MAPPER.readTree(seen);
+            seenData.remove("completenessNote");
+            int seenDataChars = seenData.toString().length();
+            assertTrue(seenDataChars < marked.toString().length() / 4,
+                    name + ": " + seenDataChars + " of " + marked.toString().length());
         }
     }
 
@@ -581,7 +588,10 @@ class ReadLimitMarkingTest {
             }
             JsonNode marked = MAPPER.readTree(seen[0]);
             assertFalse(marked.has(name), "omitted like the control: " + seen[0].length() + " chars");
-            assertTrue(marked.path("_egress").path("reducedFields").path(name).path("omitted").asBoolean());
+            boolean omitted = marked.path("_egress").path("reducedFields").path(name).path("omitted").asBoolean();
+            boolean overflowNamesIt = "RESULT_OVERFLOW".equals(marked.path("resultKind").asText())
+                    && marked.path("fieldNames").toString().contains(name);
+            assertTrue(omitted || overflowNamesIt, seen[0]);
             assertEquals(seen[1].replace(control, name), seen[0]);
         }
     }

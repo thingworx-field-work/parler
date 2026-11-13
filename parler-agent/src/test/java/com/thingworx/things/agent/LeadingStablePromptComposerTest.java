@@ -57,6 +57,8 @@ class LeadingStablePromptComposerTest {
                 + "no finding; ERROR is not partial success.\n"
                 + "- sampleOnly=true cannot support full-table claims unless a live cacheId was used by a cache-aware "
                 + "tool.\n"
+                + "- A tool result with completenessNote was reduced before you saw it: say in the answer, and in any "
+                + "saved file, which values or rows did not arrive; do not present it as complete.\n"
                 + "- CACHE_MISS means cached data is not available; do not say more cached rows can be loaded or that "
                 + "cached data supports the answer.\n"
                 + "- Preserve structured error codes; do not rewrite one failure class into another.\n"

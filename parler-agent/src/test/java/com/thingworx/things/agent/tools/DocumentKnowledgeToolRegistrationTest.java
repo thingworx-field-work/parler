@@ -33,6 +33,8 @@ class DocumentKnowledgeToolRegistrationTest {
         assertFalse(reserved.contains("search_document_chunks"));
         assertFalse(reserved.contains("get_document_chunk"));
         assertFalse(reserved.contains("resolve_document_set"));
+        assertFalse(reserved.contains("load_topic"));
+        assertFalse(reg.hasTool("load_topic"));
     }
 
     @Test
@@ -51,6 +53,8 @@ class DocumentKnowledgeToolRegistrationTest {
         assertTrue(reserved.contains("search_document_chunks"));
         assertTrue(reserved.contains("get_document_chunk"));
         assertTrue(reserved.contains("resolve_document_set"));
-        assertEquals(31, reg.getAllDefinitions().size());
+        assertTrue(reserved.contains("load_topic"));
+        assertTrue(reg.hasTool("load_topic"));
+        assertEquals(32, reg.getAllDefinitions().size());
     }
 }

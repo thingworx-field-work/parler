@@ -130,7 +130,7 @@ prompt-cache prefix (§4.2); on a generous cap it can be net-negative.
 | Current values / trends | `get_property_values`, `query_property_history`, `query_stream_data`, chart/table tools |
 | Alerts | `query_alert_summary`, `query_alert_history`, `acknowledge_alerts` |
 | Metadata exploration | `describe_entity_schema`, `discover_thing_members`, `invoke_service` |
-| Documents | `resolve_document_set`, `search_document_chunks`, `get_document_chunk` |
+| Documents | `resolve_document_set`, `search_document_chunks`, `get_document_chunk`, `load_topic` |
 | Skills / playbooks | `get_agent_skill`, `start_playbook` |
 | Utilization (extended) | `utilization_*` |
 

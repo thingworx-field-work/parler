@@ -36,12 +36,13 @@ Related documents:
 
 ## 2. Scope
 
-The agent provides three built-in tools:
+The agent provides four built-in tools:
 
 ```text
 search_document_chunks
 get_document_chunk
 resolve_document_set
+load_topic
 ```
 
 `resolve_document_set` scopes a search to the documents that apply to an asset
@@ -58,6 +59,7 @@ document-knowledge/
     source/original.pdf
     markdown/manual.md
     chunks/chunks.jsonl
+    topics/<topicChunkId>.md
     pages/page-0001.png
 ```
 
@@ -140,7 +142,7 @@ The settings live on `AgentSettings`.
 
 | Field | Type | Default | Bounds | Role |
 | --- | --- | --- | --- | --- |
-| `documentKnowledgeBuiltinsEnabled` | boolean | `false` | — | When `true`, advertise the internal Java `search_document_chunks`, `get_document_chunk`, and `resolve_document_set` tools. When `false`, do not expose them to the model. |
+| `documentKnowledgeBuiltinsEnabled` | boolean | `false` | — | When `true`, advertise the internal Java `search_document_chunks`, `get_document_chunk`, `resolve_document_set`, and `load_topic` tools. When `false`, do not expose them to the model. |
 | `documentKnowledgeRepository` | `THINGNAME` | empty | — | FileRepository Thing containing document packages. |
 | `documentKnowledgeRootPath` | string | `/document-knowledge` | — | Root folder below the repository. |
 | `documentKnowledgeIndexTtlSeconds` | integer | `300` | 30–86400 | JVM cache TTL. |
@@ -174,7 +176,7 @@ When `documentKnowledgeBuiltinsEnabled` is `false`:
 - do **not** call `ToolRegistry.register` for any of the document tools;
 - do **not** call `ToolRegistry.registerExecutorOnly` for them;
 - do **not** add any of those names to the built-in name-reservation set;
-- leave `search_document_chunks`, `get_document_chunk`, and `resolve_document_set`
+- leave `search_document_chunks`, `get_document_chunk`, `resolve_document_set`, and `load_topic`
   available for extended tools backed by ThingWorx JavaScript services or an
   external document service.
 
@@ -223,17 +225,17 @@ best 1-3 matches it intends to cite.
     },
     "assetContext": {
       "type": "object",
-      "description": "Optional asset context such as asset model, component, or document type hints."
+      "description": "Optional asset context such as asset model, component, or document type hints. To scope searches in this step to one unit's documents, put that unit's canonical Thing name in thingName; it is used only if it names a visible unit that has documents. To keep a unit across the conversation, call resolve_thing."
     },
     "documentTypes": {
       "type": "array",
       "items": {"type": "string"},
-      "description": "Optional document type filters such as operations_manual or troubleshooting_guide."
+      "description": "Optional document type filters such as operations_manual or troubleshooting_guide. Applies to matches, not to topics."
     },
     "documentIds": {
       "type": "array",
       "items": {"type": "string"},
-      "description": "Optional explicit document id filter. When resolve_document_set returns a non-empty documents[], pass those documents[].documentId values here to scope this search to the resolved set (selectionMode documentIds-filter)."
+      "description": "Optional explicit document id filter. Omit it when a search result carried documentScopeSource. Otherwise pass the documents[].documentId values of a complete resolve_document_set result to scope this search to that set (selectionMode documentIds-filter); a result marked sampleOnly or rowsOmitted is not complete. Any value here, including an empty array, replaces the runtime scope."
     },
     "limit": {
       "type": "integer",
@@ -246,9 +248,24 @@ best 1-3 matches it intends to cite.
 
 `query` is optional when useful `signals` or `assetContext` fields are present.
 If all are empty, return an empty success with a warning. `documentIds` is the
-schema-backed handoff for the explicit resolver-tool path: when `resolve_document_set`
-returns a non-empty `documents[]`, pass those ids here to scope the search to that set
-(see §3.4 rung 2 of `docs/operations/knowledge-retrieval-pipeline.md`).
+schema-backed handoff for the explicit resolver-tool path: when no runtime scope applies
+and `resolve_document_set` returns a complete non-empty `documents[]`, pass those ids here
+to scope the search to that set (see §3.4 rung 2 of
+`docs/operations/knowledge-retrieval-pipeline.md`).
+
+The model-facing wording has three rules, and the `search_document_chunks` description,
+the `documentIds` description and the `resolve_document_set` description state them
+together:
+
+- A result carrying `documentScopeSource` shows that the runtime scoped the search, so
+  the model omits `documentIds`.
+- Otherwise it passes a complete `documents[]`.
+- A `resolve_document_set` result marked `sampleOnly` or `rowsOmitted` is a sample, so it
+  is not passed. Omitting `documentIds` then uses the runtime scope when there is one and
+  searches all documents when there is none. No pagination of a sampled set exists.
+
+The runtime default applies only when the `documentIds` field is absent; any value,
+including `[]`, replaces it.
 
 ### 5.3 Success result
 
@@ -301,16 +318,116 @@ strings per document) and safe for clients to ignore. `selectionMode` is one of:
 
 | `selectionMode` | Meaning |
 | --- | --- |
-| `documentIds-filter` | The search was scoped by `documentIds` (from the call or from host-context scoping, §6.5). |
+| `documentIds-filter` | The search was scoped by `documentIds` (from the call, host-context scoping, conversation entity scoping, or a named unit, §6.5). |
 | `hard-single` | One document had hard identity evidence and a clear lead (§11); only its chunks are ranked. |
 | `diversified` | Several documents remain plausible; results are capped per document (§11). |
-| `empty` | The index holds no chunks. |
+| `empty` | The index holds no chunks, or `documentTypes` removed every document. |
 
 When the search was scoped by host context (§6.5), the response also carries
 `documentScopeSource: "host-context-resolver"` and `documentScopeResolverSource`.
+A search scoped by a conversation entity (§6.5) carries
+`documentScopeSource: "conversation-entity-resolver"` and the same
+`documentScopeResolverSource`. A search scoped by a unit named in
+`assetContext.thingName` (§6.5) carries `documentScopeSource: "asset-context-resolver"` and
+the same `documentScopeResolverSource`.
+
+A search whose named unit did not establish a scope carries one warning with the code
+`UNIT_SCOPE_NOT_ESTABLISHED`. Its message follows the stage that failed: §6.5 gives the
+stages. The search itself is unchanged.
+
+A match with `contentType: "topic"` also carries `"loadWith": "load_topic"`, placed
+directly after `contentType`, unless the loader would refuse that document under the
+injected scope (§6.6). No other match has this field.
 
 When `documentIds` is supplied, unknown ids are omitted from `selectedDocIds` and
 may yield empty `matches` with a success envelope (not a turn failure).
+
+When `documentTypes` is non-empty and removes every document the request may search, the
+result carries the warning `DOCUMENT_TYPE_FILTER_EMPTY`, whose message names the filter
+and lists up to 10 distinct, sorted `documentType` values of those documents. The
+documents the request may search are those with searchable chunks, limited to the
+`documentIds` that exist when the list is non-empty. A list with no existing id adds no
+warning, because the cause is the ids.
+
+#### Topic lane (`topics`)
+
+Every chunk's `matches` score includes its document's identity score, so a small article's
+topic is outranked by a large manual that shares the request's asset hint. The optional
+top-level `topics` array is independent of that ranking. It sits directly after `degraded`,
+before `matches`, and is omitted when empty:
+
+```json
+"topics": [
+  {
+    "docId": "demo-guide",
+    "chunkId": "topic-demo-evidence-r1",
+    "contentType": "topic",
+    "heading": "Collect the evidence for a demo ticket",
+    "score": 70,
+    "loadWith": "load_topic"
+  }
+]
+```
+
+There are at most two entries. `heading` is cut to 80 characters, and an absent heading is
+the empty string. `score` is the topic-local score, on a different scale from
+`matches[].score`. The method text comes from `load_topic`, and citations come from the
+loaded text or `get_document_chunk`.
+
+**Documents.** The lane runs only when the request carries a non-empty `documentIds`,
+which the injected default scope provides. With no list, or no existing id, it is empty; it
+never falls back to all documents. It ignores `documentTypes`, the selection plan,
+`diversify` and `limit`. `selectedDocIds` and `selectionMode` describe `matches` only, so
+with `documentTypes` a `topics` entry can be outside `selectedDocIds`; that is not a scope
+violation. A topic outside a non-empty injected scope is excluded, because `load_topic`
+would refuse it.
+
+**Candidates.** A chunk with `contentType` exactly `topic` whose `docId` and `chunkId` pass
+`TopicMethodText.validId`, checked before ranking and capping. The check covers ids only;
+a missing or oversized body still fails in `load_topic`. `matches` rows are not filtered by
+it.
+
+**Score.** It uses the chunk and the request's query text, query tokens and signal names.
+It uses no document-level score, document-type bonus, bundle penalty, BM25 or asset-context
+token. *Request tokens* are the distinct query tokens plus the tokens of the signal names.
+
+| Evidence | Points |
+| --- | --- |
+| Structured: a request signal name equal to a chunk signal | 50 each |
+| Structured: a query token matching a single-token chunk signal by equality or length-qualified prefix | 25 each |
+| Structured: a multi-word chunk signal whose every token is a query token | 25 each distinct signal |
+| Structured: the whole query in the heading, for a query of at least two distinct tokens | 35 |
+| Structured: a tag whose every token is a request token | 25 each |
+| Weak, per query token: in the heading / summary / markdown | 8 / 5 / 1, 20 in total |
+
+Asset identity earns no structured evidence. The *asset tokens* of a document are the
+tokens of `assetModels` and `documentProfile.assetModels`, and a text is *identity-only*
+when all its tokens are asset tokens. An identity-only tag or chunk signal earns nothing,
+a query token that is an asset token earns no points against a single-token signal, and an
+identity-only query earns no heading points. A multi-word signal with at least one task word
+can qualify when the query has all of its words, so asset identity alone never does. Weak
+evidence still counts family words, but it cannot qualify a topic by itself.
+
+A multi-word signal (one that tokenizes to two or more tokens) matches as a whole: its first
+word alone earns nothing. Its tokens may come in any order, and matching is by exact token
+with no stemming, so `showing` does not satisfy `shows`. A signal name with one Latin word
+beside parts the tokenizer drops, such as `valve A`, counts as a single token. An author
+wanting a looser match adds a tag or a shorter signal. The manual ranker in `matches` keeps
+its own prefix rule.
+
+A topic qualifies when `structured >= 25` and `structured + weak >= 30`. Entries are ordered
+by score, then `chunkId`, then `docId`. A failure in the lane is logged at warn level and
+omits `topics`; `matches` is unaffected.
+
+The floor is a lexical heuristic, not a proof of relevance: one non-identity tag plus its
+own word in the heading qualifies. That can cost a wrong entry and a lifted narrowing, not
+a wrong action, because a loaded method grants no tool, permission or approval. An explicit
+`documentIds` stays authoritative, so ids that omit the topic's document also omit it from
+the lane. `tokenize` is ASCII-only, so a query entirely in Chinese is one token: it matches a
+tag by whole-token equality and a signal by equality or prefix, not by other overlap.
+
+The array is small and placed early so that it survives every egress pass without changing
+the gateway. A non-empty `topics` is a topic offer (`task-state.md`).
 
 ### 5.3.1 Manifest `documentProfile` (optional)
 
@@ -427,8 +544,16 @@ chunks also carry stable `chunkId` values.
 }
 ```
 
+**Page budget.** A page has no exception to the tool-result budget
+(`configuration-repository.md`, "Tool result settings"): it reaches the model whole when its serialized envelope,
+escaping included, fits `toolResultSoftCapChars` (default 8,192); otherwise it is reduced like any result (its text cut
+at the text cap) and carries a `completenessNote`. Quotes, backslashes and newlines each cost two characters when
+serialized, so a 5,500-character page can serialize to about 11,000. An installation that wants pages near
+`documentKnowledgeChunkMaxChars` raises `toolResultSoftCapChars`; the snapshot warning
+`CONFIG_PAGE_EXCEEDS_RESULT_CAP` estimates the mismatch but ignores escaping.
+
 If `markdown` exceeds `documentKnowledgeChunkMaxChars`, the tool returns a bounded
-prefix and includes a warning:
+prefix and includes a warning (a producer reduction, so the result also carries the page `completenessNote`):
 
 ```json
 {
@@ -460,9 +585,10 @@ Background: `docs/operations/knowledge-retrieval-pipeline.md` §3. Gated by
 **`resolve_document_set(key STRING)`** returns the bounded document set that applies to
 an asset/Thing `key`:
 `{ status, resolverSource, documents: [ { documentId, alwaysInclude, appliesToMany } ] }`.
-The model passes the resolved `documents[].documentId` into `search_document_chunks`'s
-`documentIds` (§5.2) to scope retrieval. Empty `documents` (`resolverSource:
-default-empty`) ⇒ no confident scope; proceed with a normal search.
+When no runtime scope applies, the model passes a complete resolved
+`documents[].documentId` set into `search_document_chunks`'s `documentIds` (§5.2) to scope
+retrieval; a result marked `sampleOnly` or `rowsOmitted` is not passed. Empty `documents`
+(`resolverSource: default-empty`) ⇒ no confident scope; proceed with a normal search.
 
 **`resolverSource` diagnostic:** `custom | default-match | default-empty | none`.
 
@@ -505,6 +631,118 @@ the turn unscoped. Because the built-in matcher compares the key by exact string
 equality, host-context `default-match` only fires when `thingName` happens to equal a
 curated `assetModels` entry; the **custom override** is the intended ThingName→documents
 path, with fail-open `default-empty` otherwise.
+
+**Conversation entity scoping.** When no scope was injected from host context, the runtime
+derives one from the conversation's newest `resolve_thing` row (transcript rows only, with
+nothing stored), through the same `resolveHostContextScope` path with the resolved Thing
+name as the key. It therefore has the same precondition: the Thing name must be mapped by
+a `ResolveDocumentSet` override or match an `assetModels` entry after normalization.
+Otherwise the turn stays unscoped.
+
+- The row must be `status: "success"`, `resultKind: "THING_RESOLVED_INLINE"`,
+  `totalCount: 1` with exactly one named match. The newest row is selected first and then
+  validated; there is no fallback to an older row, so a newer ambiguous, failed or
+  unexecuted `resolve_thing` clears the entity. Every row for a call that did not run
+  carries its tool name for this reason.
+- It runs at the three turn entries and at the start of an approval continuation. On a
+  continuation, `PendingApprovalRecord` carries no host context, so a host-origin scope is
+  not restored; a valid `resolve_thing` row in that transcript yields a conversation scope.
+- Each executed Java built-in `resolve_thing` updates the scope for the next search in the
+  same turn. A valid single match sets or replaces a conversation scope, and any other
+  result clears it. A host-context scope is never replaced or cleared.
+- It is a default like the host-context scope: `documentIds` in the call suppresses it. It
+  does not lift `load_topic` enforcement, so a topic outside the scope stays refused until
+  a new `resolve_thing` moves the scope. It also sets the `documentScopeActive` admission
+  signal, which admits the `DOCUMENTS` bucket in `narrow` and `lazy` modes.
+- With document built-ins enabled, each turn after a successful resolution makes one
+  resolver call: an index-cache lookup plus one `ResolveDocumentSet` invocation.
+- A conversation rebuilt from its Stream has no `Role.TOOL` rows, and trimming or a
+  checkpoint can remove the row. Those conversations have no derived scope until the model
+  resolves again.
+
+Each derivation logs one info line with the Thing name, document count and resolver source
+(or `empty`), so a missing mapping can be told apart from a defect.
+
+**Named-unit scoping.** A search that names a unit in `assetContext.thingName` establishes
+that unit's scope when nothing else has, so the first search of a conversation can reach the
+unit's topics without an earlier `resolve_thing`. Precedence and limits:
+
+- It applies only when the call has no `documentIds` field, no scope is injected, and
+  `thingName` is non-blank text. Host context, a conversation entity scope and any explicit
+  `documentIds` (including `[]`) therefore win, and a later search that names another unit
+  does not replace the scope. Anything else is silent.
+- The trimmed name must have at most 256 characters and no control characters, pass the
+  visible-Thing gate that scalar Thing tools use, and resolve to a non-empty set through
+  `resolveHostContextScope` with the canonical name. It has the same mapping precondition as
+  conversation entity scoping. Identity rules (display name, serial, suffix) are not applied:
+  they belong to `resolve_thing`.
+- The scope lasts for the current execution segment, the chat turn or approval continuation
+  in which `AgentToolContext` lives. Later searches in the segment default to it, a successful
+  `resolve_thing` replaces it, and any other `resolve_thing` result clears it. It is not
+  restored after an approval pause or in a later turn, because nothing is stored and the
+  history rule reads only `resolve_thing` rows. Only `resolve_thing` keeps a unit across the
+  conversation.
+- While it is set it behaves like any injected scope: `load_topic` refuses a document outside
+  it. It cannot change tool admission, because `narrow` advertises the search only when a
+  document signal already holds.
+- `assetContext` keeps its scoring effect whether or not a scope results, and no other
+  `assetContext` field is an identity.
+- A null agent skips the derivation. Each attempt logs one info line, as above.
+
+A rejected name adds one `UNIT_SCOPE_NOT_ESTABLISHED` warning with exactly `code` and
+`message`, echoing the name with control characters replaced by spaces and cut to 80
+characters:
+
+| Stage that failed | Message says |
+| --- | --- |
+| Identity (the name's shape or the gate), with `resolve_thing` recoverable this turn | It is not the exact name of a visible unit; call `resolve_thing` with the user's text and search again if the user named a unit |
+| Identity, with no v3 identity rule loaded | The same, but asking for the exact Thing name instead |
+| Document (an accepted name with an empty set, a resolver exception, or an unresolved index) | The unit is visible but no scope is available; looking it up again will not change this |
+
+An identity lookup can repair only the identity stage: `resolve_thing` ends in the same
+document resolver, so the document form directs no lookup. The production resolver reports an
+unresolved index as an empty result, and the search's own repository warning then sits beside
+this one.
+
+## 6.6 Tool: `load_topic`
+
+`load_topic` loads the complete working method of a search hit with `contentType: "topic"`. It uses the hit's existing `(docId, chunkId)` reference. The external generator owns the indexed chunk row and the working file `<root>/<docId>/topics/<chunkId>.md`; the runtime does not generate topics, register the tools named in them, or extract PDFs. The working text is Markdown by convention and is delivered unchanged: the runtime does not render, validate or transform it, and no title or front-matter rule applies. Only that exact name is read; `<chunkId>.txt`, the name used by agents 0.1.251 to 0.1.254, is never read, even when present, and there is no fallback. A package published for those agents therefore needs `<chunkId>.md` added (the same bytes beside the old file) before its topics load; the index row and chunk id stay, because a rename of unchanged text is not a new revision. Publish the working file before exposing its chunk row and use a new chunk id for a changed revision. Discovery follows the existing index TTL and scan/chunk limits; topic bodies are read on each load rather than cached. Existing lexical scoring and content-type tie ranking are unchanged.
+
+Input is a JSON object with required string fields `docId` and `chunkId`. Each id must be non-blank, 1–256 Java UTF-16 code units, have no leading/trailing whitespace, contain no `..`, `/`, backslash, ISO control character or Unicode line/paragraph separator, and differ from `.`. Ids are exact: they are not trimmed, case-folded, or URL-decoded. Invalid JSON/ids fail before index/file access. A non-empty injected document scope restricts this loader; an empty/absent scope does not. Search scope remains an overridable default, and `get_document_chunk` is unchanged.
+
+After scope validation and configured-index resolution, the loader requires the exact indexed topic row before deriving the file path. It uses `FileRepositoryRepositoryReader.forCurrentUser` / `LoadText` for the body even on a warm index hit. Missing, empty, unreadable or oversized text is never replaced by chunk Markdown, old text, a configuration/System-user read, or an excerpt. Working text must be non-blank and at most 7,000 Java UTF-16 code units. It is preserved exactly as returned by `LoadText`.
+
+Success is plain text, with LF header separators, followed by the complete body:
+
+```text
+topic: <chunkId>
+document: <docId>
+sha256: <64 lowercase hex digits>   chars: <body String.length()>
+complete: true
+---
+<working text>
+```
+
+The hash covers the UTF-8 encoding of the exact decoded body, not raw file bytes. Bounded ids and body keep the entire result below 8,192 code units; a defensive full-result bound is also checked. The non-JSON carrier passes through ordinary result egress unchanged, including when the body contains `[` or JSON-looking text. The hash is diagnostic, not content-addressed revision enforcement. Repeating the reference returns the same carrier while the file is unchanged.
+
+Failures use `{status:"error",code,message,docId,chunkId}` with safe messages and nullable ids when input cannot be parsed. The first failing step determines the code:
+
+| Condition | Code |
+| --- | --- |
+| Invalid JSON, missing/non-string/invalid ids | `BAD_REQUEST` |
+| Valid doc id excluded by a non-empty injected scope | `TOPIC_OUT_OF_SCOPE` |
+| Document repository not configured | `DOCUMENT_REPOSITORY_NOT_CONFIGURED` |
+| Repository unavailable or current-user index/body read denied | `DOCUMENT_REPOSITORY_UNAVAILABLE` |
+| Another index-load failure with no usable index | `DOCUMENT_TOOL_INTERNAL_ERROR` |
+| Indexed chunk absent or not `topic` | `TOPIC_NOT_FOUND` |
+| Topic body missing, empty, or another non-permission body-read failure | `TOPIC_LOAD_FAILED` |
+| Body or whole carrier exceeds its limit | `TOPIC_TOO_LARGE` |
+
+The cache carries failure classification in per-call `LoadResult` metadata for `resolveIndexForTopic`; it never stores failure reasons in a shared entry. Cold/expired rebuild permission denial returns no index immediately, with no stale fallback or cache replacement/deletion/negative caching. Other rebuild failures retain existing stale fallback; a stale topic still requires a current-user body read. An absent reader with a stale candidate can therefore produce stale index success followed by repository-unavailable at body resolution. No second diagnostic probe guesses a lost read failure. The sibling Optional adapter/error mapping, cache keys, TTL, warnings, and successful/degraded indexing behavior remain unchanged.
+
+Only successful Java built-in dispatch records `topic:<docId>/<chunkId>` in turn-local active-method state. A failed load does not activate a method or displace retained successful text. The name is unregistered/unreserved when document built-ins are disabled, and a same-named extended tool does not claim Java-loader recognition or `topic-load/1`. Both built-in and document registration switches are required. The tool is not playbook-safe.
+
+Active methods bypass only document-turn narrowing and preserve the upstream-admitted tool list. They do not override `narrow/lazy` schema admission, capability/permission checks, or human approval. Topic instructions have ordinary tool-result authority. Approval snapshots carry recognition and complete topic batches into continuation; a new user turn or process restart needs a new load. The newest successful batch per active topic stays in current-turn requests or the existing context-budget failure is reported. Dynamic skill-body retention is unchanged. See `task-state.md`, `context-compaction.md`, and `configuration-repository.md` for lifecycle, budget limits, and runtime feature diagnostics.
 
 ## 7. FileRepository package discovery
 
@@ -632,7 +870,17 @@ ThingWorx authorizes each repository read the agent actually makes. A cache hit
 reuses an index that an earlier (re)build loaded, possibly for another user,
 and is not re-authorized for the current user.
 
-There is no refresh service; the index changes only through a TTL rebuild. The
+**Refresh.** The `AgentThing` service `RefreshDocumentKnowledgeIndex` (no parameters, result a JSON string, platform
+per-service permissions, feature `document-index-refresh/1`) invalidates this agent's index key
+(`name|repository|rootPath`) and returns `{invalidated, evictedIndexLoadedAt, ttlSeconds}`: `invalidated` is true
+exactly when an entry was removed, and `evictedIndexLoadedAt` is that entry's load time or `null`. It does not rebuild;
+the next search or chunk read does, lazily, so a publisher can call it after publishing a changed package instead of
+waiting for the TTL. A rebuild that began before the invalidation serves its own call but is not stored, and after an
+invalidation a failed rebuild has no stale index to serve and fails as a first load does. Another agent's, repository's
+or root's index is untouched. `GetAgentRuntimeSnapshot` reports a root block `documentKnowledge` with the numeric
+document-index settings and `index {loadedAt, expiresAt}` or `null`, read without triggering a load. `DisableThing`,
+`EnableThing`, `RestartThing` and `RefreshPromptContextCache` do not clear the index; only this service or the TTL
+does. The
 cache logs misses and rebuilds at `info` (hits at `debug`), refusals and stale
 serves at `warn`, and the index load logs its start, its result, and a summary
 of skipped packages.
@@ -888,7 +1136,13 @@ includes:
 | Test | Expected |
 | --- | --- |
 | `documentKnowledgeBuiltinsEnabled=false` | None of the document tools registered in `ToolRegistry`; names absent from `builtinToolDefinitionNames()`; extended tools may use the same names. |
-| `documentKnowledgeBuiltinsEnabled=true` | All three document tools (`search_document_chunks`, `get_document_chunk`, `resolve_document_set`) registered with `ToolDefinition`s; names present in merged LLM list and `builtinToolDefinitionNames()`. |
+| `documentKnowledgeBuiltinsEnabled=true` | All four document tools (`search_document_chunks`, `get_document_chunk`, `resolve_document_set`, `load_topic`) registered with `ToolDefinition`s when built-ins are enabled; names present in merged LLM list and `builtinToolDefinitionNames()`. |
+| Topic loading and classified failures | `TopicLoadTest`: discovery/load/complete egress; id/body bounds; scope checks; cold/expired typed index denial; warm-cache body denial; internal/stale controls; no recognition on failure. |
+| Conversation entity scope, topic offer and `loadWith` | `ConversationEntityScopeTest`: newest-row selection, no fallback, real playbook handoff row, in-turn update, host precedence, origin labels, loader enforcement, source wiring; `TopicOfferFlowTest`: loop-level offer, egress sampling, approval pause, `loadWith` position and scope condition, the failing two-turn shape |
+| Topic lane, instructions and type-filter warning | `TopicLaneTest`: multi-word tags, the floor, asset identity in every structured branch, loader-valid ids, order and cap, Chinese queries, request documents and injected scope, `documentTypes`, projection, exact references through every egress pass, the R13 strings, `DOCUMENT_TYPE_FILTER_EMPTY`. `TopicOfferFlowTest`: `topics` as an offer and a hinted turn-two search that keeps the operational tool. |
+| Named-unit scope and multi-word signals | `SearchUnitScopeTest`: derivation, precedence, equality with the settings overload apart from the warning, each warning stage, sanitized echo, egress, fail-open paths, segment lifetime; `TopicOfferFlowTest`: a first search that names the unit reaches `load_topic` from the runtime's own `topics`, with no `resolve_thing`; `TopicLaneTest`: first word, whole signal in any order, missing and inflected words, one award per distinct signal, asset and task words. |
+| Method lifecycle and approval | `ActiveMethodLifecycleTest` / `TopicMethodApprovalFlowTest`: checklist-independent recognition, exact admitted tool preservation, immutable snapshots, skipped siblings, nested approval, each approval outcome, full text in actual outbound requests, and runtime feature names. |
+| Active-topic budget protection | `ActiveTopicRetentionTest`: newest success per active topic, duplicates/failures, mixed-batch pairing, earlier-turn/skill-only exclusion, and explicit failure on an impossible protected footprint. |
 | Generated `search_document_chunks` schema | Provider-compatible parameters object (no invalid array `items` omissions). |
 | Good fixture search for `Chiller High Pressure Shutdown` | Returns troubleshooting chunk on page 25. |
 | Search with exact alarm signal | Signal match outranks broad page chunk. |

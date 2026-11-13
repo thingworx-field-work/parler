@@ -57,6 +57,8 @@ public final class PendingApprovalRecord {
      * v1b.2: merged dynamic {@code get_agent_skill} short ids (merge order); immutable copy; empty when none.
      */
     private final List<String> dynamicSkillShortNamesSnapshot;
+    /** Turn-local recognition, separate from checklist skill identities. */
+    private final List<String> activeMethodIdsSnapshot;
     /**
      * When the gated tool is a configuration-repository extended tool with HITL, holds the resolved Thing name for
      * post-approval execution; {@code null} for {@code invoke_service} / {@code set_property_value}.
@@ -111,7 +113,25 @@ public final class PendingApprovalRecord {
                 invokeServiceTypeResolution, invokeServiceParameterRepair,
                 slashSkillShortNamesInOrderOrNull, dynamicSkillShortNamesInOrderOrNull,
                 extendedToolTargetEntityName, extendedToolTargetServiceName,
-                System.currentTimeMillis(), List.of(), tabularChartRoundSnapshot);
+                tabularChartRoundSnapshot, List.of());
+    }
+
+    public PendingApprovalRecord(
+            String pendingId, String requestId, String conversationId, String principal, String agentThingName,
+            String remoteThingName, ToolCall gatedToolCall, List<ChatMessage> messages,
+            SecurityContext securityContextAtCreate, String preWriteValueSnapshotJson, String userIanaTimezone,
+            long expiresAtEpochMillis, ServiceTargetEntityTypeResolution invokeServiceTypeResolution,
+            InvokeServiceParameterNormalizer.Repair invokeServiceParameterRepair,
+            List<String> slashSkillShortNamesInOrderOrNull, List<String> dynamicSkillShortNamesInOrderOrNull,
+            String extendedToolTargetEntityName, String extendedToolTargetServiceName,
+            TabularChartRoundState.Snapshot tabularChartRoundSnapshot,
+            List<String> activeMethodIdsSnapshot) {
+        this(pendingId, requestId, conversationId, principal, agentThingName, remoteThingName, gatedToolCall, messages,
+                securityContextAtCreate, preWriteValueSnapshotJson, userIanaTimezone, expiresAtEpochMillis,
+                invokeServiceTypeResolution, invokeServiceParameterRepair,
+                slashSkillShortNamesInOrderOrNull, dynamicSkillShortNamesInOrderOrNull,
+                extendedToolTargetEntityName, extendedToolTargetServiceName,
+                System.currentTimeMillis(), List.of(), tabularChartRoundSnapshot, activeMethodIdsSnapshot);
     }
 
     private PendingApprovalRecord(
@@ -135,7 +155,9 @@ public final class PendingApprovalRecord {
             String extendedToolTargetServiceName,
             long createdAtEpochMillis,
             List<ToolCall> interruptedBatchSiblingToolCallsOrNull,
-            TabularChartRoundState.Snapshot tabularChartRoundSnapshot) {
+            TabularChartRoundState.Snapshot tabularChartRoundSnapshot,
+            List<String> activeMethodIdsSnapshot) {
+        this.activeMethodIdsSnapshot = activeMethodIdsSnapshot == null ? List.of() : List.copyOf(activeMethodIdsSnapshot);
         this.createdAtEpochMillis = createdAtEpochMillis;
         this.pendingId = pendingId;
         this.requestId = requestId;
@@ -200,7 +222,7 @@ public final class PendingApprovalRecord {
                 extendedToolTargetServiceName,
                 createdAtEpochMillis,
                 siblings,
-                tabularChartRoundSnapshot);
+                tabularChartRoundSnapshot, activeMethodIdsSnapshot);
     }
 
     /** Legacy arity — {@code invokeServiceTypeResolution} and {@code invokeServiceParameterRepair} are {@code null}. */
@@ -240,6 +262,10 @@ public final class PendingApprovalRecord {
         this(pendingId, requestId, conversationId, principal, agentThingName, remoteThingName, gatedToolCall, messages,
                 securityContextAtCreate, preWriteValueSnapshotJson, userIanaTimezone, expiresAtEpochMillis,
                 invokeServiceTypeResolution, null, null, null, null, null);
+    }
+
+    public List<String> getActiveMethodIdsSnapshot() {
+        return activeMethodIdsSnapshot;
     }
 
     public long getExpiresAtEpochMillis() {

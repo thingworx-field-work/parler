@@ -76,7 +76,11 @@ import com.thingworx.things.agent.tools.ToolAdmissionSignals;
 import com.thingworx.things.agent.tools.ToolBucket;
 import com.thingworx.things.agent.tools.ToolBuckets;
 import com.thingworx.things.agent.tools.AgentToolContext;
+import com.thingworx.things.agent.tools.ConversationEntityScope;
+import com.thingworx.things.agent.tools.DocumentKnowledgeIndexCache;
 import com.thingworx.things.agent.tools.DocumentKnowledgeRuntime;
+import com.thingworx.things.agent.tools.DocumentKnowledgeSettings;
+import com.thingworx.things.agent.tools.ResolvedDocumentSet;
 import com.thingworx.things.agent.tools.ConsecutiveIdenticalToolCallRegistry;
 import com.thingworx.things.agent.tools.DocumentSearchProgressGuard;
 import com.thingworx.things.agent.tools.DocumentSearchProgressGuardRegistry;
@@ -88,6 +92,13 @@ import com.thingworx.things.agent.tools.BuiltInTools;
 import com.thingworx.things.agent.tools.ModelKeyResolutionNormalize;
 import com.thingworx.things.agent.tools.AlertPromptDefaults;
 import com.thingworx.things.agent.tools.ApprovalPendingException;
+import com.thingworx.things.agent.metrics.ParlerMetrics;
+import com.thingworx.things.agent.metrics.ParlerToolScope;
+import com.thingworx.things.agent.metrics.ParlerTurnScope;
+import com.thingworx.things.agent.metrics.ToolKind;
+import com.thingworx.things.agent.metrics.TurnEntryPoint;
+import com.thingworx.things.agent.metrics.TurnOutcome;
+import com.thingworx.things.agent.metrics.TurnOutcomes;
 import com.thingworx.things.agent.tools.BuiltInToolTimeErrorJson;
 import com.thingworx.things.agent.tools.CustomToolHarvester;
 import com.thingworx.things.agent.tools.CustomToolNaturalTimeException;
@@ -179,6 +190,7 @@ import com.thingworx.things.agent.taskstate.AgentTaskState;
 import com.thingworx.things.agent.taskstate.AgentTaskStateHooks;
 import com.thingworx.things.agent.taskstate.SkillChecklistContinuationMerge;
 import com.thingworx.things.agent.taskstate.TaskProgressV1bDynamicMerge;
+import com.thingworx.things.agent.taskstate.ActiveMethodHooks;
 import com.thingworx.things.agent.taskstate.SkillChecklistParseException;
 import com.thingworx.things.agent.taskstate.SkillChecklistParser;
 import com.thingworx.things.agent.taskstate.TaskProgressV1b;
@@ -380,20 +392,31 @@ public class AgentThing extends AgentBaseThing {
 
         if (conversationId != null && !conversationId.isEmpty()) {
             synchronized (lockForConversation(conversationId)) {
-                HostContextTurnPrep prep = prepareHostContextTurn(hostContext, conversationId, "Chat");
-                return executeChatTurn(message, systemPrompt, conversationId, toolsPreview, prep);
+                ParlerTurnScope turnScope = ParlerMetrics.startTurn(TurnEntryPoint.CHAT);
+                try {
+                    HostContextTurnPrep prep = prepareHostContextTurn(hostContext, conversationId, "Chat");
+                    return executeChatTurn(message, systemPrompt, conversationId, toolsPreview, prep, turnScope);
+                } finally {
+                    turnScope.close();
+                }
             }
         }
-        HostContextTurnPrep prep = HostContextTurnPrep.renderedOnly(hostContext, this);
-        logHostContextUplinkDecision(prep.decision, "Chat");
-        return executeChatTurn(message, systemPrompt, conversationId, toolsPreview, prep);
+        ParlerTurnScope turnScope = ParlerMetrics.startTurn(TurnEntryPoint.CHAT);
+        try {
+            HostContextTurnPrep prep = HostContextTurnPrep.renderedOnly(hostContext, this);
+            logHostContextUplinkDecision(prep.decision, "Chat");
+            return executeChatTurn(message, systemPrompt, conversationId, toolsPreview, prep, turnScope);
+        } finally {
+            turnScope.close();
+        }
     }
 
     /**
      * One synchronous chat turn: resolve history, run agent loop, persist messages for threaded chats.
      */
     private String executeChatTurn(String message, String systemPrompt, String conversationId,
-            List<ToolDefinition> toolsPreview, HostContextTurnPrep hostContextTurnOrNull) throws Exception {
+            List<ToolDefinition> toolsPreview, HostContextTurnPrep hostContextTurnOrNull,
+            ParlerTurnScope turnScope) throws Exception {
         final String hostContextRenderedPromptOrNull = hostContextTurnOrNull != null
                 ? hostContextTurnOrNull.llmEphemeralPromptOrNull
                 : null;
@@ -405,11 +428,15 @@ public class AgentThing extends AgentBaseThing {
         try {
             PlaybookSlashEarly playbookEarly = tryExecutePlaybookSlashTurn(message, conversationId, hostContextRenderedPromptOrNull);
             if (playbookEarly != null) {
-                return finishPlaybookSlashTurn(message, playbookEarly.assistantText, conversationId, systemPrompt, null,
+                String slashText = finishPlaybookSlashTurn(message, playbookEarly.assistantText, conversationId,
+                        systemPrompt, null,
                         hostContextRenderedPromptOrNull, ConversationRehydrateSettings.disabled(), playbookEarly.playbookLlmUsage,
                         hostContextSnapshotJsonOrNull, null).assistantText;
+                turnScope.outcome(TurnOutcomes.forPlaybookSlash(true));
+                return slashText;
             }
         } catch (Exception e) {
+            turnScope.outcome(TurnOutcomes.forPlaybookSlash(false));
             if (ArtifactCacheTurnFaults.isRepositoryUnavailable(e)) {
                 _logger.error("[{}] Artifact Cache repository unavailable during Chat playbook", getName(), e);
                 throw artifactCacheServiceException(AgentLoop.AgentResult.error(
@@ -460,6 +487,7 @@ public class AgentThing extends AgentBaseThing {
             AgentToolContext.setUserIanaTimezone(null);
             AgentToolContext.setHostContextJson(null);
             maybeInjectHostContextDocumentScope(hostContextTurnOrNull);
+            maybeInjectConversationEntityDocumentScope(messages);
             AgentToolContext.setParlerActiveMessages(messages);
             AgentToolContext.setParlerEphemeralSystemIndices(turn.ephemeralIndices());
             primeAgentTaskStateForTurn(turn, "", conversationId);
@@ -487,6 +515,7 @@ public class AgentThing extends AgentBaseThing {
             if (conversationId != null && !conversationId.isEmpty()) {
                 _conversations.put(conversationId, messages);
             }
+            turnScope.outcome(TurnOutcome.ERROR);
             throw artifactCacheServiceException(result);
         }
 
@@ -506,6 +535,7 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
             _conversations.put(conversationId, messages);
         }
 
+        turnScope.outcome(TurnOutcomes.forResultStatus(result.getStatus()));
         return result.getContent();
     }
 
@@ -560,6 +590,8 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
                         fireAgentResponseEvent(effectiveConvId, artifactCacheAdmissionResult(cacheAdmission));
                         return;
                     }
+                    final ParlerTurnScope turnScope = ParlerMetrics.startTurn(TurnEntryPoint.CHAT_ASYNC);
+                    try {
                     final HostContextTurnPrep hostContextTurn = prepareHostContextTurn(hostContext, effectiveConvId,
                             "ChatAsync");
                     final String hostContextRenderedPrompt = hostContextTurn.llmEphemeralPromptOrNull;
@@ -579,9 +611,11 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
                                             slashU.getCompletionTokens(), slashU));
                             _logger.info("[{}] ChatAsync playbook slash done conversationId={}", thingName,
                                     effectiveConvId);
+                            turnScope.outcome(TurnOutcomes.forPlaybookSlash(true));
                             return;
                         }
                     } catch (Exception playbookEx) {
+                        turnScope.outcome(TurnOutcomes.forPlaybookSlash(false));
                         if (ArtifactCacheTurnFaults.isRepositoryUnavailable(playbookEx)) {
                             _logger.error("[{}] Artifact Cache repository unavailable during ChatAsync playbook",
                                     thingName, playbookEx);
@@ -635,6 +669,7 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
                         AgentToolContext.setUserIanaTimezone(null);
                         AgentToolContext.setHostContextJson(null);
                         maybeInjectHostContextDocumentScope(hostContextTurn);
+                        maybeInjectConversationEntityDocumentScope(messages);
                         AgentToolContext.setParlerActiveMessages(messages);
                         AgentToolContext.setParlerEphemeralSystemIndices(turn.ephemeralIndices());
                         primeAgentTaskStateForTurn(turn, "", effectiveConvId);
@@ -656,6 +691,7 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
                                     org.joda.time.DateTime.now(org.joda.time.DateTimeZone.UTC).toString());
                             _conversations.put(effectiveConvId, messages);
                             fireAgentResponseEvent(effectiveConvId, result);
+                            turnScope.outcome(TurnOutcome.ERROR);
                             return;
                         }
                         ChartGroupTurnHooks.onTurnEnd(result);
@@ -675,6 +711,10 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
                         _logger.info("[{}] ChatAsync done conversationId={} status={} iterations={}",
                                 thingName, effectiveConvId, result.getStatus(), result.getIterations());
                         fireAgentResponseEvent(effectiveConvId, result);
+                        turnScope.outcome(TurnOutcomes.forResultStatus(result.getStatus()));
+                    }
+                    } finally {
+                        turnScope.close();
                     }
                 }
             } catch (Exception e) {
@@ -743,6 +783,15 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
         } catch (Exception e) {
             _logger.warn("[{}] host-context document scope injection failed: {}", getName(), e.getMessage());
         }
+    }
+
+    /** Derives the default document scope from the conversation's newest resolved unit when none was injected. */
+    private void maybeInjectConversationEntityDocumentScope(List<ChatMessage> messages) {
+        ConversationEntityScope.injectFromHistory(messages, this::resolveEntityDocumentSet);
+    }
+
+    private Optional<ResolvedDocumentSet> resolveEntityDocumentSet(String thingName) {
+        return DocumentKnowledgeRuntime.resolveHostContextScope(this, thingName);
     }
 
     /** Reads {@code context.thingName} from the raw host-context wire JSON, or null. */
@@ -910,6 +959,10 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
                         return;
                     }
 
+                    // Admitted segment: the session.ack call above stays outside the measurement, and a failed ack
+                    // still reaches this point and records under the ordinary outcome rules.
+                    final ParlerTurnScope turnScope = ParlerMetrics.startTurn(TurnEntryPoint.STREAM);
+                    try {
                     final HostContextTurnPrep hostContextTurn = prepareHostContextTurn(hostContext, effectiveConvId,
                             "ParlerStreamToRemoteThing");
                     final String hostContextRenderedPrompt = hostContextTurn.llmEphemeralPromptOrNull;
@@ -945,9 +998,11 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
                             _logger.info(
                                     "[{}] ParlerStreamToRemoteThing playbook slash done remoteThing={} requestId={}",
                                     thingName, remoteName, requestId);
+                            turnScope.outcome(TurnOutcomes.forPlaybookSlash(true));
                             return;
                         }
                     } catch (Exception playbookEx) {
+                        turnScope.outcome(TurnOutcomes.forPlaybookSlash(false));
                         _logger.warn("[{}] ParlerStreamToRemoteThing playbook slash failed requestId={}: {}",
                                 thingName, requestId, playbookEx.getMessage(), playbookEx);
                         if (ArtifactCacheTurnFaults.isRepositoryUnavailable(playbookEx)) {
@@ -1047,6 +1102,7 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
                         AgentToolContext.setParlerEphemeralSystemIndices(turn.ephemeralIndices());
                         AgentToolContext.setHostContextJson(null);
                         maybeInjectHostContextDocumentScope(hostContextTurn);
+                        maybeInjectConversationEntityDocumentScope(messages);
                         AgentToolContext.setParlerRemoteConversation(remoteConversation);
                         AgentToolContext.setParlerDownlinkOk(downlinkOk);
                         FetchCachedReplayGuard.beginTurn(FetchCachedReplayGuard.turnKey(effectiveConvId, requestId));
@@ -1083,6 +1139,7 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
                                             thingName, pendingId, tomb, par != null, remoteName, requestId);
                                     ParlerRunningTurnCancelRegistry.clear(effectiveConvId, requestId, turnPrincipal,
                                             thingName);
+                                    turnScope.outcome(TurnOutcomes.forAwaitingApproval(tomb, false));
                                 } else {
                                     if (downlinkOk.get() && remoteConversation != null) {
                                         JSONObject summary = buildHitlApprovalSummary(par);
@@ -1107,6 +1164,7 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
                                             "[{}] ParlerStreamToRemoteThing awaiting approval remoteThing={} requestId={} pendingId={}",
                                             thingName, remoteName, requestId, pendingId);
                                     fireAgentResponseEvent(effectiveConvId, result);
+                                    turnScope.outcome(TurnOutcomes.forAwaitingApproval(false, true));
                                 }
                             }
                         } else if (isArtifactCacheTerminal(result)) {
@@ -1123,6 +1181,7 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
                             _logger.info("[{}] ParlerStreamToRemoteThing cache terminal remoteThing={} requestId={}",
                                     thingName, remoteName, requestId);
                             fireAgentResponseEvent(effectiveConvId, result);
+                            turnScope.outcome(TurnOutcome.ERROR);
                         } else if (result.getStatus() == AgentLoop.AgentResult.Status.CANCELLED) {
                             ChartGroupTurnHooks.onTurnEnd(result);
                             if (downlinkOk.get()) {
@@ -1146,6 +1205,7 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
                             _logger.info("[{}] ParlerStreamToRemoteThing user cancel remoteThing={} requestId={}",
                                     thingName, remoteName, requestId);
                             fireAgentResponseEvent(effectiveConvId, result);
+                            turnScope.outcome(TurnOutcome.CANCELLED);
                         } else {
                             ChartGroupTurnHooks.onTurnEnd(result);
 ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
@@ -1194,10 +1254,14 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
                             _logger.info("[{}] ParlerStreamToRemoteThing done remoteThing={} requestId={} status={}",
                                     thingName, remoteName, requestId, result.getStatus());
                             fireAgentResponseEvent(effectiveConvId, result);
+                            turnScope.outcome(TurnOutcomes.forResultStatus(result.getStatus()));
                         }
                     }
                     } finally {
                         ParlerRunningTurnCancelRegistry.clear(effectiveConvId, requestId, turnPrincipal, thingName);
+                    }
+                    } finally {
+                        turnScope.close();
                     }
                 }
             } catch (Exception e) {
@@ -1767,7 +1831,11 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
         TaskProgressV1bHitlReplay.replayTerminalDecision(seed.gated);
     }
 
-    private void runParlerPostToolAgentLoop(
+    /**
+     * Returns the continuation segment's turn outcome for the caller's {@link ParlerTurnScope}, including the handled
+     * exception and early-return paths.
+     */
+    private TurnOutcome runParlerPostToolAgentLoop(
             PendingApprovalRecord rec,
             List<ChatMessage> messages,
             Thing remoteConversation,
@@ -1829,9 +1897,10 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
                     rateControlSinkForRemote(remoteConversation, wireCid, wireRid), rec.getUserIanaTimezone());
             ParlerHitlContinuationContext.bindForGatedToolExecution(AgentThing.this, rec, remoteConversation,
                     downlinkOk, messages);
+            maybeInjectConversationEntityDocumentScope(messages);
             List<String> slashSnap = rec.getSlashSkillShortNamesSnapshot();
             primeAgentTaskStateFromHistory(wireRid, wireCid, messages, slashSnap,
-                    rec.getDynamicSkillShortNamesSnapshot());
+                    rec.getDynamicSkillShortNamesSnapshot(), rec.getActiveMethodIdsSnapshot());
             applyHitlTaskStateSeed(hitlSeedOrNull);
             if (hitlSeedOrNull != null) {
                 if (hitlSeedOrNull.approvedSetPropertyJson != null) {
@@ -1871,7 +1940,7 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
                     _conversations.put(wireCid, messages);
                 }
                 fireAgentResponseEvent(wireCid, cacheFailure);
-                return;
+                return TurnOutcome.ERROR;
             }
             if (downlinkOk.get() && remoteConversation != null) {
                 ParlerReceiveMessageSupport.send(remoteConversation,
@@ -1882,18 +1951,19 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
             synchronized (lockForConversation(wireCid)) {
                 _conversations.put(wireCid, messages);
             }
-            return;
+            return TurnOutcome.ERROR;
         } finally {
             ChartGroupTurnHooks.captureBeforeContextClear();
             AgentToolContext.clear();
         }
 
         if (!loopOk) {
-            return;
+            return TurnOutcome.ERROR;
         }
 
         if (result.getStatus() == AgentLoop.AgentResult.Status.AWAITING_APPROVAL) {
             String nestedPending = result.getApprovalPendingId();
+            TurnOutcome pausedOutcome;
             synchronized (ParlerConversationLocks.lockFor(wireCid)) {
                 PendingApprovalRecord nestedRec =
                         nestedPending != null ? PendingApprovalStore.get(nestedPending) : null;
@@ -1906,6 +1976,7 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
                             "[{}] runParlerPostToolAgentLoop: suppress approval.required "
                                     + "(pendingId={} tombstoneActive={} storeHit={}) requestId={} conversationId={}",
                             thingName, nestedPending, tomb, nestedRec != null, wireRid, wireCid);
+                    pausedOutcome = TurnOutcomes.forAwaitingApproval(tomb, false);
                 } else {
                     if (downlinkOk.get() && remoteConversation != null) {
                         JSONObject summary = buildHitlApprovalSummary(nestedRec);
@@ -1925,9 +1996,10 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
                     }
                     _conversations.put(wireCid, messages);
                     fireAgentResponseEvent(wireCid, result);
+                    pausedOutcome = TurnOutcomes.forAwaitingApproval(false, true);
                 }
             }
-            return;
+            return pausedOutcome;
         }
 
         if (isArtifactCacheTerminal(result)) {
@@ -1943,7 +2015,7 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
                 _conversations.put(wireCid, messages);
             }
             fireAgentResponseEvent(wireCid, result);
-            return;
+            return TurnOutcome.ERROR;
         }
 
         ChartGroupTurnHooks.onTurnEnd(result);
@@ -1982,6 +2054,7 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
             _conversations.put(wireCid, messages);
         }
         fireAgentResponseEvent(wireCid, result);
+        return TurnOutcomes.forResultStatus(result.getStatus());
     }
 
     private void runParlerApprovalContinuation(PendingApprovalRecord rec, String decision,
@@ -2013,6 +2086,10 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
                 return;
             }
 
+            // Fresh segment for the continuation (the approval pause closed the original one). Human approval wait
+            // and pre-admission work are outside the measurement.
+            final ParlerTurnScope turnScope = ParlerMetrics.startTurn(TurnEntryPoint.APPROVAL_RESUME);
+            try {
             if ("cancel".equalsIgnoreCase(decision)) {
                 ToolCall gatedCancel = rec.getGatedToolCall();
                 if (gatedCancel == null) {
@@ -2033,6 +2110,8 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
                         PresentationArtifactRegistry.removeTurn(tk);
                         LazyToolRegistrationRegistry.removeTurn(tk);
                     }
+                    // Continuation record is incomplete without the gated call.
+                    turnScope.outcome(TurnOutcome.ERROR);
                     return;
                 }
                 if (downlinkOk.get() && remoteConversation != null) {
@@ -2049,8 +2128,8 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
                         getName(), gatedCancel.getFunctionName());
                 appendHitlInterruptedBatchSiblingToolResultsDurable(rec, msgs, wireCid);
                 ParlerHitlAuditLog.continuationOutcome(rec, "cancel", "cancelled", false, "", thingName);
-                runParlerPostToolAgentLoop(rec, msgs, remoteConversation, downlinkOk,
-                        HitlEvidenceSeed.terminal(gatedCancel, TaskStateErrorCode.HITL_CANCELLED));
+                turnScope.outcome(runParlerPostToolAgentLoop(rec, msgs, remoteConversation, downlinkOk,
+                        HitlEvidenceSeed.terminal(gatedCancel, TaskStateErrorCode.HITL_CANCELLED)));
                 return;
             }
 
@@ -2074,6 +2153,8 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
                         PresentationArtifactRegistry.removeTurn(tk);
                         LazyToolRegistrationRegistry.removeTurn(tk);
                     }
+                    // Continuation record is incomplete without the gated call.
+                    turnScope.outcome(TurnOutcome.ERROR);
                     return;
                 }
                 String cmt = approvalComment != null ? approvalComment.trim() : "";
@@ -2090,8 +2171,8 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
                         sk, sk, getName(), gatedReject.getFunctionName());
                 appendHitlInterruptedBatchSiblingToolResultsDurable(rec, msgs, wireCid);
                 ParlerHitlAuditLog.continuationOutcome(rec, "reject_with_comment", "rejected", false, "", thingName);
-                runParlerPostToolAgentLoop(rec, msgs, remoteConversation, downlinkOk,
-                        HitlEvidenceSeed.terminal(gatedReject, TaskStateErrorCode.HITL_REJECTED));
+                turnScope.outcome(runParlerPostToolAgentLoop(rec, msgs, remoteConversation, downlinkOk,
+                        HitlEvidenceSeed.terminal(gatedReject, TaskStateErrorCode.HITL_REJECTED)));
                 return;
             }
 
@@ -2100,13 +2181,25 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
             List<ChatMessage> continuationMessages = new ArrayList<>(rec.getMessagesCopy());
             ParlerHitlContinuationContext.bindForGatedToolExecution(this, rec, remoteConversation, downlinkOk,
                     continuationMessages);
+            // R24: the approved call's budget is resolved once, when its execution starts; the formatter and the
+            // presentation below both use it.
+            ResultBudget approvedBudget = resolveResultBudget(gatedName);
+            if (gated != null) {
+                AgentToolContext.putResultBudget(gated.getId(), approvedBudget);
+            }
             String toolResult;
             ParsedWriteOutcome po;
+            // Approved gated attempt: measured from the dispatch decision through its result or exception, closed
+            // before approval notification, history append, and the post-tool loop.
+            final ParlerToolScope approvedToolScope = ParlerMetrics.startTool(ToolKind.OTHER);
+            try {
             if ("set_property_value".equals(gatedName)) {
+                approvedToolScope.kind(ToolKind.BUILT_IN);
                 String preSnap = rec.getPreWriteValueSnapshotJson();
                 if (preSnap != null) {
                     String nowSnap = SetPropertyValueExecutor.snapshotPropertyValueForStaleCheck(gated);
                     if (nowSnap != null && !preSnap.equals(nowSnap)) {
+                        approvedToolScope.markError();
                         toolResult = SetPropertyValueExecutor.staleCompareRejectedJson();
                         po = parseSetPropertyToolResult(toolResult);
                         _logger.info("[{}] set_property_value stale compare: pendingId={} conversationId={}",
@@ -2120,6 +2213,7 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
                     po = parseSetPropertyToolResult(toolResult);
                 }
             } else if (rec.getExtendedToolTargetEntityName() != null && rec.getExtendedToolTargetServiceName() != null) {
+                approvedToolScope.kind(ToolKind.CUSTOM);
                 try {
                     // Fail closed on registry miss: raw target/service execute would skip
                     // dry-run enforce and executionBlockReason.
@@ -2129,16 +2223,19 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
                     Optional<String> miss = ServiceCapabilityRuntimePolicy.hitlApproveRegistryMissReason(
                             hitlExt, gatedName);
                     if (miss.isPresent()) {
+                        approvedToolScope.markError();
                         toolResult = capabilityPolicyBlockedResult(gatedName, miss.get());
                     } else {
                         toolResult = executeExtendedTool(gated, hitlExt.find(gatedName).orElseThrow());
                     }
                 } catch (Exception e) {
+                    approvedToolScope.markError();
                     _logger.warn("[{}] extended tool approve execution failed: {}", thingName, e.getMessage(), e);
                     toolResult = "{\"status\":\"error\",\"message\":\"" + escapeJsonString(e.getMessage()) + "\"}";
                 }
                 po = parseSetPropertyToolResult(toolResult);
             } else if ("invoke_service".equals(gatedName)) {
+                approvedToolScope.kind(ToolKind.BUILT_IN);
                 ServiceTargetEntityTypeResolution fromPending = rec.getInvokeServiceTypeResolution();
                 boolean bindNorm = fromPending != null && fromPending.isNormalized();
                 if (bindNorm) {
@@ -2163,8 +2260,13 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
             } else {
                 _logger.warn("[{}] approve continuation: unsupported gated tool {} pendingId={}",
                         thingName, gatedName, rec.getPendingId());
+                approvedToolScope.markError();
                 toolResult = "{\"status\":\"error\",\"code\":\"UNSUPPORTED_GATE\",\"message\":\"Unsupported gated tool after approval.\"}";
                 po = parseSetPropertyToolResult(toolResult);
+            }
+            approvedToolScope.completed(toolResult);
+            } finally {
+                approvedToolScope.close();
             }
             if (downlinkOk.get() && remoteConversation != null) {
                 if (!ParlerReceiveMessageSupport.send(remoteConversation,
@@ -2183,8 +2285,8 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
             toolResult = TabularChartRoundHooks.augmentJsonSourceHandle(gatedName, toolResult);
             List<ChatMessage> messages = new ArrayList<>(rec.getMessagesCopy());
             String sk = streamConversationKey(wireCid);
-            HitlSyntheticToolResultAppender.appendDurable(messages, rec.getGatedToolCall().getId(), toolResult, sk, sk,
-                    getName(), gatedName);
+            ApprovedToolResultAppender.append(messages, rec.getGatedToolCall().getId(), gatedName, toolResult,
+                    capabilityDataClassificationForTool(gatedName), approvedBudget, sk, sk, getName());
             appendHitlInterruptedBatchSiblingToolResultsDurable(rec, messages, wireCid);
             HitlEvidenceSeed seed = null;
             if (rec.getGatedToolCall() != null) {
@@ -2197,10 +2299,28 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
                             rec.getExtendedToolTargetEntityName(), rec.getExtendedToolTargetServiceName());
                 }
             }
-            runParlerPostToolAgentLoop(rec, messages, remoteConversation, downlinkOk, seed);
+            turnScope.outcome(runParlerPostToolAgentLoop(rec, messages, remoteConversation, downlinkOk, seed));
+            } finally {
+                turnScope.close();
+            }
         } finally {
             ThreadLocalContext.clearSecurityContext();
         }
+    }
+
+    /**
+     * The result budget of one call of {@code toolName} (topic round 6, R24): the live installation settings, with the
+     * extended tool's declared {@code resultTextCapChars} when it has one.
+     */
+    public ResultBudget resolveResultBudget(String toolName) {
+        ToolResultSettings settings = ToolResultSettings.fromAgent(this);
+        Integer toolCap = null;
+        if (toolName != null && _promptContextSnapshot != null
+                && _promptContextSnapshot.getExtendedToolRegistry() != null) {
+            toolCap = _promptContextSnapshot.getExtendedToolRegistry().find(toolName)
+                    .flatMap(ExtendedToolDefinition::resultTextCapChars).orElse(null);
+        }
+        return settings.budgetFor(toolCap);
     }
 
     /**
@@ -2845,6 +2965,18 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
     }
 
     @ThingworxServiceDefinition(
+            name = "RefreshDocumentKnowledgeIndex",
+            description = "Invalidate this agent's document-knowledge index so the next document search rebuilds it (no rebuild here). Returns {invalidated, evictedIndexLoadedAt, ttlSeconds}. See docs/agent/document-chunk-tools.md.")
+    @ThingworxServiceResult(name = "result", baseType = "STRING", description = "JSON {invalidated, evictedIndexLoadedAt, ttlSeconds}")
+    public String RefreshDocumentKnowledgeIndex() throws Exception {
+        DocumentKnowledgeSettings settings = DocumentKnowledgeSettings.fromAgent(this);
+        DocumentKnowledgeIndexCache.Invalidation inv = DocumentKnowledgeIndexCache.invalidate(settings, getName());
+        _logger.info("[{}] RefreshDocumentKnowledgeIndex invalidated={} evictedIndexLoadedAt={}", getName(),
+                inv.invalidated(), inv.evictedIndexLoadedAt());
+        return DocumentIndexRefreshJson.refreshResult(inv, settings.indexTtlSeconds());
+    }
+
+    @ThingworxServiceDefinition(
             name = "GetTaxonomyDiagnostics",
             description = "Returns current semantic taxonomy cache status and diagnostics JSON.")
     @ThingworxServiceResult(name = "result", baseType = "STRING", description = "JSON per CONTRACTS/TAXONOMY_RESOLVER.md")
@@ -3064,6 +3196,27 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
             tools.put("advertiseLegacyServiceDiscoveryTools", _advertiseLegacyServiceDiscoveryTools);
             tools.put("documentKnowledgeBuiltinsEnabled", _documentKnowledgeBuiltinsEnabled);
             tools.put("documentTurnToolNarrowingDisabled", _documentTurnToolNarrowingDisabled);
+            ToolResultSettings toolResultSettings = ToolResultSettings.fromAgent(this);
+            tools.put("resultJsonMode", toolResultSettings.jsonMode().wireName());
+            ObjectNode resultBudget = tools.putObject("resultBudget");
+            resultBudget.put("softCapChars", toolResultSettings.softCapChars());
+            resultBudget.put("softCapSource", toolResultSettings.softCapSource());
+            resultBudget.put("textCapChars", toolResultSettings.textCapChars());
+            resultBudget.put("textCapSource", toolResultSettings.textCapSource());
+            ArrayNode perTool = resultBudget.putArray("perTool");
+            for (ExtendedToolDefinition et : snap.getExtendedToolRegistry().allByName().values()) {
+                et.resultTextCapChars().ifPresent(cap -> {
+                    ResultBudget b = toolResultSettings.budgetFor(cap);
+                    perTool.addObject().put("name", et.llmName()).put("textCapChars", b.textCapChars())
+                            .put("source", b.source());
+                });
+            }
+            ArrayNode budgetWarnings = resultBudget.putArray("warnings");
+            List<ToolResultSettings.Warning> allBudgetWarnings = new ArrayList<>(toolResultSettings.warnings());
+            allBudgetWarnings.addAll(toolResultSettings.pageWarnings(getDocumentKnowledgeChunkMaxChars()));
+            for (ToolResultSettings.Warning w : allBudgetWarnings) {
+                budgetWarnings.addObject().put("code", w.code()).put("message", w.message());
+            }
             ArrayNode builtIn = tools.putArray("builtIn");
             _toolRegistry.getAllDefinitions().stream().map(ToolDefinition::getName).sorted(Comparator.naturalOrder())
                     .forEach(builtIn::add);
@@ -3263,6 +3416,8 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
         if (includeRepositoryFiles) {
             appendConfigurationRepositoryFilesJson(cfg, snap);
         }
+        root.set("documentKnowledge", DocumentIndexRefreshJson.snapshotBlock(DocumentKnowledgeSettings.fromAgent(this), getName()));
+        root.set("features", JSON.valueToTree(RuntimeFeatures.names(_toolRegistry != null && _toolRegistry.hasTool("load_topic"))));
         return JSON.writeValueAsString(root);
     }
 
@@ -4169,7 +4324,7 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
      */
     private void primeAgentTaskStateFromHistory(String requestIdOrNull, String conversationIdOrNull,
             List<ChatMessage> messages, List<String> slashSkillSnapshotOrNull,
-            List<String> dynamicSkillSnapshotOrNull) {
+            List<String> dynamicSkillSnapshotOrNull, List<String> activeMethodSnapshotOrNull) {
         String goal = "";
         if (messages != null) {
             for (int i = messages.size() - 1; i >= 0; i--) {
@@ -4198,6 +4353,7 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
                 st.recordMergedDynamicSkillShortName(dyn.trim());
             }
         }
+        st.restoreActiveMethodIds(activeMethodSnapshotOrNull);
         st.setTaskProgressV1b(TaskProgressV1b.fromChecklist(checklistUnion));
         AgentToolContext.setAgentTaskState(st);
         TaskProgressWireEmitter.flushSnapshot(st);
@@ -4206,24 +4362,53 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
     /**
      * Dispatches configuration-repository extended tools or the built-in registry. Applies
      * {@link ConsecutiveIdenticalToolCallTracker} before dispatch; body is in
-     * {@link #dispatchExecuteToolCallWithoutRepetitionGuard(ToolCall)}.
+     * {@link #dispatchExecuteToolCallWithoutRepetitionGuard(ToolCall, ParlerToolScope)}. Records one tool metrics
+     * sample per completed call, terminal block, or thrown exception; an approval pause records none.
      */
     private String executeToolCall(ToolCall toolCall) throws Exception {
+        final ParlerToolScope toolScope = ParlerMetrics.startTool(toolKindForDispatch(toolCall.getFunctionName()));
+        try {
         JsonNode repeatArgs = ConsecutiveIdenticalToolCallTracker.parseArgumentsForHashing(toolCall.getArguments());
         String turnKey = FetchCachedReplayGuard.resolveCurrentTurnKey();
         ConsecutiveIdenticalToolCallTracker repTracker = ConsecutiveIdenticalToolCallRegistry.acquireForTurn(turnKey);
         Optional<String> repetitionBlocked = repTracker.interceptThirdIdentical(toolCall.getFunctionName(), repeatArgs);
         if (repetitionBlocked.isPresent()) {
+            toolScope.markError();
             return repetitionBlocked.get();
         }
         try {
-            String dispatched = dispatchExecuteToolCallWithoutRepetitionGuard(toolCall);
+            String dispatched = dispatchExecuteToolCallWithoutRepetitionGuard(toolCall, toolScope);
+            toolScope.completed(dispatched);
             repTracker.recordCompletion(toolCall.getFunctionName(), repeatArgs, dispatched);
             afterDocumentToolDispatch(toolCall.getFunctionName(), toolCall.getArguments(), dispatched, false);
             return dispatched;
         } catch (ApprovalPendingException e) {
+            toolScope.suppress();
             throw e;
         }
+        } finally {
+            toolScope.close();
+        }
+    }
+
+    /**
+     * Metrics {@code tool_kind} for a dispatcher call: {@code start_playbook} is a workflow, an extended registry
+     * match is custom, the named built-in branches and built-in registry tools are built-in, anything else is other.
+     */
+    private ToolKind toolKindForDispatch(String fn) {
+        if ("start_playbook".equals(fn)) {
+            return ToolKind.WORKFLOW;
+        }
+        ExtendedToolRegistrySnapshot extSnap = _promptContextSnapshot != null
+                ? _promptContextSnapshot.getExtendedToolRegistry() : ExtendedToolRegistrySnapshot.missing();
+        if (fn != null && extSnap.find(fn).isPresent()) {
+            return ToolKind.CUSTOM;
+        }
+        if ("set_property_value".equals(fn) || "invoke_service".equals(fn)
+                || (fn != null && _toolRegistry != null && _toolRegistry.hasExecutor(fn))) {
+            return ToolKind.BUILT_IN;
+        }
+        return ToolKind.OTHER;
     }
 
     private static void afterDocumentToolDispatch(
@@ -4252,7 +4437,8 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
     }
 
     /** Core dispatch after {@link ConsecutiveIdenticalToolCallTracker} allows the call. */
-    private String dispatchExecuteToolCallWithoutRepetitionGuard(ToolCall toolCall) throws Exception {
+    private String dispatchExecuteToolCallWithoutRepetitionGuard(ToolCall toolCall, ParlerToolScope toolScope)
+            throws Exception {
         String fn = toolCall.getFunctionName();
         DocumentTurnToolNarrowing.recordToolInvocation(fn);
         if ("start_playbook".equals(fn)) {
@@ -4272,6 +4458,7 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
             if (gate == ServiceCapabilityRuntimePolicy.DirectDispatchDecision.BLOCKED) {
                 String reason = ServiceCapabilityRuntimePolicy.executionBlockReason(ext)
                         .orElse("capability policy blocked");
+                toolScope.markError();
                 String toolResult = capabilityPolicyBlockedResult(toolCall.getFunctionName(), reason);
                 AgentTaskStateHooks.afterExecution(toolCall, toolResult);
                 TaskProgressV1bHooks.afterTrackedTool(toolCall, toolResult);
@@ -4285,6 +4472,7 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
                     AgentTaskStateHooks.markBlocked(toolCall);
                     throw e;
                 }
+                toolScope.markError();
                 String blocked = ParlerHitlStreamScopedEnqueue.approvalRequiresParlerContextJson(fn);
                 AgentTaskStateHooks.afterExecution(toolCall, blocked);
                 TaskProgressV1bHooks.afterTrackedTool(toolCall, blocked);
@@ -4293,6 +4481,7 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
             String toolResult = executeExtendedTool(toolCall, ext);
             AgentTaskStateHooks.afterExecution(toolCall, toolResult);
             TaskProgressV1bHooks.afterTrackedTool(toolCall, toolResult);
+            ActiveMethodHooks.afterGetAgentSkill(toolCall, toolResult);
             TaskProgressV1bDynamicMerge.afterGetAgentSkill(toolCall, toolResult);
             return TabularChartRoundHooks.afterBuiltInToolResult(fn, toolResult);
         }
@@ -4318,6 +4507,7 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
                 TaskProgressV1bHooks.onBlocked(gatedSetProperty);
                 throw e;
             }
+            toolScope.markError();
             return SetPropertyValueExecutor.blockedOutsideParlerContextJson();
         }
         boolean boundInvokeNorm = false;
@@ -4378,6 +4568,7 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
                 if (boundInvokeParamRepair) {
                     InvokeServiceParameterRepairBinding.unbind();
                 }
+                toolScope.markError();
                 String blocked = ParlerHitlStreamScopedEnqueue.approvalRequiresParlerContextJson(fn);
                 AgentTaskStateHooks.afterExecution(toolCall, blocked);
                 TaskProgressV1bHooks.afterTrackedTool(toolCall, blocked);
@@ -4400,10 +4591,14 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
         }
         try {
             String toolResult = _toolRegistry.executeTool(toolCall);
+            ActiveMethodHooks.afterLoadTopic(toolCall, toolResult);
+            ActiveMethodHooks.afterSearchDocumentChunks(toolCall, toolResult);
+            ConversationEntityScope.afterResolveThing(toolCall, toolResult, this::resolveEntityDocumentSet);
             if (AgentTaskStateHooks.shouldTrack(toolCall.getFunctionName())) {
                 AgentTaskStateHooks.afterExecution(toolCall, toolResult);
             }
             TaskProgressV1bHooks.afterTrackedTool(toolCall, toolResult);
+            ActiveMethodHooks.afterGetAgentSkill(toolCall, toolResult);
             TaskProgressV1bDynamicMerge.afterGetAgentSkill(toolCall, toolResult);
             return TabularChartRoundHooks.afterBuiltInToolResult(toolCall.getFunctionName(), toolResult);
         } finally {
@@ -4536,7 +4731,8 @@ ChatMessage finalAssistant = ChatMessage.assistant(result.getContent());
             return "{\"status\":\"error\",\"message\":\"Failed to parse tool arguments\"}";
         }
         InfoTable rawResult = PlatformAccess.invokeAsUser(target, serviceName, params);
-        String out = InvokeServiceExecutor.formatDirectServiceResultForLlm(rawResult, sdMeta, target);
+        String out = InvokeServiceExecutor.formatDirectServiceResultForLlm(rawResult, sdMeta, target,
+                AgentToolContext.resultBudgetFor(toolCall.getId(), llmName));
         _logger.info("[{}] extended tool {} ok in {}ms resultChars={}", getName(), llmName,
                 System.currentTimeMillis() - t0, out != null ? out.length() : 0);
         return out;

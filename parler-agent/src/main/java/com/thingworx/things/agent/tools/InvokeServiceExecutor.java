@@ -379,7 +379,8 @@ public final class InvokeServiceExecutor {
         }
 
         long invokeMs = System.currentTimeMillis() - t0;
-        String out = formatToolResult(outer, sd, typeRes, paramRepair, entity, false);
+        String out = formatToolResult(outer, sd, typeRes, paramRepair, entity, false,
+                AgentToolContext.resultBudgetFor(call.getId(), "invoke_service"));
         out = maybeRejectOversizedInvokeServiceResult(out, entityType, entityName, serviceName);
         LOG.info("invoke_service success {}.{} in {}ms (responseChars={})",
                 entityName, serviceName, invokeMs, out != null ? out.length() : 0);
@@ -619,9 +620,25 @@ public final class InvokeServiceExecutor {
         return result;
     }
 
-    private static String formatToolResult(InfoTable outer, ServiceDefinition sd,
+    /** Shared by both invocation paths: {@code doInvokeService} (built-in) and {@link #formatDirectServiceResultForLlm}. */
+    static String formatToolResult(InfoTable outer, ServiceDefinition sd,
             ServiceTargetEntityTypeResolution typeRes, InvokeServiceParameterNormalizer.Repair paramRepair,
             RootEntity entity, boolean surfaceConversationCacheIdForSmallInfotable)
+            throws Exception {
+        return formatToolResult(outer, sd, typeRes, paramRepair, entity, surfaceConversationCacheIdForSmallInfotable,
+                AgentToolContext.resultBudgetFor(null, null));
+    }
+
+    /**
+     * Round 6 R25a: room the gateway needs beyond the formatter's table (note, markers, classification stamp). A
+     * table whose serialized size plus this reserve exceeds the call's soft cap gets a cache before any reduction.
+     */
+    static final int TABLE_ENVELOPE_RESERVE_CHARS = 1_536;
+
+    static String formatToolResult(InfoTable outer, ServiceDefinition sd,
+            ServiceTargetEntityTypeResolution typeRes, InvokeServiceParameterNormalizer.Repair paramRepair,
+            RootEntity entity, boolean surfaceConversationCacheIdForSmallInfotable,
+            com.thingworx.things.agent.ResultBudget budget)
             throws Exception {
         FieldDefinition resultFd = sd.getResultType();
         BaseTypes resultBase = resultFd != null && resultFd.getBaseType() != null
@@ -668,6 +685,17 @@ public final class InvokeServiceExecutor {
             if (surfaceConversationCacheIdForSmallInfotable) {
                 String cacheId = storeInfotableInConversationCache(cloneInfoTableShallow(inner));
                 outNode.put("cacheId", cacheId);
+            } else if (budget != null && MAPPER.writeValueAsString(outNode).length() + TABLE_ENVELOPE_RESERVE_CHARS
+                    > budget.softCapChars()) {
+                // R25a: the gateway will drop rows; prepare the handle first. A cache that cannot be prepared is
+                // reported by the gateway as recovery "unavailable", never as a handle that does not exist.
+                try {
+                    outNode.put("cacheId", storeInfotableInConversationCache(cloneInfoTableShallow(inner)));
+                } catch (Exception e) {
+                    ArtifactCacheTurnFaults.rethrowRepositoryUnavailable(e);
+                    LOG.warn("invoke_service: cache for an over-budget table could not be prepared: {}",
+                            e.getMessage());
+                }
             }
             return attachInvokeSuccessMetadata(MAPPER.writeValueAsString(outNode), typeRes, paramRepair);
         }
@@ -686,6 +714,9 @@ public final class InvokeServiceExecutor {
         ok.put("resultKind", resultBase.name());
         if (resultBase == BaseTypes.PASSWORD) {
             ok.put("result", ParlerInfotableJsonUtil.passwordColumnLlmPlaceholder());
+        } else if (resultBase == BaseTypes.JSON
+                && AgentToolContext.toolResultJsonMode() == com.thingworx.things.agent.ToolResultSettings.JsonMode.NODE) {
+            ok.set("result", jsonValueOrText(raw));
         } else {
             ok.set("result", primitiveOrObjectToJson(raw));
         }
@@ -698,8 +729,15 @@ public final class InvokeServiceExecutor {
      * (no entity-type normalization metadata).
      */
     public static String formatDirectServiceResultForLlm(InfoTable outer, ServiceDefinition sd, RootEntity entity) {
+        return formatDirectServiceResultForLlm(outer, sd, entity, AgentToolContext.resultBudgetFor(null, null));
+    }
+
+    /** As above, with the budget captured when the call started executing (round 6, R24). */
+    public static String formatDirectServiceResultForLlm(InfoTable outer, ServiceDefinition sd, RootEntity entity,
+            com.thingworx.things.agent.ResultBudget budget) {
         try {
-            return formatToolResult(outer, sd, null, InvokeServiceParameterNormalizer.Repair.none(), entity, true);
+            return formatToolResult(outer, sd, null, InvokeServiceParameterNormalizer.Repair.none(), entity, true,
+                    budget);
         } catch (Exception e) {
             ArtifactCacheTurnFaults.rethrowRepositoryUnavailable(e);
             LOG.warn("formatDirectServiceResultForLlm: {}", e.getMessage(), e);
@@ -893,6 +931,23 @@ public final class InvokeServiceExecutor {
             } catch (Exception e) {
                 return MAPPER.getNodeFactory().textNode(v.toString());
             }
+        }
+        return primitiveOrObjectToJson(v);
+    }
+
+    /**
+     * {@code toolResultJsonMode=node}: a JSON result as a JSON object or array node; a value that cannot be read as
+     * JSON falls back to the string form, with no error (R22).
+     */
+    static JsonNode jsonValueOrText(Object v) {
+        String text = v instanceof String ? (String) v : String.valueOf(v);
+        try {
+            JsonNode parsed = MAPPER.readTree(text);
+            if (parsed != null && parsed.isContainerNode()) {
+                return parsed;
+            }
+        } catch (Exception ignored) {
+            // not JSON: keep today's string form
         }
         return primitiveOrObjectToJson(v);
     }

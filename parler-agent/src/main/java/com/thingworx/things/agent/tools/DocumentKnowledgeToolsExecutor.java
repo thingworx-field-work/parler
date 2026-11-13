@@ -18,6 +18,10 @@ public final class DocumentKnowledgeToolsExecutor {
         return DocumentKnowledgeRuntime.executeGetDocumentChunk(call, AgentToolContext.getAgentThing());
     }
 
+    public static String executeLoadTopic(ToolCall call) throws Exception {
+        return DocumentKnowledgeRuntime.executeLoadTopic(call, AgentToolContext.getAgentThing());
+    }
+
     public static String executeResolveDocumentSet(ToolCall call) throws Exception {
         return DocumentKnowledgeRuntime.executeResolveDocumentSet(call, AgentToolContext.getAgentThing());
     }
